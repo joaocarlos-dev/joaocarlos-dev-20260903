@@ -480,4 +480,4 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-/backend/src/EmployeeManagmentSystem.API/EmployeeManagmentSystem.API/appsettings.Local.json
+/backend/src/EmployeeManagmentSystem.API/appsettings.Local.json

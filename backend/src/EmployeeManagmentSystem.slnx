@@ -1,4 +1,15 @@
 <Solution>
-  <Project Path="EmployeeManagmentSystem.API/EmployeeManagmentSystem.API/EmployeeManagmentSystem.API.csproj" />
-  <Project Path="EmployeeManagmentSystem.Domain/EmployeeManagmentSystem.Domain/EmployeeManagmentSystem.Domain.csproj" />
+  <Folder Name="/1. API/">
+    <Project Path="EmployeeManagmentSystem.API/EmployeeManagmentSystem.API.csproj" />
+  </Folder>
+  <Folder Name="/2. Application/">
+    <Project Path="EmployeeManagmentSystem.Application/EmployeeManagmentSystem.Application.csproj" Id="57abe736-8b97-4572-96fe-cab525972354" />
+  </Folder>
+  <Folder Name="/3. Domain/">
+    <Project Path="EmployeeManagmentSystem.Domain/EmployeeManagmentSystem.Domain.csproj" />
+  </Folder>
+  <Folder Name="/4. Infrastructure/">
+    <Project Path="EmployeeManagmentSystem.Infrastructure/EmployeeManagmentSystem.Infrastructure.csproj" Id="f574d373-f4be-450a-a584-fa8eba30931d" />
+  </Folder>
+  <Folder Name="/5. Tests/" />
 </Solution>
