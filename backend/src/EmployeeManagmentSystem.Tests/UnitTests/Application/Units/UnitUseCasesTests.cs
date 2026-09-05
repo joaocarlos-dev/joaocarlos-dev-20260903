@@ -1,0 +1,86 @@
+using EmployeeManagmentSystem.Application;
+using EmployeeManagmentSystem.Application.Abstractions.Persistence;
+using EmployeeManagmentSystem.Application.Common.Exceptions;
+using EmployeeManagmentSystem.Application.Units;
+using EmployeeManagmentSystem.Domain.Entities;
+using EmployeeManagmentSystem.Domain.Enums;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using DomainUnit = EmployeeManagmentSystem.Domain.Entities.Unit;
+
+namespace EmployeeManagmentSystem.Tests.UnitTests.Application.Units;
+
+public sealed class UnitUseCasesTests
+{
+    [Fact]
+    public async Task CreateUnit_WithCodeSurroundedBySpaces_ShouldDetectDuplicate()
+    {
+        var unitRepository = new FakeUnitRepository();
+        unitRepository.Units.Add(new DomainUnit("UNIT-001", "Headquarters"));
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(unitRepository, employeeRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new CreateUnitCommand(" UNIT-001 ", "Branch");
+
+        var action = () => mediator.Send(command);
+
+        await Assert.ThrowsAsync<ApplicationConflictException>(action);
+        Assert.Single(unitRepository.Units);
+        Assert.Equal(0, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task UpdateUnit_WithStatus_ShouldPersistInactiveStatus()
+    {
+        var unitRepository = new FakeUnitRepository();
+        var unit = new DomainUnit("UNIT-001", "Headquarters");
+        unitRepository.Units.Add(unit);
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(unitRepository, employeeRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new UpdateUnitCommand(unit.Id, null, EntityStatus.Inactive);
+
+        await mediator.Send(command);
+
+        Assert.Equal(EntityStatus.Inactive, unit.Status);
+        Assert.Equal(1, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task ListUnits_WithEmployees_ShouldLoadEmployeesInSingleBatch()
+    {
+        var unitRepository = new FakeUnitRepository();
+        var firstUnit = new DomainUnit("UNIT-001", "Headquarters");
+        var secondUnit = new DomainUnit("UNIT-002", "Branch");
+        unitRepository.Units.AddRange([firstUnit, secondUnit]);
+        var employeeRepository = new FakeEmployeeRepository();
+        employeeRepository.Employees.Add(new Employee("EMP-001", "First", Guid.NewGuid(), firstUnit));
+        employeeRepository.Employees.Add(new Employee("EMP-002", "Second", Guid.NewGuid(), secondUnit));
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(unitRepository, employeeRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var query = new ListUnitsQuery();
+
+        var result = await mediator.Send(query);
+
+        Assert.Equal(2, result.Count);
+        Assert.All(result, unit => Assert.Single(unit.Employees));
+        Assert.Equal(1, employeeRepository.ListByUnitIdsCalls);
+    }
+
+    private static ServiceProvider CreateProvider(
+        FakeUnitRepository unitRepository,
+        FakeEmployeeRepository employeeRepository,
+        FakeUnitOfWork unitOfWork)
+    {
+        var services = new ServiceCollection();
+        services.AddApplicationDependencies();
+        services.AddSingleton<IUnitRepository>(unitRepository);
+        services.AddSingleton<IEmployeeRepository>(employeeRepository);
+        services.AddSingleton<IUnitOfWork>(unitOfWork);
+
+        return services.BuildServiceProvider();
+    }
+}

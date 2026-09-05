@@ -65,13 +65,23 @@ A Application definirá contratos para repositórios, unidade de trabalho, hash 
 
 ### CQRS e validação
 
-- [ ] separar operações de escrita em commands e operações de leitura em queries;
-- [ ] implementar handlers na camada Application;
-- [ ] criar validators com FluentValidation para commands e queries;
-- [ ] executar a validação antes dos handlers;
-- [ ] manter as invariantes de negócio no Domain, independentemente da validação de entrada.
+- [x] separar operações de escrita em commands e operações de leitura em queries;
+- [x] implementar handlers MediatR na camada Application;
+- [x] criar validators com FluentValidation para commands e queries;
+- [x] executar a validação antes dos handlers;
+- [x] manter as invariantes de negócio no Domain, independentemente da validação de entrada.
 
-Commands não retornam modelos de leitura. Queries não alteram estado. O FluentValidation será responsável pela validação de entrada na Application, enquanto as entidades continuarão protegendo suas próprias invariantes.
+Commands não retornam modelos de leitura. Queries não alteram estado. O MediatR será responsável pelo envio das requisições aos handlers. Um `IPipelineBehavior` do FluentValidation validará a entrada na Application, enquanto as entidades continuarão protegendo suas próprias invariantes.
+
+### Injeção de dependência
+
+- [x] manter o `Program.cs` apenas com o bootstrap da aplicação;
+- [x] centralizar a composição da API na pasta `Configurations`;
+- [x] separar as configurações de Swagger, JWT e dependências;
+- [ ] criar uma extensão de injeção ao final do arquivo de cada service da Infrastructure;
+- [ ] chamar as extensões dos services exclusivamente em `Configurations/DependencyInjectionConfiguration.cs`.
+
+Cada service da Infrastructure terá no mesmo arquivo uma classe estática nomeada `{ServiceName}DependencyInjection`. A configuração central da API chamará essas extensões, mantendo o `Program.cs` mínimo e a responsabilidade de registro próxima da implementação do service.
 
 ## Mensageria
 
@@ -162,10 +172,10 @@ As falhas seguirão o padrão Problem Details:
 - [x] criar a entidade base auditável;
 - [x] criar User, Employee e Unit;
 - [x] criar enums e regras de negócio iniciais;
-- [ ] criar DTOs, contratos de repositórios e casos de uso;
-- [ ] definir contratos para hash de senha, token e transações.
-- [ ] definir abstrações de commands, queries e handlers;
-- [ ] configurar o pipeline do FluentValidation.
+- [x] criar DTOs, contratos de repositórios e casos de uso;
+- [x] definir contratos para hash de senha, token e transações.
+- [x] definir abstrações de commands e queries sobre MediatR;
+- [x] implementar o pipeline do FluentValidation.
 
 ### Infrastructure e Docker
 
