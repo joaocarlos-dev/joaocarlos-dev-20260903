@@ -1,4 +1,5 @@
-using EmployeeManagmentSystem.API.Configurations;
+using EmployeeManagmentSystem.API.Configurations.DependencyInjection;
+using EmployeeManagmentSystem.API.Configurations.Pipeline;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApiDependencies(builder.Configuration);

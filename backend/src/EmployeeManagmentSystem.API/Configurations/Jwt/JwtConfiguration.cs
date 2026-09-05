@@ -2,7 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
-namespace EmployeeManagmentSystem.API.Configurations;
+namespace EmployeeManagmentSystem.API.Configurations.Jwt;
 
 public static class JwtConfiguration
 {

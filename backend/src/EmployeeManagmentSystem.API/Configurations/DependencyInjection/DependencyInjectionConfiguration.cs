@@ -1,6 +1,8 @@
+using EmployeeManagmentSystem.API.Configurations.Jwt;
+using EmployeeManagmentSystem.API.Configurations.Swagger;
 using EmployeeManagmentSystem.Application;
 
-namespace EmployeeManagmentSystem.API.Configurations;
+namespace EmployeeManagmentSystem.API.Configurations.DependencyInjection;
 
 public static class DependencyInjectionConfiguration
 {

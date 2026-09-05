@@ -1,6 +1,6 @@
 using Microsoft.OpenApi.Models;
 
-namespace EmployeeManagmentSystem.API.Configurations;
+namespace EmployeeManagmentSystem.API.Configurations.Swagger;
 
 public static class SwaggerConfiguration
 {

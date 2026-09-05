@@ -1,4 +1,4 @@
-using EmployeeManagmentSystem.API.Configurations;
+using EmployeeManagmentSystem.API.Configurations.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

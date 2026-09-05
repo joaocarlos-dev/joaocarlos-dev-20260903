@@ -1,4 +1,6 @@
-namespace EmployeeManagmentSystem.API.Configurations;
+using EmployeeManagmentSystem.API.Configurations.Swagger;
+
+namespace EmployeeManagmentSystem.API.Configurations.Pipeline;
 
 public static class ApiConfiguration
 {
