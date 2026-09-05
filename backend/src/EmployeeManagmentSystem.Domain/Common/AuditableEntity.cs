@@ -38,4 +38,12 @@ public abstract class AuditableEntity
         DeletedAt = DateTimeOffset.UtcNow;
         MarkAsUpdated();
     }
+
+    protected void EnsureNotDeleted(string entityName)
+    {
+        if (IsDeleted)
+        {
+            throw new DomainException($"The {entityName} has been deleted.");
+        }
+    }
 }

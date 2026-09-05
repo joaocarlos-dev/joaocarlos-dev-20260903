@@ -27,6 +27,7 @@ public sealed class Employee : AuditableEntity
 
     public void UpdateName(string name)
     {
+        EnsureNotDeleted("employee");
         Name = DomainRules.Required(name, nameof(name));
         MarkAsUpdated();
     }
@@ -34,6 +35,7 @@ public sealed class Employee : AuditableEntity
     public void TransferTo(Unit unit)
     {
         ArgumentNullException.ThrowIfNull(unit);
+        EnsureNotDeleted("employee");
         unit.EnsureCanReceiveEmployee();
 
         UnitId = unit.Id;

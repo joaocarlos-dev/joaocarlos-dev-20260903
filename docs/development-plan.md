@@ -63,6 +63,16 @@ Application -------------> Domain
 
 A Application definirá contratos para repositórios, unidade de trabalho, hash de senha e geração de token. A Infrastructure implementará esses contratos. Controllers serão responsáveis apenas pelo protocolo HTTP e delegarão o comportamento aos casos de uso.
 
+### CQRS e validação
+
+- [ ] separar operações de escrita em commands e operações de leitura em queries;
+- [ ] implementar handlers na camada Application;
+- [ ] criar validators com FluentValidation para commands e queries;
+- [ ] executar a validação antes dos handlers;
+- [ ] manter as invariantes de negócio no Domain, independentemente da validação de entrada.
+
+Commands não retornam modelos de leitura. Queries não alteram estado. O FluentValidation será responsável pela validação de entrada na Application, enquanto as entidades continuarão protegendo suas próprias invariantes.
+
 ## Mensageria
 
 A fila interna de registro de usuários não faz parte dos requisitos obrigatórios e não será usada no fluxo principal. O cadastro precisa confirmar imediatamente as restrições de unicidade e o vínculo com colaboradores. Caso a mensageria seja adicionada posteriormente, será usada apenas para efeitos secundários após a persistência da transação.
@@ -154,6 +164,8 @@ As falhas seguirão o padrão Problem Details:
 - [x] criar enums e regras de negócio iniciais;
 - [ ] criar DTOs, contratos de repositórios e casos de uso;
 - [ ] definir contratos para hash de senha, token e transações.
+- [ ] definir abstrações de commands, queries e handlers;
+- [ ] configurar o pipeline do FluentValidation.
 
 ### Infrastructure e Docker
 
@@ -179,7 +191,7 @@ As falhas seguirão o padrão Problem Details:
 
 - [ ] implementar hash seguro de senha;
 - [ ] implementar emissão e validação de JWT;
-- [ ] impedir login de usuário inativo;
+- [x] impedir autenticação de usuário inativo no Domain;
 - [ ] proteger todas as rotas administrativas.
 
 ### Funcionalidades

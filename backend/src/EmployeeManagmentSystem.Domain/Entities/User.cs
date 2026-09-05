@@ -22,6 +22,7 @@ public sealed class User : AuditableEntity
     public string Login { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
     public EntityStatus Status { get; private set; }
+    public bool IsActive => Status == EntityStatus.Active;
 
     public void UpdatePassword(string passwordHash)
     {
@@ -38,5 +39,13 @@ public sealed class User : AuditableEntity
 
         Status = status;
         MarkAsUpdated();
+    }
+
+    public void EnsureCanAuthenticate()
+    {
+        if (!IsActive)
+        {
+            throw new DomainException("An inactive user cannot authenticate.");
+        }
     }
 }

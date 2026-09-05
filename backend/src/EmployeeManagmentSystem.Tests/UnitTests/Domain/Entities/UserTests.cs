@@ -54,4 +54,15 @@ public sealed class UserTests
         Assert.Equal(EntityStatus.Inactive, user.Status);
         Assert.NotNull(user.UpdatedAt);
     }
+
+    [Fact]
+    public void EnsureCanAuthenticate_WithInactiveUser_ShouldThrowDomainException()
+    {
+        var user = new User("USR-001", "admin", "hashed-password");
+        user.ChangeStatus(EntityStatus.Inactive);
+
+        Action action = user.EnsureCanAuthenticate;
+
+        Assert.Throws<DomainException>(action);
+    }
 }

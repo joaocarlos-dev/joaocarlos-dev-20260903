@@ -20,6 +20,7 @@ public sealed class Unit : AuditableEntity
     public string Code { get; private set; } = string.Empty;
     public string Name { get; private set; } = string.Empty;
     public EntityStatus Status { get; private set; }
+    public bool IsActive => Status == EntityStatus.Active;
 
     public void UpdateName(string name)
     {
@@ -40,7 +41,7 @@ public sealed class Unit : AuditableEntity
 
     public void EnsureCanReceiveEmployee()
     {
-        if (Status != EntityStatus.Active)
+        if (!IsActive)
         {
             throw new DomainException("An inactive unit cannot receive employees.");
         }
