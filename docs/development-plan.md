@@ -1,292 +1,422 @@
-# Plano de desenvolvimento
+# Plano de desenvolvimento do backend
 
 ## Objetivo
 
-Entregar um backend funcional para gestão de usuários, colaboradores e unidades em três dias. O front-end em Angular será iniciado somente após a conclusão e validação integral do backend.
+Entregar uma API funcional para gestão de usuários, colaboradores e unidades, com autenticação JWT, persistência PostgreSQL, documentação Swagger e cobertura por testes unitários e de integração.
 
-## Acompanhamento
+O front-end em Angular somente será iniciado depois que o gate de aceite do backend estiver integralmente concluído.
+
+## Como acompanhar
 
 - `[x]` concluído e validado;
 - `[ ]` pendente;
+- um item estrutural concluído não significa que a feature correspondente está disponível pela API;
 - todos os testes devem seguir o padrão AAA: Arrange, Act e Assert;
-- o projeto de testes é organizado nas pastas `UnitTests` e `IntegrationTests`.
+- testes devem ser organizados em `UnitTests` e `IntegrationTests`.
 
-## Escopo funcional
+## Arquitetura definida
 
-O backend deverá oferecer:
-
-- [ ] cadastro de usuários com código e login únicos, senha protegida e status ativo ou inativo;
-- [ ] atualização somente da senha e do status dos usuários;
-- [ ] listagem de usuários com filtro por status;
-- [ ] cadastro de colaboradores com código único, nome, usuário e unidade;
-- [ ] atualização do nome e da unidade dos colaboradores;
-- [ ] remoção lógica e listagem de colaboradores;
-- [ ] cadastro e inativação de unidades;
-- [ ] bloqueio da inclusão ou transferência de colaboradores para unidades inativas;
-- [ ] listagem de unidades com seus colaboradores;
-- [ ] autenticação JWT Bearer;
-- [ ] documentação e execução das rotas pelo Swagger e por uma coleção HTTP ou Postman;
-- [ ] persistência em PostgreSQL executado por Docker;
-- [ ] testes unitários e de integração.
-
-## Estado atual do projeto
-
-- [x] projetos API, Application, Domain, Infrastructure e Tests criados;
-- [x] dependências entre as camadas configuradas;
-- [x] template WeatherForecast removido;
-- [x] Dockerfile, PostgreSQL e pipeline de testes configurados pelo Docker Compose;
-- [x] estrutura inicial do Domain criada com testes unitários;
-- [ ] persistência e migrations configuradas;
-- [ ] casos de uso e rotas implementados;
-- [ ] autenticação e autorização configuradas;
-- [ ] testes de integração implementados.
-
-## Arquitetura
-
-As dependências entre os projetos deverão seguir esta direção:
+O projeto seguirá organização em camadas, CQRS com MediatR, validação com FluentValidation e uma adaptação de MVC na API.
 
 ```text
-Front-end
-    |
-    v
-API -----------------> Infrastructure
- |                           |
- v                           v
-Application -------------> Domain
+API ----------------------> Application
+ |                              |
+ |                              v
+ +--------> Infrastructure --> Domain
 ```
 
-- [x] Domain não depende de outro projeto.
+- [x] Domain não depende de outros projetos.
 - [x] Application depende somente de Domain.
 - [x] Infrastructure depende de Application e Domain.
 - [x] API depende de Application e Infrastructure e atua como composition root.
-- [ ] PostgreSQL é acessado exclusivamente pela Infrastructure.
+- [ ] garantir que PostgreSQL e serviços externos sejam acessados exclusivamente pela Infrastructure.
 
-A Application definirá contratos para repositórios, unidade de trabalho, hash de senha e geração de token. A Infrastructure implementará esses contratos. Controllers serão responsáveis apenas pelo protocolo HTTP e delegarão o comportamento aos casos de uso.
+### Domain
 
-### CQRS e validação
+Responsável por entidades, estados, invariantes e regras que precisam permanecer válidas independentemente da entrada da API ou da persistência.
 
-- [x] separar operações de escrita em commands e operações de leitura em queries;
-- [x] implementar handlers MediatR na camada Application;
-- [x] criar validators com FluentValidation para commands e queries;
-- [x] organizar cada ação em uma pasta própria dentro de `Commands` ou `Queries`;
-- [x] manter o handler no arquivo do command ou query e o validator em arquivo separado;
-- [x] executar a validação antes dos handlers;
-- [x] manter as invariantes de negócio no Domain, independentemente da validação de entrada.
+- [x] entidade base auditável com identificador e datas de criação, atualização e remoção lógica;
+- [x] entidades `User`, `Employee` e `Unit`;
+- [x] status ativo e inativo;
+- [x] bloqueio de autenticação de usuário inativo;
+- [x] bloqueio de inclusão e transferência para unidade inativa;
+- [x] remoção lógica de colaboradores;
+- [x] testes unitários das regras atuais.
 
-Commands não retornam modelos de leitura. Queries não alteram estado. Não serão usados arquivos ou classes genéricas de `UseCases`: cada operação terá um command ou query com seu handler e um validator correspondente. O MediatR será responsável pelo envio das requisições aos handlers. Um `IPipelineBehavior` do FluentValidation validará a entrada na Application, enquanto as entidades continuarão protegendo suas próprias invariantes.
+### Application
 
-### Injeção de dependência
+Responsável pela orquestração das operações, sem acesso direto a banco, HTTP ou implementações de segurança.
 
-- [x] manter o `Program.cs` apenas com o bootstrap da aplicação;
-- [x] centralizar a composição da API na pasta `Configurations`;
-- [x] separar as configurações de Swagger, JWT e dependências;
-- [ ] criar uma extensão de injeção ao final do arquivo de cada service da Infrastructure;
-- [ ] chamar as extensões dos services exclusivamente em `Configurations/DependencyInjectionConfiguration.cs`.
+```text
+Application/
+|-- Abstractions/
+|-- Behaviors/
+|-- Commands/
+|   `-- Recurso/
+|       `-- Acao/
+|           |-- AcaoCommand.cs
+|           `-- AcaoCommandValidator.cs
+|-- Queries/
+|   `-- Recurso/
+|       `-- Acao/
+|           |-- AcaoQuery.cs
+|           `-- AcaoQueryValidator.cs
+|-- Common/
+`-- DTOs/
+```
 
-Cada service da Infrastructure terá no mesmo arquivo uma classe estática nomeada `{ServiceName}DependencyInjection`. A configuração central da API chamará essas extensões, mantendo o `Program.cs` mínimo e a responsabilidade de registro próxima da implementação do service.
+Regras obrigatórias:
 
-## Mensageria
+- [x] escritas representadas por commands;
+- [x] leituras representadas por queries;
+- [x] cada ação possui uma pasta própria;
+- [x] command ou query e seu handler permanecem no mesmo arquivo;
+- [x] cada validator permanece em arquivo separado;
+- [x] handlers enviados pelo MediatR;
+- [x] validators executados pelo pipeline do FluentValidation antes do handler;
+- [x] contratos de repositórios, unidade de trabalho, hash de senha e token definidos;
+- [x] DTOs de saída definidos;
+- [x] não utilizar arquivos, pastas ou classes `UseCase` ou `UseCases`.
 
-A fila interna de registro de usuários não faz parte dos requisitos obrigatórios e não será usada no fluxo principal. O cadastro precisa confirmar imediatamente as restrições de unicidade e o vínculo com colaboradores. Caso a mensageria seja adicionada posteriormente, será usada apenas para efeitos secundários após a persistência da transação.
+### Infrastructure
 
-## Modelo de domínio
+Responsável por PostgreSQL, Entity Framework Core e implementações dos contratos da Application.
 
-### Entidade base
+Cada implementação será um service em sua própria pasta. A extensão de DI permanecerá no final do mesmo arquivo do service.
 
-Uma entidade base auditável atenderá ao requisito de herança e concentrará:
+```text
+Infrastructure/
+|-- Persistence/
+|   |-- EmployeeManagementDbContext.cs
+|   |-- Configurations/
+|   `-- Migrations/
+`-- Services/
+    |-- Users/
+    |   `-- UserService.cs
+    |-- Employees/
+    |   `-- EmployeeService.cs
+    |-- Units/
+    |   `-- UnitService.cs
+    `-- Security/
+        |-- PasswordHasherService.cs
+        `-- TokenService.cs
+```
 
-- identificador;
-- data de criação;
-- data de atualização;
-- data de remoção lógica.
+Padrão obrigatório para cada service:
 
-### User
+```text
+UserService.cs
+|-- UserService
+`-- UserServiceDependencyInjection
+```
 
-- `id`;
-- `code`, único;
-- `login`, único;
-- `password_hash`;
-- `status` como Active ou Inactive;
-- campos de auditoria.
+- [ ] implementar `UserService` e `UserServiceDependencyInjection`;
+- [ ] implementar `EmployeeService` e `EmployeeServiceDependencyInjection`;
+- [ ] implementar `UnitService` e `UnitServiceDependencyInjection`;
+- [ ] implementar serviço de hash de senha com sua extensão de DI;
+- [ ] implementar serviço de geração de JWT com sua extensão de DI;
+- [ ] implementar unidade de trabalho e configuração de persistência;
+- [ ] chamar as extensões dos services somente pela configuração central da API.
 
-### Employee
+### API e MVC adaptado
 
-- `id`;
-- `code`, único;
-- `name`;
-- `email`, caso seja mantido como extensão do requisito;
-- `user_id`, obrigatório e único;
-- `unit_id`, obrigatório;
-- campos de auditoria.
+A API será a camada de apresentação. Os controllers representam o papel de Controller; commands, queries, entidades e DTOs representam o Model; as respostas JSON representam a View adaptada para uma API HTTP.
 
-### Unit
+Os controllers devem apenas:
 
-- `id`;
-- `code`, único;
-- `name`;
-- `status` como Active ou Inactive;
-- campos de auditoria.
+- receber e interpretar dados HTTP;
+- construir commands ou queries;
+- enviar a mensagem pelo MediatR;
+- converter o resultado no status HTTP adequado.
 
-As tabelas serão nomeadas `users`, `employees` e `units`. Os campos temporais usarão horário com fuso. Uma unidade inativa não poderá receber novos colaboradores nem transferências. A remoção de colaborador será lógica.
+Controllers não podem conter regras de negócio, consultas ao banco ou implementações de serviços.
 
-## Rotas planejadas
+```text
+API/
+|-- Configurations/
+|   |-- DependencyInjection/
+|   |   `-- DependencyInjectionConfiguration.cs
+|   |-- Jwt/
+|   |   `-- JwtConfiguration.cs
+|   |-- Swagger/
+|   |   `-- SwaggerConfiguration.cs
+|   `-- Pipeline/
+|       `-- ApiConfiguration.cs
+|-- Controllers/
+|   |-- AuthController.cs
+|   |-- UsersController.cs
+|   |-- EmployeesController.cs
+|   `-- UnitsController.cs
+`-- Program.cs
+```
 
-Todas as rotas, exceto o login, exigirão autenticação JWT.
+- [x] manter o `Program.cs` com bootstrap mínimo;
+- [x] centralizar configurações fora do `Program.cs`;
+- [ ] mover as configurações atuais para suas respectivas subpastas;
+- [ ] organizar os namespaces de configuração conforme as subpastas;
+- [ ] registrar os services da Infrastructure em `Configurations/DependencyInjection`;
+- [ ] manter configuração e middleware de Swagger em `Configurations/Swagger`;
+- [ ] manter configuração de autenticação e validação JWT em `Configurations/Jwt`;
+- [ ] manter composição do pipeline HTTP em `Configurations/Pipeline`;
+- [ ] criar controllers finos, organizados por recurso.
 
-| Método | Rota | Finalidade |
-| --- | --- | --- |
-| `POST` | `/api/v1/auth/login` | Autenticar um usuário ativo |
-| `POST` | `/api/v1/users` | Cadastrar usuário |
-| `GET` | `/api/v1/users` | Listar usuários e aceitar filtro por status |
-| `GET` | `/api/v1/users/{id}` | Consultar usuário |
-| `PATCH` | `/api/v1/users/{id}` | Alterar senha ou status |
-| `POST` | `/api/v1/employees` | Cadastrar colaborador |
-| `GET` | `/api/v1/employees` | Listar colaboradores |
-| `GET` | `/api/v1/employees/{id}` | Consultar colaborador |
-| `PATCH` | `/api/v1/employees/{id}` | Alterar nome ou unidade |
-| `DELETE` | `/api/v1/employees/{id}` | Remover colaborador logicamente |
-| `POST` | `/api/v1/units` | Cadastrar unidade |
-| `GET` | `/api/v1/units` | Listar unidades com seus colaboradores |
-| `GET` | `/api/v1/units/{id}` | Consultar unidade |
-| `PATCH` | `/api/v1/units/{id}` | Alterar nome ou status |
+## Estado atual validado
 
-As falhas seguirão o padrão Problem Details:
+### Concluído
 
-- `400 Bad Request` para campos ou requisições inválidas;
-- `401 Unauthorized` para autenticação ausente ou inválida;
-- `404 Not Found` para recursos inexistentes;
-- `409 Conflict` para duplicidades, vínculos já utilizados ou unidades inativas;
-- `201 Created` para cadastros concluídos;
-- `204 No Content` para atualizações e remoções concluídas sem corpo.
+- [x] solução com API, Application, Domain, Infrastructure e Tests;
+- [x] referências entre camadas configuradas;
+- [x] template WeatherForecast removido;
+- [x] Domain e invariantes iniciais implementados;
+- [x] commands, queries, handlers e validators estruturados por ação;
+- [x] contratos e DTOs da Application definidos;
+- [x] MediatR e pipeline do FluentValidation registrados;
+- [x] configuração inicial de JWT Bearer existente na API;
+- [x] configuração inicial do Swagger com esquema Bearer existente na API;
+- [x] Dockerfile multi-stage com etapa de testes;
+- [x] Docker Compose com PostgreSQL, testes como gate e API;
+- [x] 33 testes unitários passando;
+- [x] testes atuais organizados em `UnitTests` e seguindo AAA.
 
-## Dia 1: fundação, domínio e persistência
+### Ainda não entregue ponta a ponta
 
-### Estrutura
+- [ ] status inicial ativo ou inativo no cadastro de usuário;
+- [ ] services da Infrastructure;
+- [ ] Entity Framework Core e provider Npgsql;
+- [ ] DbContext, mappings e migrations;
+- [ ] controllers e rotas HTTP;
+- [ ] emissão real de JWT e hash seguro de senha;
+- [ ] tratamento global de erros e Problem Details;
+- [ ] autorização das rotas administrativas;
+- [ ] testes de integração;
+- [ ] coleção HTTP ou Postman;
+- [ ] documentação operacional no README.
 
-- [x] normalizar os diretórios dos projetos;
-- [x] incluir API, Application, Domain, Infrastructure e Tests na solução;
-- [x] organizar o projeto de testes nas pastas `UnitTests` e `IntegrationTests`;
-- [x] configurar as referências entre as camadas;
-- [x] remover o template WeatherForecast.
+## Etapa 1 — Reorganização final da API
 
-### Domain e Application
+Objetivo: consolidar o padrão estrutural antes da implementação das rotas.
 
-- [x] criar a entidade base auditável;
-- [x] criar User, Employee e Unit;
-- [x] criar enums e regras de negócio iniciais;
-- [x] criar DTOs, contratos de repositórios e casos de uso;
-- [x] definir contratos para hash de senha, token e transações.
-- [x] definir abstrações de commands e queries sobre MediatR;
-- [x] implementar o pipeline do FluentValidation.
+- [ ] criar `Configurations/DependencyInjection`;
+- [ ] criar `Configurations/Jwt`;
+- [ ] criar `Configurations/Swagger`;
+- [ ] criar `Configurations/Pipeline`;
+- [ ] mover as configurações existentes e ajustar namespaces;
+- [ ] adicionar status ao `CreateUserCommand`, ao Domain e ao validator correspondente;
+- [ ] testar criação de usuário ativo e inativo;
+- [ ] manter no `Program.cs` somente criação do builder, registro central, construção e pipeline central;
+- [ ] validar registro do MediatR, FluentValidation, autenticação e Swagger;
+- [ ] atualizar testes de configuração da API.
 
-### Infrastructure e Docker
+Critério de conclusão:
 
-- [ ] configurar Entity Framework Core e Npgsql;
-- [ ] criar DbContext, mappings e repositórios;
-- [ ] criar a migration inicial;
-- [ ] definir índices, relacionamentos e restrições;
-- [x] criar Dockerfile e `docker-compose.yml`;
-- [x] configurar PostgreSQL com volume, health check e variáveis de ambiente;
-- [ ] preparar um usuário inicial para permitir o primeiro login.
+- [ ] `Program.cs` permanece mínimo;
+- [ ] nenhuma configuração transversal fica diretamente no `Program.cs`;
+- [ ] solução compila e todos os testes unitários passam.
 
-### Critério de conclusão
+## Etapa 2 — Persistência e services da Infrastructure
 
-- [x] solução compilando;
-- [x] PostgreSQL iniciado pelo Docker Compose;
-- [ ] migration aplicada em banco vazio;
-- [ ] API conectando ao banco;
-- [x] dependências arquiteturais validadas.
+Objetivo: implementar todos os contratos da Application com PostgreSQL.
 
-## Dia 2: casos de uso, rotas e autenticação
+### Persistência
 
-### Segurança
+- [ ] adicionar Entity Framework Core e Npgsql;
+- [ ] criar `EmployeeManagementDbContext`;
+- [ ] implementar `IUnitOfWork`;
+- [ ] mapear `User`, `Employee` e `Unit`;
+- [ ] usar nomes de tabelas `users`, `employees` e `units`;
+- [ ] usar tipos temporais com fuso;
+- [ ] configurar remoção lógica de colaboradores nas consultas;
+- [ ] criar migration inicial;
+- [ ] validar a migration em banco vazio.
+
+### Restrições no banco
+
+- [ ] índice único para código de usuário;
+- [ ] índice único para login normalizado;
+- [ ] índice único para código de colaborador;
+- [ ] índice único para código de unidade;
+- [ ] relacionamento obrigatório e único entre usuário e colaborador;
+- [ ] relacionamento obrigatório entre colaborador e unidade;
+- [ ] chaves estrangeiras e comportamento de exclusão definidos explicitamente.
+
+### Services
+
+- [ ] `UserService` implementa `IUserRepository`;
+- [ ] `EmployeeService` implementa `IEmployeeRepository`;
+- [ ] `UnitService` implementa `IUnitRepository`;
+- [ ] cada service fica em pasta própria;
+- [ ] cada arquivo de service termina com `{ServiceName}DependencyInjection`;
+- [ ] as extensões registram somente os contratos pertencentes ao service;
+- [ ] as extensões são chamadas pela configuração de DI da API.
+
+Critério de conclusão:
+
+- [ ] todos os contratos de persistência possuem implementação;
+- [ ] migration aplica e reverte sem erro em banco vazio;
+- [ ] API inicia conectada ao PostgreSQL;
+- [ ] restrições de unicidade existem também no banco.
+
+## Etapa 3 — Segurança e autenticação
+
+Objetivo: implementar e registrar os mecanismos de credencial e token que serão expostos pela API na etapa seguinte.
 
 - [ ] implementar hash seguro de senha;
-- [ ] implementar emissão e validação de JWT;
-- [x] impedir autenticação de usuário inativo no Domain;
-- [ ] proteger todas as rotas administrativas.
+- [ ] implementar verificação de senha;
+- [ ] implementar geração de JWT com identificador e login do usuário;
+- [ ] configurar emissor, audiência, chave e expiração por ambiente;
+- [ ] impedir inicialização ou emissão de token sem configuração segura;
+- [ ] preparar usuário inicial sem versionar senha ou hash sensível;
+- [ ] testar unitariamente hash, verificação de senha e geração de token;
+- [ ] testar unitariamente credenciais válidas, inválidas e usuário inativo.
 
-### Funcionalidades
+Critério de conclusão:
 
-- [ ] implementar casos de uso de usuários;
-- [ ] implementar casos de uso de unidades;
-- [ ] implementar casos de uso de colaboradores;
-- [ ] validar unicidade de códigos e login;
-- [ ] garantir a relação única entre usuário e colaborador;
-- [x] impedir inclusão ou transferência para unidade inativa no Domain;
-- [x] implementar remoção lógica de colaboradores no Domain.
+- [ ] implementações de `IPasswordHasher` e `ITokenService` estão registradas pela API;
+- [ ] tokens gerados atendem às regras de validação configuradas;
+- [ ] configuração insegura ou ausente impede emissão de token.
 
-### API
+## Etapa 4 — Features HTTP
 
-- [ ] implementar controllers e rotas versionadas;
-- [ ] configurar validação das requisições;
-- [ ] configurar tratamento global de erros;
-- [ ] configurar Problem Details;
-- [ ] configurar Swagger com autenticação Bearer.
+Objetivo: expor as operações da Application por controllers finos.
+
+| Recurso | Método e rota | Mensagem | Application | Infrastructure | API | Integração |
+| --- | --- | --- | --- | --- | --- | --- |
+| Autenticação | `POST /api/v1/auth/login` | `AuthenticateQuery` | [x] | [ ] | [ ] | [ ] |
+| Usuários | `POST /api/v1/users` | `CreateUserCommand` | [ ] | [ ] | [ ] | [ ] |
+| Usuários | `GET /api/v1/users` | `GetUsersQuery` | [x] | [ ] | [ ] | [ ] |
+| Usuários | `GET /api/v1/users/{id}` | `GetUserQuery` | [x] | [ ] | [ ] | [ ] |
+| Usuários | `PATCH /api/v1/users/{id}` | `UpdateUserCommand` | [x] | [ ] | [ ] | [ ] |
+| Colaboradores | `POST /api/v1/employees` | `CreateEmployeeCommand` | [x] | [ ] | [ ] | [ ] |
+| Colaboradores | `GET /api/v1/employees` | `GetEmployeesQuery` | [x] | [ ] | [ ] | [ ] |
+| Colaboradores | `GET /api/v1/employees/{id}` | `GetEmployeeQuery` | [x] | [ ] | [ ] | [ ] |
+| Colaboradores | `PATCH /api/v1/employees/{id}` | `UpdateEmployeeCommand` | [x] | [ ] | [ ] | [ ] |
+| Colaboradores | `DELETE /api/v1/employees/{id}` | `DeleteEmployeeCommand` | [x] | [ ] | [ ] | [ ] |
+| Unidades | `POST /api/v1/units` | `CreateUnitCommand` | [x] | [ ] | [ ] | [ ] |
+| Unidades | `GET /api/v1/units` | `GetUnitsQuery` | [x] | [ ] | [ ] | [ ] |
+| Unidades | `GET /api/v1/units/{id}` | `GetUnitQuery` | [x] | [ ] | [ ] | [ ] |
+| Unidades | `PATCH /api/v1/units/{id}` | `UpdateUnitCommand` | [x] | [ ] | [ ] | [ ] |
+
+Regras funcionais a validar ponta a ponta:
+
+- [ ] cadastro de usuário aceita status inicial ativo ou inativo;
+- [ ] código e login de usuário únicos;
+- [ ] atualização de usuário limitada a senha e status;
+- [ ] filtro de usuários por status;
+- [ ] código de colaborador único;
+- [ ] exatamente um usuário por colaborador;
+- [ ] atualização de colaborador limitada a nome e unidade;
+- [ ] remoção lógica e exclusão dos removidos nas listagens;
+- [ ] código de unidade único;
+- [ ] unidade inativa não recebe inclusão nem transferência;
+- [ ] listagem de unidades inclui seus colaboradores não removidos.
+
+Regras de acesso HTTP:
+
+- [ ] criar `AuthController` com login anônimo;
+- [ ] manter o login como única rota anônima;
+- [ ] proteger todos os controllers administrativos com autenticação Bearer;
+- [ ] login válido retorna token utilizável;
+- [ ] login inválido não revela se usuário ou senha falhou;
+- [ ] usuário inativo não recebe token;
+- [ ] rota protegida rejeita acesso sem token ou com token inválido.
+
+## Etapa 5 — Contrato HTTP e tratamento de erros
+
+Objetivo: padronizar respostas, falhas e documentação das rotas.
+
+- [ ] configurar versionamento em `/api/v1`;
+- [ ] mapear validações do FluentValidation para `400 Bad Request`;
+- [ ] mapear autenticação inválida para `401 Unauthorized`;
+- [ ] mapear recursos inexistentes para `404 Not Found`;
+- [ ] mapear duplicidades e conflitos de regra para `409 Conflict`;
+- [ ] retornar `201 Created` nos cadastros;
+- [ ] retornar `204 No Content` nas atualizações e remoção;
+- [ ] criar tratamento global de exceções;
+- [ ] responder falhas com Problem Details;
+- [ ] documentar autenticação Bearer e respostas no Swagger;
+- [ ] garantir que o Swagger esteja acessível no ambiente definido para avaliação.
+
+Critério de conclusão:
+
+- [ ] controllers não possuem lógica de negócio nem persistência;
+- [ ] todas as rotas aparecem no Swagger;
+- [ ] códigos HTTP e Problem Details estão consistentes.
+
+## Etapa 6 — Testes automatizados
 
 ### Testes unitários
 
-- [x] testar regras iniciais das entidades usando AAA;
-- [x] testar alterações permitidas nos usuários;
-- [x] testar bloqueio de unidade inativa;
-- [ ] testar vínculo único entre usuário e colaborador;
-- [ ] testar os fluxos de sucesso e falha dos casos de uso.
-
-### Critério de conclusão
-
-- [ ] todas as rotas disponíveis no Swagger;
-- [ ] autenticação funcionando;
-- [ ] regras críticas cobertas por testes unitários;
-- [ ] controllers sem lógica de negócio ou persistência;
-- [x] compilação e testes unitários atuais passando.
-
-## Dia 3: integração e aceite do backend
+- [x] testar entidades e invariantes atuais do Domain;
+- [x] testar pipeline de validação;
+- [x] testar fluxos principais já cobertos de autenticação, usuários, unidades e colaboradores;
+- [ ] cobrir todos os handlers em sucesso e recurso inexistente;
+- [ ] cobrir todos os validators com entradas válidas e inválidas;
+- [ ] cobrir duplicidades, filtros, atualizações, transferência e remoção lógica;
+- [ ] manter todos os testes no padrão AAA.
 
 ### Testes de integração
 
-- [ ] configurar WebApplicationFactory;
-- [ ] executar PostgreSQL isolado com Testcontainers;
-- [ ] validar migrations e inicialização da API;
-- [ ] testar autenticação válida e inválida;
-- [ ] testar bloqueio de usuário inativo;
-- [ ] testar os fluxos de usuários, unidades e colaboradores;
+- [ ] criar estrutura `IntegrationTests`;
+- [ ] configurar `WebApplicationFactory`;
+- [ ] permitir que a fixture selecione o banco por configuração;
+- [ ] usar PostgreSQL isolado com Testcontainers na execução local ou CI com daemon Docker disponível;
+- [ ] reutilizar o serviço PostgreSQL do Compose quando os testes rodarem dentro do container `tests`;
+- [ ] não iniciar Testcontainers de dentro do container `tests`;
+- [ ] testar aplicação das migrations;
+- [ ] testar autenticação válida, inválida e usuário inativo;
+- [ ] testar acesso anônimo às rotas protegidas;
+- [ ] testar todos os endpoints de usuários;
+- [ ] testar todos os endpoints de colaboradores;
+- [ ] testar todos os endpoints de unidades;
 - [ ] testar filtros, duplicidades e recursos inexistentes;
-- [ ] testar unidade inativa e relação única de usuário;
-- [ ] testar remoção lógica;
-- [ ] testar listagem de unidades com colaboradores;
-- [ ] testar acesso sem token.
+- [ ] testar unidade inativa, vínculo único e remoção lógica;
+- [ ] validar formato de Problem Details.
 
-### Empacotamento e documentação
+Critério de conclusão:
 
-- [x] validar o Dockerfile da API;
-- [x] integrar API e PostgreSQL no Docker Compose;
-- [ ] garantir que nenhum segredo seja versionado;
-- [ ] criar coleção Postman ou atualizar o arquivo `.http`;
-- [ ] documentar execução, migrations, autenticação e testes no README;
+- [ ] testes unitários e de integração passam localmente;
+- [ ] testes passam no estágio `tests` do Docker Compose;
+- [ ] execução local ou CI valida o modo Testcontainers;
+- [ ] execução pelo Compose valida o modo de conexão externa;
+- [ ] banco de integração é isolado e reproduzível.
+
+## Etapa 7 — Docker, documentação e aceite
+
+- [x] Dockerfile da API criado;
+- [x] PostgreSQL configurado no Docker Compose com health check e volume;
+- [x] API condicionada ao sucesso do container de testes;
+- [ ] integrar execução automática das migrations na inicialização ou implantação;
+- [ ] fornecer configurações seguras para JWT sem versionar segredos;
+- [ ] validar subida completa com `docker compose up --build`;
+- [ ] executar uma requisição real de login e uma rota protegida;
+- [ ] criar coleção Postman ou arquivo `.http` com todos os fluxos;
+- [ ] documentar configuração, migrations, execução e testes no README;
 - [ ] executar revisão final independente.
 
-### Gate obrigatório
+## Gate obrigatório do backend
 
-O front-end somente poderá começar quando:
+O backend estará concluído somente quando:
 
-- [x] `dotnet build` terminar sem erros;
+- [x] a solução compila atualmente sem erros ou avisos;
 - [ ] todos os testes unitários e de integração passarem;
-- [x] `docker compose up` iniciar API e PostgreSQL;
-- [ ] o Swagger estiver acessível;
-- [ ] a migration funcionar em banco vazio;
-- [ ] o fluxo completo estiver validado;
+- [ ] a migration funcionar em PostgreSQL vazio;
+- [ ] API, testes e PostgreSQL subirem pelo Docker Compose;
+- [ ] todas as rotas estiverem disponíveis e documentadas no Swagger;
+- [ ] autenticação e autorização funcionarem ponta a ponta;
+- [ ] todas as regras funcionais estiverem validadas pela API;
 - [ ] nenhum segredo estiver versionado;
+- [ ] README e coleção de requisições estiverem completos;
 - [ ] não houver achados materiais pendentes na revisão final.
 
-## Etapa posterior: front-end
+## Etapa posterior — Front-end
 
-Após o gate do backend, o desenvolvimento Angular seguirá esta ordem:
+Após o gate do backend:
 
-- [ ] estrutura do projeto e configuração dos ambientes;
-- [ ] autenticação, interceptor JWT e guards;
-- [ ] layout e navegação;
-- [ ] gestão de usuários;
-- [ ] gestão de unidades;
-- [ ] gestão de colaboradores;
-- [ ] validações e tratamento de erros;
-- [ ] testes e integração final com a API.
+- [ ] criar estrutura e configurações do Angular;
+- [ ] implementar autenticação, interceptor JWT e guards;
+- [ ] implementar layout e navegação;
+- [ ] implementar gestão de usuários;
+- [ ] implementar gestão de unidades;
+- [ ] implementar gestão de colaboradores;
+- [ ] implementar validações e tratamento de erros;
+- [ ] integrar e testar todo o portal com a API.
