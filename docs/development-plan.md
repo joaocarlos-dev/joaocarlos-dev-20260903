@@ -68,10 +68,12 @@ A Application definirá contratos para repositórios, unidade de trabalho, hash 
 - [x] separar operações de escrita em commands e operações de leitura em queries;
 - [x] implementar handlers MediatR na camada Application;
 - [x] criar validators com FluentValidation para commands e queries;
+- [x] organizar cada ação em uma pasta própria dentro de `Commands` ou `Queries`;
+- [x] manter o handler no arquivo do command ou query e o validator em arquivo separado;
 - [x] executar a validação antes dos handlers;
 - [x] manter as invariantes de negócio no Domain, independentemente da validação de entrada.
 
-Commands não retornam modelos de leitura. Queries não alteram estado. O MediatR será responsável pelo envio das requisições aos handlers. Um `IPipelineBehavior` do FluentValidation validará a entrada na Application, enquanto as entidades continuarão protegendo suas próprias invariantes.
+Commands não retornam modelos de leitura. Queries não alteram estado. Não serão usados arquivos ou classes genéricas de `UseCases`: cada operação terá um command ou query com seu handler e um validator correspondente. O MediatR será responsável pelo envio das requisições aos handlers. Um `IPipelineBehavior` do FluentValidation validará a entrada na Application, enquanto as entidades continuarão protegendo suas próprias invariantes.
 
 ### Injeção de dependência
 

@@ -3,21 +3,11 @@ using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 using EmployeeManagmentSystem.Application.Abstractions.Security;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
 using EmployeeManagmentSystem.Application.DTOs;
-using FluentValidation;
 using MediatR;
 
-namespace EmployeeManagmentSystem.Application.Authentication;
+namespace EmployeeManagmentSystem.Application.Queries.Authentication.Authenticate;
 
 public sealed record AuthenticateQuery(string Login, string Password) : IQuery<AuthenticationDto>;
-
-internal sealed class AuthenticateQueryValidator : AbstractValidator<AuthenticateQuery>
-{
-    public AuthenticateQueryValidator()
-    {
-        RuleFor(query => query.Login).NotEmpty();
-        RuleFor(query => query.Password).NotEmpty();
-    }
-}
 
 internal sealed class AuthenticateQueryHandler(
     IUserRepository userRepository,

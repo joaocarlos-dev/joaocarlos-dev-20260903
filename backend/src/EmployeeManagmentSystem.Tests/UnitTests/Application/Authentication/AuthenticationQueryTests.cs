@@ -1,8 +1,8 @@
 using EmployeeManagmentSystem.Application;
 using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 using EmployeeManagmentSystem.Application.Abstractions.Security;
-using EmployeeManagmentSystem.Application.Authentication;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
+using EmployeeManagmentSystem.Application.Queries.Authentication.Authenticate;
 using EmployeeManagmentSystem.Domain.Entities;
 using EmployeeManagmentSystem.Domain.Enums;
 using MediatR;
@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EmployeeManagmentSystem.Tests.UnitTests.Application.Authentication;
 
-public sealed class AuthenticationUseCaseTests
+public sealed class AuthenticationQueryTests
 {
     [Fact]
     public async Task Authenticate_WithValidCredentials_ShouldReturnToken()

@@ -1,8 +1,9 @@
 using EmployeeManagmentSystem.Application;
 using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 using EmployeeManagmentSystem.Application.Abstractions.Security;
+using EmployeeManagmentSystem.Application.Commands.Users.CreateUser;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
-using EmployeeManagmentSystem.Application.Users;
+using EmployeeManagmentSystem.Application.Queries.Users.GetUsers;
 using EmployeeManagmentSystem.Domain.Entities;
 using EmployeeManagmentSystem.Domain.Enums;
 using MediatR;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EmployeeManagmentSystem.Tests.UnitTests.Application.Users;
 
-public sealed class UserUseCasesTests
+public sealed class UserOperationsTests
 {
     [Fact]
     public async Task CreateUser_WithUniqueData_ShouldHashPasswordAndPersistUser()
@@ -57,7 +58,7 @@ public sealed class UserUseCasesTests
         var unitOfWork = new FakeUnitOfWork();
         await using var provider = CreateProvider(repository, unitOfWork);
         var mediator = provider.GetRequiredService<IMediator>();
-        var query = new ListUsersQuery(EntityStatus.Inactive);
+        var query = new GetUsersQuery(EntityStatus.Inactive);
 
         var result = await mediator.Send(query);
 

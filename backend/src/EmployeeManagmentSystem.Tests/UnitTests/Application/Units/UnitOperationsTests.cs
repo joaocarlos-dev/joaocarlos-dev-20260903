@@ -1,7 +1,9 @@
 using EmployeeManagmentSystem.Application;
 using EmployeeManagmentSystem.Application.Abstractions.Persistence;
+using EmployeeManagmentSystem.Application.Commands.Units.CreateUnit;
+using EmployeeManagmentSystem.Application.Commands.Units.UpdateUnit;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
-using EmployeeManagmentSystem.Application.Units;
+using EmployeeManagmentSystem.Application.Queries.Units.GetUnits;
 using EmployeeManagmentSystem.Domain.Entities;
 using EmployeeManagmentSystem.Domain.Enums;
 using MediatR;
@@ -10,7 +12,7 @@ using DomainUnit = EmployeeManagmentSystem.Domain.Entities.Unit;
 
 namespace EmployeeManagmentSystem.Tests.UnitTests.Application.Units;
 
-public sealed class UnitUseCasesTests
+public sealed class UnitOperationsTests
 {
     [Fact]
     public async Task CreateUnit_WithCodeSurroundedBySpaces_ShouldDetectDuplicate()
@@ -61,7 +63,7 @@ public sealed class UnitUseCasesTests
         var unitOfWork = new FakeUnitOfWork();
         await using var provider = CreateProvider(unitRepository, employeeRepository, unitOfWork);
         var mediator = provider.GetRequiredService<IMediator>();
-        var query = new ListUnitsQuery();
+        var query = new GetUnitsQuery();
 
         var result = await mediator.Send(query);
 

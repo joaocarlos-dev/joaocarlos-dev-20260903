@@ -1,7 +1,8 @@
 using EmployeeManagmentSystem.Application;
 using EmployeeManagmentSystem.Application.Abstractions.Persistence;
+using EmployeeManagmentSystem.Application.Commands.Employees.CreateEmployee;
+using EmployeeManagmentSystem.Application.Commands.Employees.DeleteEmployee;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
-using EmployeeManagmentSystem.Application.Employees;
 using EmployeeManagmentSystem.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +10,7 @@ using DomainUnit = EmployeeManagmentSystem.Domain.Entities.Unit;
 
 namespace EmployeeManagmentSystem.Tests.UnitTests.Application.Employees;
 
-public sealed class EmployeeUseCasesTests
+public sealed class EmployeeOperationsTests
 {
     [Fact]
     public async Task CreateEmployee_WithAvailableUserAndActiveUnit_ShouldPersistEmployee()
