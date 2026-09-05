@@ -4,8 +4,10 @@ using EmployeeManagmentSystem.Application.Commands.Units.CreateUnit;
 using EmployeeManagmentSystem.Application.Commands.Units.UpdateUnit;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
 using EmployeeManagmentSystem.Application.Queries.Units.GetUnits;
+using EmployeeManagmentSystem.Domain.Common;
 using EmployeeManagmentSystem.Domain.Entities;
 using EmployeeManagmentSystem.Domain.Enums;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using DomainUnit = EmployeeManagmentSystem.Domain.Entities.Unit;
@@ -47,6 +49,60 @@ public sealed class UnitOperationsTests
         await mediator.Send(command);
 
         Assert.Equal(EntityStatus.Inactive, unit.Status);
+        Assert.Equal(1, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task CreateUnit_WithNameExceedingMaximumLength_ShouldFailValidationAndNotPersist()
+    {
+        var unitRepository = new FakeUnitRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(unitRepository, employeeRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new CreateUnitCommand("UNIT-001", new string('a', EntityFieldLengths.Name + 1));
+
+        var action = () => mediator.Send(command);
+
+        await Assert.ThrowsAsync<ValidationException>(action);
+        Assert.Empty(unitRepository.Units);
+        Assert.Equal(0, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task CreateUnit_WithTrimmedNameAtMaximumLength_ShouldPersistNormalizedName()
+    {
+        var unitRepository = new FakeUnitRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(unitRepository, employeeRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var name = new string('a', EntityFieldLengths.Name);
+        var command = new CreateUnitCommand("UNIT-001", $" {name} ");
+
+        await mediator.Send(command);
+
+        var unit = Assert.Single(unitRepository.Units);
+        Assert.Equal(name, unit.Name);
+        Assert.Equal(1, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task UpdateUnit_WithTrimmedNameAtMaximumLength_ShouldPersistNormalizedName()
+    {
+        var unitRepository = new FakeUnitRepository();
+        var unit = new DomainUnit("UNIT-001", "Headquarters");
+        unitRepository.Units.Add(unit);
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(unitRepository, employeeRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var name = new string('a', EntityFieldLengths.Name);
+        var command = new UpdateUnitCommand(unit.Id, $" {name} ", null);
+
+        await mediator.Send(command);
+
+        Assert.Equal(name, unit.Name);
         Assert.Equal(1, unitOfWork.SaveCalls);
     }
 

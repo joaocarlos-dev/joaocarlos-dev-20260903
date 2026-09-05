@@ -13,7 +13,7 @@ internal sealed class FakeUserRepository : IUserRepository
         Task.FromResult(Users.SingleOrDefault(user => user.Id == id));
 
     public Task<User?> GetByLoginAsync(string login, CancellationToken cancellationToken = default) =>
-        Task.FromResult(Users.SingleOrDefault(user => user.Login == login));
+        Task.FromResult(Users.SingleOrDefault(user => string.Equals(user.Login, login, StringComparison.OrdinalIgnoreCase)));
 
     public Task<IReadOnlyCollection<User>> ListAsync(
         EntityStatus? status,
@@ -25,7 +25,7 @@ internal sealed class FakeUserRepository : IUserRepository
         Task.FromResult(Users.Any(user => user.Code == code));
 
     public Task<bool> LoginExistsAsync(string login, CancellationToken cancellationToken = default) =>
-        Task.FromResult(Users.Any(user => user.Login == login));
+        Task.FromResult(Users.Any(user => string.Equals(user.Login, login, StringComparison.OrdinalIgnoreCase)));
 
     public Task AddAsync(User user, CancellationToken cancellationToken = default)
     {

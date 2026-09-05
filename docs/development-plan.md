@@ -29,7 +29,7 @@ API ----------------------> Application
 - [x] Application depende somente de Domain.
 - [x] Infrastructure depende de Application e Domain.
 - [x] API depende de Application e Infrastructure e atua como composition root.
-- [ ] garantir que PostgreSQL e serviços externos sejam acessados exclusivamente pela Infrastructure.
+- [x] garantir que PostgreSQL e serviços externos sejam acessados exclusivamente pela Infrastructure.
 
 ### Domain
 
@@ -110,13 +110,13 @@ UserService.cs
 `-- UserServiceDependencyInjection
 ```
 
-- [ ] implementar `UserService` e `UserServiceDependencyInjection`;
-- [ ] implementar `EmployeeService` e `EmployeeServiceDependencyInjection`;
-- [ ] implementar `UnitService` e `UnitServiceDependencyInjection`;
+- [x] implementar `UserService` e `UserServiceDependencyInjection`;
+- [x] implementar `EmployeeService` e `EmployeeServiceDependencyInjection`;
+- [x] implementar `UnitService` e `UnitServiceDependencyInjection`;
 - [ ] implementar serviço de hash de senha com sua extensão de DI;
 - [ ] implementar serviço de geração de JWT com sua extensão de DI;
-- [ ] implementar unidade de trabalho e configuração de persistência;
-- [ ] chamar as extensões dos services somente pela configuração central da API.
+- [x] implementar unidade de trabalho e configuração de persistência;
+- [x] chamar as extensões dos services somente pela configuração central da API.
 
 ### API e MVC adaptado
 
@@ -154,7 +154,7 @@ API/
 - [x] centralizar configurações fora do `Program.cs`;
 - [x] mover as configurações atuais para suas respectivas subpastas;
 - [x] organizar os namespaces de configuração conforme as subpastas;
-- [ ] registrar os services da Infrastructure em `Configurations/DependencyInjection`;
+- [x] registrar os services da Infrastructure em `Configurations/DependencyInjection`;
 - [x] manter configuração e middleware de Swagger em `Configurations/Swagger`;
 - [x] manter configuração de autenticação e validação JWT em `Configurations/Jwt`;
 - [x] manter composição do pipeline HTTP em `Configurations/Pipeline`;
@@ -175,14 +175,14 @@ API/
 - [x] configuração inicial do Swagger com esquema Bearer existente na API;
 - [x] Dockerfile multi-stage com etapa de testes;
 - [x] Docker Compose com PostgreSQL, testes como gate e API;
-- [x] 37 testes unitários passando;
+- [x] todos os testes unitários atuais passando;
 - [x] testes atuais organizados em `UnitTests` e seguindo AAA.
 
 ### Ainda não entregue ponta a ponta
 
-- [ ] services da Infrastructure;
-- [ ] Entity Framework Core e provider Npgsql;
-- [ ] DbContext, mappings e migrations;
+- [x] services de persistência da Infrastructure;
+- [x] Entity Framework Core e provider Npgsql;
+- [x] DbContext, mappings e migration inicial;
 - [ ] controllers e rotas HTTP;
 - [ ] emissão real de JWT e hash seguro de senha;
 - [ ] tratamento global de erros e Problem Details;
@@ -218,42 +218,42 @@ Objetivo: implementar todos os contratos da Application com PostgreSQL.
 
 ### Persistência
 
-- [ ] adicionar Entity Framework Core e Npgsql;
-- [ ] criar `EmployeeManagementDbContext`;
-- [ ] implementar `IUnitOfWork`;
-- [ ] mapear `User`, `Employee` e `Unit`;
-- [ ] usar nomes de tabelas `users`, `employees` e `units`;
-- [ ] usar tipos temporais com fuso;
-- [ ] configurar remoção lógica de colaboradores nas consultas;
-- [ ] criar migration inicial;
-- [ ] validar a migration em banco vazio.
+- [x] adicionar Entity Framework Core e Npgsql;
+- [x] criar `EmployeeManagementDbContext`;
+- [x] implementar `IUnitOfWork`;
+- [x] mapear `User`, `Employee` e `Unit`;
+- [x] usar nomes de tabelas `users`, `employees` e `units`;
+- [x] usar tipos temporais com fuso;
+- [x] configurar remoção lógica de colaboradores nas consultas;
+- [x] criar migration inicial;
+- [x] validar a migration em banco vazio.
 
 ### Restrições no banco
 
-- [ ] índice único para código de usuário;
-- [ ] índice único para login normalizado;
-- [ ] índice único para código de colaborador;
-- [ ] índice único para código de unidade;
-- [ ] relacionamento obrigatório e único entre usuário e colaborador;
-- [ ] relacionamento obrigatório entre colaborador e unidade;
-- [ ] chaves estrangeiras e comportamento de exclusão definidos explicitamente.
+- [x] índice único para código de usuário;
+- [x] índice único case-insensitive para login;
+- [x] índice único para código de colaborador;
+- [x] índice único para código de unidade;
+- [x] relacionamento obrigatório e único entre usuário e colaborador;
+- [x] relacionamento obrigatório entre colaborador e unidade;
+- [x] chaves estrangeiras e comportamento de exclusão definidos explicitamente.
 
 ### Services
 
-- [ ] `UserService` implementa `IUserRepository`;
-- [ ] `EmployeeService` implementa `IEmployeeRepository`;
-- [ ] `UnitService` implementa `IUnitRepository`;
-- [ ] cada service fica em pasta própria;
-- [ ] cada arquivo de service termina com `{ServiceName}DependencyInjection`;
-- [ ] as extensões registram somente os contratos pertencentes ao service;
-- [ ] as extensões são chamadas pela configuração de DI da API.
+- [x] `UserService` implementa `IUserRepository`;
+- [x] `EmployeeService` implementa `IEmployeeRepository`;
+- [x] `UnitService` implementa `IUnitRepository`;
+- [x] cada service fica em pasta própria;
+- [x] cada arquivo de service termina com `{ServiceName}DependencyInjection`;
+- [x] as extensões registram somente os contratos pertencentes ao service;
+- [x] as extensões são chamadas pela configuração de DI da API.
 
 Critério de conclusão:
 
-- [ ] todos os contratos de persistência possuem implementação;
-- [ ] migration aplica e reverte sem erro em banco vazio;
-- [ ] API inicia conectada ao PostgreSQL;
-- [ ] restrições de unicidade existem também no banco.
+- [x] todos os contratos de persistência possuem implementação;
+- [x] migration aplica e reverte sem erro em banco vazio;
+- [x] API inicia com provider PostgreSQL configurado e banco saudável no Compose;
+- [x] restrições de unicidade existem também no banco.
 
 ## Etapa 3 — Segurança e autenticação
 
@@ -281,19 +281,19 @@ Objetivo: expor as operações da Application por controllers finos.
 | Recurso | Método e rota | Mensagem | Application | Infrastructure | API | Integração |
 | --- | --- | --- | --- | --- | --- | --- |
 | Autenticação | `POST /api/v1/auth/login` | `AuthenticateQuery` | [x] | [ ] | [ ] | [ ] |
-| Usuários | `POST /api/v1/users` | `CreateUserCommand` | [x] | [ ] | [ ] | [ ] |
-| Usuários | `GET /api/v1/users` | `GetUsersQuery` | [x] | [ ] | [ ] | [ ] |
-| Usuários | `GET /api/v1/users/{id}` | `GetUserQuery` | [x] | [ ] | [ ] | [ ] |
-| Usuários | `PATCH /api/v1/users/{id}` | `UpdateUserCommand` | [x] | [ ] | [ ] | [ ] |
-| Colaboradores | `POST /api/v1/employees` | `CreateEmployeeCommand` | [x] | [ ] | [ ] | [ ] |
-| Colaboradores | `GET /api/v1/employees` | `GetEmployeesQuery` | [x] | [ ] | [ ] | [ ] |
-| Colaboradores | `GET /api/v1/employees/{id}` | `GetEmployeeQuery` | [x] | [ ] | [ ] | [ ] |
-| Colaboradores | `PATCH /api/v1/employees/{id}` | `UpdateEmployeeCommand` | [x] | [ ] | [ ] | [ ] |
-| Colaboradores | `DELETE /api/v1/employees/{id}` | `DeleteEmployeeCommand` | [x] | [ ] | [ ] | [ ] |
-| Unidades | `POST /api/v1/units` | `CreateUnitCommand` | [x] | [ ] | [ ] | [ ] |
-| Unidades | `GET /api/v1/units` | `GetUnitsQuery` | [x] | [ ] | [ ] | [ ] |
-| Unidades | `GET /api/v1/units/{id}` | `GetUnitQuery` | [x] | [ ] | [ ] | [ ] |
-| Unidades | `PATCH /api/v1/units/{id}` | `UpdateUnitCommand` | [x] | [ ] | [ ] | [ ] |
+| Usuários | `POST /api/v1/users` | `CreateUserCommand` | [x] | [x] | [ ] | [ ] |
+| Usuários | `GET /api/v1/users` | `GetUsersQuery` | [x] | [x] | [ ] | [ ] |
+| Usuários | `GET /api/v1/users/{id}` | `GetUserQuery` | [x] | [x] | [ ] | [ ] |
+| Usuários | `PATCH /api/v1/users/{id}` | `UpdateUserCommand` | [x] | [x] | [ ] | [ ] |
+| Colaboradores | `POST /api/v1/employees` | `CreateEmployeeCommand` | [x] | [x] | [ ] | [ ] |
+| Colaboradores | `GET /api/v1/employees` | `GetEmployeesQuery` | [x] | [x] | [ ] | [ ] |
+| Colaboradores | `GET /api/v1/employees/{id}` | `GetEmployeeQuery` | [x] | [x] | [ ] | [ ] |
+| Colaboradores | `PATCH /api/v1/employees/{id}` | `UpdateEmployeeCommand` | [x] | [x] | [ ] | [ ] |
+| Colaboradores | `DELETE /api/v1/employees/{id}` | `DeleteEmployeeCommand` | [x] | [x] | [ ] | [ ] |
+| Unidades | `POST /api/v1/units` | `CreateUnitCommand` | [x] | [x] | [ ] | [ ] |
+| Unidades | `GET /api/v1/units` | `GetUnitsQuery` | [x] | [x] | [ ] | [ ] |
+| Unidades | `GET /api/v1/units/{id}` | `GetUnitQuery` | [x] | [x] | [ ] | [ ] |
+| Unidades | `PATCH /api/v1/units/{id}` | `UpdateUnitCommand` | [x] | [x] | [ ] | [ ] |
 
 Regras funcionais a validar ponta a ponta:
 
@@ -351,7 +351,7 @@ Critério de conclusão:
 - [ ] cobrir todos os handlers em sucesso e recurso inexistente;
 - [ ] cobrir todos os validators com entradas válidas e inválidas;
 - [ ] cobrir duplicidades, filtros, atualizações, transferência e remoção lógica;
-- [ ] manter todos os testes no padrão AAA.
+- [x] manter todos os testes atuais no padrão AAA.
 
 ### Testes de integração
 
@@ -386,7 +386,7 @@ Critério de conclusão:
 - [x] API condicionada ao sucesso do container de testes;
 - [ ] integrar execução automática das migrations na inicialização ou implantação;
 - [ ] fornecer configurações seguras para JWT sem versionar segredos;
-- [ ] validar subida completa com `docker compose up --build`;
+- [x] validar subida completa com `docker compose up --build`;
 - [ ] executar uma requisição real de login e uma rota protegida;
 - [ ] criar coleção Postman ou arquivo `.http` com todos os fluxos;
 - [ ] documentar configuração, migrations, execução e testes no README;
@@ -398,8 +398,8 @@ O backend estará concluído somente quando:
 
 - [x] a solução compila atualmente sem erros ou avisos;
 - [ ] todos os testes unitários e de integração passarem;
-- [ ] a migration funcionar em PostgreSQL vazio;
-- [ ] API, testes e PostgreSQL subirem pelo Docker Compose;
+- [x] a migration funcionar em PostgreSQL vazio;
+- [x] API, testes e PostgreSQL subirem pelo Docker Compose;
 - [ ] todas as rotas estiverem disponíveis e documentadas no Swagger;
 - [ ] autenticação e autorização funcionarem ponta a ponta;
 - [ ] todas as regras funcionais estiverem validadas pela API;

@@ -4,6 +4,7 @@ using EmployeeManagmentSystem.Application.Abstractions.Security;
 using EmployeeManagmentSystem.Application.Commands.Users.CreateUser;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
 using EmployeeManagmentSystem.Application.Queries.Users.GetUsers;
+using EmployeeManagmentSystem.Domain.Common;
 using EmployeeManagmentSystem.Domain.Entities;
 using EmployeeManagmentSystem.Domain.Enums;
 using FluentValidation;
@@ -40,7 +41,7 @@ public sealed class UserOperationsTests
         var unitOfWork = new FakeUnitOfWork();
         await using var provider = CreateProvider(repository, unitOfWork);
         var mediator = provider.GetRequiredService<IMediator>();
-        var command = new CreateUserCommand("USR-002", " admin ", "password456", EntityStatus.Active);
+        var command = new CreateUserCommand("USR-002", " ADMIN ", "password456", EntityStatus.Active);
 
         var action = () => mediator.Send(command);
 
@@ -80,6 +81,45 @@ public sealed class UserOperationsTests
         await Assert.ThrowsAsync<ValidationException>(action);
         Assert.Empty(repository.Users);
         Assert.Equal(0, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task CreateUser_WithLoginExceedingMaximumLength_ShouldFailValidationAndNotPersist()
+    {
+        var repository = new FakeUserRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(repository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new CreateUserCommand(
+            "USR-001",
+            new string('a', EntityFieldLengths.Login + 1),
+            "password123",
+            EntityStatus.Active);
+
+        var action = () => mediator.Send(command);
+
+        await Assert.ThrowsAsync<ValidationException>(action);
+        Assert.Empty(repository.Users);
+        Assert.Equal(0, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task CreateUser_WithTrimmedValuesAtMaximumLength_ShouldPersistNormalizedValues()
+    {
+        var repository = new FakeUserRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(repository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var code = new string('c', EntityFieldLengths.Code);
+        var login = new string('l', EntityFieldLengths.Login);
+        var command = new CreateUserCommand($" {code} ", $" {login} ", "password123", EntityStatus.Active);
+
+        await mediator.Send(command);
+
+        var user = Assert.Single(repository.Users);
+        Assert.Equal(code, user.Code);
+        Assert.Equal(login, user.Login);
+        Assert.Equal(1, unitOfWork.SaveCalls);
     }
 
     [Fact]
