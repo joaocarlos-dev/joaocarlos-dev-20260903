@@ -6,6 +6,7 @@ using EmployeeManagmentSystem.Application.Common.Exceptions;
 using EmployeeManagmentSystem.Application.Queries.Users.GetUsers;
 using EmployeeManagmentSystem.Domain.Entities;
 using EmployeeManagmentSystem.Domain.Enums;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,13 +21,14 @@ public sealed class UserOperationsTests
         var unitOfWork = new FakeUnitOfWork();
         await using var provider = CreateProvider(repository, unitOfWork);
         var mediator = provider.GetRequiredService<IMediator>();
-        var command = new CreateUserCommand("USR-001", "admin", "password123");
+        var command = new CreateUserCommand("USR-001", "admin", "password123", EntityStatus.Active);
 
         var id = await mediator.Send(command);
 
         var user = Assert.Single(repository.Users);
         Assert.Equal(id, user.Id);
         Assert.Equal("hashed:password123", user.PasswordHash);
+        Assert.Equal(EntityStatus.Active, user.Status);
         Assert.Equal(1, unitOfWork.SaveCalls);
     }
 
@@ -38,12 +40,45 @@ public sealed class UserOperationsTests
         var unitOfWork = new FakeUnitOfWork();
         await using var provider = CreateProvider(repository, unitOfWork);
         var mediator = provider.GetRequiredService<IMediator>();
-        var command = new CreateUserCommand("USR-002", " admin ", "password456");
+        var command = new CreateUserCommand("USR-002", " admin ", "password456", EntityStatus.Active);
 
         var action = () => mediator.Send(command);
 
         await Assert.ThrowsAsync<ApplicationConflictException>(action);
         Assert.Single(repository.Users);
+        Assert.Equal(0, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task CreateUser_WithInactiveStatus_ShouldPersistInactiveUser()
+    {
+        var repository = new FakeUserRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(repository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new CreateUserCommand("USR-001", "admin", "password123", EntityStatus.Inactive);
+
+        var id = await mediator.Send(command);
+
+        var user = Assert.Single(repository.Users);
+        Assert.Equal(id, user.Id);
+        Assert.Equal(EntityStatus.Inactive, user.Status);
+        Assert.Equal(1, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task CreateUser_WithInvalidStatus_ShouldFailValidationAndNotPersist()
+    {
+        var repository = new FakeUserRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(repository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new CreateUserCommand("USR-001", "admin", "password123", (EntityStatus)999);
+
+        var action = () => mediator.Send(command);
+
+        await Assert.ThrowsAsync<ValidationException>(action);
+        Assert.Empty(repository.Users);
         Assert.Equal(0, unitOfWork.SaveCalls);
     }
 

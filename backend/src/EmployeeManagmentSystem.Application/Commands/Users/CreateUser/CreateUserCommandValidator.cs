@@ -9,5 +9,6 @@ internal sealed class CreateUserCommandValidator : AbstractValidator<CreateUserC
         RuleFor(command => command.Code).NotEmpty();
         RuleFor(command => command.Login).NotEmpty();
         RuleFor(command => command.Password).NotEmpty().MinimumLength(8);
+        RuleFor(command => command.Status).IsInEnum();
     }
 }

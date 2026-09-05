@@ -10,12 +10,17 @@ public sealed class User : AuditableEntity
     }
 
     public User(string code, string login, string passwordHash)
+        : this(code, login, passwordHash, EntityStatus.Active)
+    {
+    }
+
+    public User(string code, string login, string passwordHash, EntityStatus status)
         : base(Guid.NewGuid())
     {
         Code = DomainRules.Required(code, nameof(code));
         Login = DomainRules.Required(login, nameof(login));
         PasswordHash = DomainRules.Required(passwordHash, nameof(passwordHash));
-        Status = EntityStatus.Active;
+        Status = EnsureValidStatus(status);
     }
 
     public string Code { get; private set; } = string.Empty;
@@ -32,12 +37,7 @@ public sealed class User : AuditableEntity
 
     public void ChangeStatus(EntityStatus status)
     {
-        if (!Enum.IsDefined(status))
-        {
-            throw new DomainException("The user status is invalid.");
-        }
-
-        Status = status;
+        Status = EnsureValidStatus(status);
         MarkAsUpdated();
     }
 
@@ -47,5 +47,15 @@ public sealed class User : AuditableEntity
         {
             throw new DomainException("An inactive user cannot authenticate.");
         }
+    }
+
+    private static EntityStatus EnsureValidStatus(EntityStatus status)
+    {
+        if (!Enum.IsDefined(status))
+        {
+            throw new DomainException("The user status is invalid.");
+        }
+
+        return status;
     }
 }

@@ -152,12 +152,12 @@ API/
 
 - [x] manter o `Program.cs` com bootstrap mínimo;
 - [x] centralizar configurações fora do `Program.cs`;
-- [ ] mover as configurações atuais para suas respectivas subpastas;
-- [ ] organizar os namespaces de configuração conforme as subpastas;
+- [x] mover as configurações atuais para suas respectivas subpastas;
+- [x] organizar os namespaces de configuração conforme as subpastas;
 - [ ] registrar os services da Infrastructure em `Configurations/DependencyInjection`;
-- [ ] manter configuração e middleware de Swagger em `Configurations/Swagger`;
-- [ ] manter configuração de autenticação e validação JWT em `Configurations/Jwt`;
-- [ ] manter composição do pipeline HTTP em `Configurations/Pipeline`;
+- [x] manter configuração e middleware de Swagger em `Configurations/Swagger`;
+- [x] manter configuração de autenticação e validação JWT em `Configurations/Jwt`;
+- [x] manter composição do pipeline HTTP em `Configurations/Pipeline`;
 - [ ] criar controllers finos, organizados por recurso.
 
 ## Estado atual validado
@@ -175,12 +175,11 @@ API/
 - [x] configuração inicial do Swagger com esquema Bearer existente na API;
 - [x] Dockerfile multi-stage com etapa de testes;
 - [x] Docker Compose com PostgreSQL, testes como gate e API;
-- [x] 33 testes unitários passando;
+- [x] 37 testes unitários passando;
 - [x] testes atuais organizados em `UnitTests` e seguindo AAA.
 
 ### Ainda não entregue ponta a ponta
 
-- [ ] status inicial ativo ou inativo no cadastro de usuário;
 - [ ] services da Infrastructure;
 - [ ] Entity Framework Core e provider Npgsql;
 - [ ] DbContext, mappings e migrations;
@@ -196,22 +195,22 @@ API/
 
 Objetivo: consolidar o padrão estrutural antes da implementação das rotas.
 
-- [ ] criar `Configurations/DependencyInjection`;
-- [ ] criar `Configurations/Jwt`;
-- [ ] criar `Configurations/Swagger`;
-- [ ] criar `Configurations/Pipeline`;
-- [ ] mover as configurações existentes e ajustar namespaces;
-- [ ] adicionar status ao `CreateUserCommand`, ao Domain e ao validator correspondente;
-- [ ] testar criação de usuário ativo e inativo;
-- [ ] manter no `Program.cs` somente criação do builder, registro central, construção e pipeline central;
-- [ ] validar registro do MediatR, FluentValidation, autenticação e Swagger;
-- [ ] atualizar testes de configuração da API.
+- [x] criar `Configurations/DependencyInjection`;
+- [x] criar `Configurations/Jwt`;
+- [x] criar `Configurations/Swagger`;
+- [x] criar `Configurations/Pipeline`;
+- [x] mover as configurações existentes e ajustar namespaces;
+- [x] adicionar status ao `CreateUserCommand`, ao Domain e ao validator correspondente;
+- [x] testar criação de usuário ativo e inativo;
+- [x] manter no `Program.cs` somente criação do builder, registro central, construção e pipeline central;
+- [x] validar registro do MediatR, FluentValidation, autenticação e Swagger;
+- [x] atualizar testes de configuração da API.
 
 Critério de conclusão:
 
-- [ ] `Program.cs` permanece mínimo;
-- [ ] nenhuma configuração transversal fica diretamente no `Program.cs`;
-- [ ] solução compila e todos os testes unitários passam.
+- [x] `Program.cs` permanece mínimo;
+- [x] nenhuma configuração transversal fica diretamente no `Program.cs`;
+- [x] solução compila e todos os testes unitários passam.
 
 ## Etapa 2 — Persistência e services da Infrastructure
 
@@ -282,7 +281,7 @@ Objetivo: expor as operações da Application por controllers finos.
 | Recurso | Método e rota | Mensagem | Application | Infrastructure | API | Integração |
 | --- | --- | --- | --- | --- | --- | --- |
 | Autenticação | `POST /api/v1/auth/login` | `AuthenticateQuery` | [x] | [ ] | [ ] | [ ] |
-| Usuários | `POST /api/v1/users` | `CreateUserCommand` | [ ] | [ ] | [ ] | [ ] |
+| Usuários | `POST /api/v1/users` | `CreateUserCommand` | [x] | [ ] | [ ] | [ ] |
 | Usuários | `GET /api/v1/users` | `GetUsersQuery` | [x] | [ ] | [ ] | [ ] |
 | Usuários | `GET /api/v1/users/{id}` | `GetUserQuery` | [x] | [ ] | [ ] | [ ] |
 | Usuários | `PATCH /api/v1/users/{id}` | `UpdateUserCommand` | [x] | [ ] | [ ] | [ ] |

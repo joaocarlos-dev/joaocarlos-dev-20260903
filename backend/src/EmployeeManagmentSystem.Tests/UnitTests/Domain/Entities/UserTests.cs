@@ -22,6 +22,28 @@ public sealed class UserTests
     }
 
     [Fact]
+    public void Constructor_WithInactiveStatus_ShouldCreateInactiveUser()
+    {
+        const EntityStatus status = EntityStatus.Inactive;
+
+        var user = new User("USR-001", "admin", "hashed-password", status);
+
+        Assert.Equal(status, user.Status);
+        Assert.False(user.IsActive);
+        Assert.Null(user.UpdatedAt);
+    }
+
+    [Fact]
+    public void Constructor_WithInvalidStatus_ShouldThrowDomainException()
+    {
+        var invalidStatus = (EntityStatus)999;
+
+        Action action = () => new User("USR-001", "admin", "hashed-password", invalidStatus);
+
+        Assert.Throws<DomainException>(action);
+    }
+
+    [Fact]
     public void UpdatePassword_WithEmptyHash_ShouldThrowDomainException()
     {
         var user = new User("USR-001", "admin", "hashed-password");

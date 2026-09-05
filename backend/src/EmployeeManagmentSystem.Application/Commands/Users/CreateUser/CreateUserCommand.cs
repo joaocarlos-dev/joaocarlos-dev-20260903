@@ -3,11 +3,12 @@ using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 using EmployeeManagmentSystem.Application.Abstractions.Security;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
 using EmployeeManagmentSystem.Domain.Entities;
+using EmployeeManagmentSystem.Domain.Enums;
 using MediatR;
 
 namespace EmployeeManagmentSystem.Application.Commands.Users.CreateUser;
 
-public sealed record CreateUserCommand(string Code, string Login, string Password) : ICommand<Guid>;
+public sealed record CreateUserCommand(string Code, string Login, string Password, EntityStatus Status) : ICommand<Guid>;
 
 internal sealed class CreateUserCommandHandler(
     IUserRepository userRepository,
@@ -29,7 +30,7 @@ internal sealed class CreateUserCommandHandler(
             throw new ApplicationConflictException("The user login is already in use.");
         }
 
-        var user = new User(code, login, passwordHasher.Hash(request.Password));
+        var user = new User(code, login, passwordHasher.Hash(request.Password), request.Status);
         await userRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
