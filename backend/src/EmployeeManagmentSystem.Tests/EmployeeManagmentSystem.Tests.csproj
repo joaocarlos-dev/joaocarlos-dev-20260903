@@ -17,6 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EmployeeManagmentSystem.API\EmployeeManagmentSystem.API.csproj" />
+    <ProjectReference Include="..\EmployeeManagmentSystem.Application\EmployeeManagmentSystem.Application.csproj" />
+    <ProjectReference Include="..\EmployeeManagmentSystem.Domain\EmployeeManagmentSystem.Domain.csproj" />
+    <ProjectReference Include="..\EmployeeManagmentSystem.Infrastructure\EmployeeManagmentSystem.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

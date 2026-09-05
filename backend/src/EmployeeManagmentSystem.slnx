@@ -11,5 +11,7 @@
   <Folder Name="/4. Infrastructure/">
     <Project Path="EmployeeManagmentSystem.Infrastructure/EmployeeManagmentSystem.Infrastructure.csproj" Id="f574d373-f4be-450a-a584-fa8eba30931d" />
   </Folder>
-  <Folder Name="/5. Tests/" />
+  <Folder Name="/5. Tests/">
+    <Project Path="EmployeeManagmentSystem.Tests/EmployeeManagmentSystem.Tests.csproj" Id="42b7a1df-f3aa-4b35-b10c-ee86e0922c57" />
+  </Folder>
 </Solution>
