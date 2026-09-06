@@ -187,7 +187,7 @@ API/
 - [x] emissão real de JWT e hash seguro de senha;
 - [x] tratamento global de erros e Problem Details;
 - [x] autorização das rotas administrativas;
-- [ ] testes de integração;
+- [x] testes de integração;
 - [ ] coleção HTTP ou Postman;
 - [ ] documentação operacional no README.
 
@@ -280,44 +280,44 @@ Objetivo: expor as operações da Application por controllers finos.
 
 | Recurso | Método e rota | Mensagem | Application | Infrastructure | API | Integração |
 | --- | --- | --- | --- | --- | --- | --- |
-| Autenticação | `POST /api/v1/auth/login` | `AuthenticateQuery` | [x] | [x] | [x] | [ ] |
-| Usuários | `POST /api/v1/users` | `CreateUserCommand` | [x] | [x] | [x] | [ ] |
-| Usuários | `GET /api/v1/users` | `GetUsersQuery` | [x] | [x] | [x] | [ ] |
-| Usuários | `GET /api/v1/users/{id}` | `GetUserQuery` | [x] | [x] | [x] | [ ] |
-| Usuários | `PATCH /api/v1/users/{id}` | `UpdateUserCommand` | [x] | [x] | [x] | [ ] |
-| Colaboradores | `POST /api/v1/employees` | `CreateEmployeeCommand` | [x] | [x] | [x] | [ ] |
-| Colaboradores | `GET /api/v1/employees` | `GetEmployeesQuery` | [x] | [x] | [x] | [ ] |
-| Colaboradores | `GET /api/v1/employees/{id}` | `GetEmployeeQuery` | [x] | [x] | [x] | [ ] |
-| Colaboradores | `PATCH /api/v1/employees/{id}` | `UpdateEmployeeCommand` | [x] | [x] | [x] | [ ] |
-| Colaboradores | `DELETE /api/v1/employees/{id}` | `DeleteEmployeeCommand` | [x] | [x] | [x] | [ ] |
-| Unidades | `POST /api/v1/units` | `CreateUnitCommand` | [x] | [x] | [x] | [ ] |
-| Unidades | `GET /api/v1/units` | `GetUnitsQuery` | [x] | [x] | [x] | [ ] |
-| Unidades | `GET /api/v1/units/{id}` | `GetUnitQuery` | [x] | [x] | [x] | [ ] |
-| Unidades | `PATCH /api/v1/units/{id}` | `UpdateUnitCommand` | [x] | [x] | [x] | [ ] |
+| Autenticação | `POST /api/v1/auth/login` | `AuthenticateQuery` | [x] | [x] | [x] | [x] |
+| Usuários | `POST /api/v1/users` | `CreateUserCommand` | [x] | [x] | [x] | [x] |
+| Usuários | `GET /api/v1/users` | `GetUsersQuery` | [x] | [x] | [x] | [x] |
+| Usuários | `GET /api/v1/users/{id}` | `GetUserQuery` | [x] | [x] | [x] | [x] |
+| Usuários | `PATCH /api/v1/users/{id}` | `UpdateUserCommand` | [x] | [x] | [x] | [x] |
+| Colaboradores | `POST /api/v1/employees` | `CreateEmployeeCommand` | [x] | [x] | [x] | [x] |
+| Colaboradores | `GET /api/v1/employees` | `GetEmployeesQuery` | [x] | [x] | [x] | [x] |
+| Colaboradores | `GET /api/v1/employees/{id}` | `GetEmployeeQuery` | [x] | [x] | [x] | [x] |
+| Colaboradores | `PATCH /api/v1/employees/{id}` | `UpdateEmployeeCommand` | [x] | [x] | [x] | [x] |
+| Colaboradores | `DELETE /api/v1/employees/{id}` | `DeleteEmployeeCommand` | [x] | [x] | [x] | [x] |
+| Unidades | `POST /api/v1/units` | `CreateUnitCommand` | [x] | [x] | [x] | [x] |
+| Unidades | `GET /api/v1/units` | `GetUnitsQuery` | [x] | [x] | [x] | [x] |
+| Unidades | `GET /api/v1/units/{id}` | `GetUnitQuery` | [x] | [x] | [x] | [x] |
+| Unidades | `PATCH /api/v1/units/{id}` | `UpdateUnitCommand` | [x] | [x] | [x] | [x] |
 
 Regras funcionais a validar ponta a ponta:
 
-- [ ] cadastro de usuário aceita status inicial ativo ou inativo;
-- [ ] código e login de usuário únicos;
-- [ ] atualização de usuário limitada a senha e status;
-- [ ] filtro de usuários por status;
-- [ ] código de colaborador único;
-- [ ] exatamente um usuário por colaborador;
-- [ ] atualização de colaborador limitada a nome e unidade;
-- [ ] remoção lógica e exclusão dos removidos nas listagens;
-- [ ] código de unidade único;
-- [ ] unidade inativa não recebe inclusão nem transferência;
-- [ ] listagem de unidades inclui seus colaboradores não removidos.
+- [x] cadastro de usuário aceita status inicial ativo ou inativo;
+- [x] código e login de usuário únicos;
+- [x] atualização de usuário limitada a senha e status;
+- [x] filtro de usuários por status;
+- [x] código de colaborador único;
+- [x] exatamente um usuário por colaborador;
+- [x] atualização de colaborador limitada a nome e unidade;
+- [x] remoção lógica e exclusão dos removidos nas listagens;
+- [x] código de unidade único;
+- [x] unidade inativa não recebe inclusão nem transferência;
+- [x] listagem de unidades inclui seus colaboradores não removidos.
 
 Regras de acesso HTTP:
 
 - [x] criar `AuthController` com login anônimo;
 - [x] manter o login como única rota anônima;
 - [x] proteger todos os controllers administrativos com autenticação Bearer;
-- [ ] login válido retorna token utilizável;
-- [ ] login inválido não revela se usuário ou senha falhou;
-- [ ] usuário inativo não recebe token;
-- [ ] rota protegida rejeita acesso sem token ou com token inválido.
+- [x] login válido retorna token utilizável;
+- [x] login inválido não revela se usuário ou senha falhou;
+- [x] usuário inativo não recebe token;
+- [x] rota protegida rejeita acesso sem token ou com token inválido.
 
 ## Etapa 5 — Contrato HTTP e tratamento de erros
 
@@ -348,36 +348,36 @@ Critério de conclusão:
 - [x] testar entidades e invariantes atuais do Domain;
 - [x] testar pipeline de validação;
 - [x] testar fluxos principais já cobertos de autenticação, usuários, unidades e colaboradores;
-- [ ] cobrir todos os handlers em sucesso e recurso inexistente;
-- [ ] cobrir todos os validators com entradas válidas e inválidas;
-- [ ] cobrir duplicidades, filtros, atualizações, transferência e remoção lógica;
+- [x] cobrir todos os handlers em sucesso e recurso inexistente;
+- [x] cobrir todos os validators com entradas válidas e inválidas;
+- [x] cobrir duplicidades, filtros, atualizações, transferência e remoção lógica;
 - [x] manter todos os testes atuais no padrão AAA.
 
 ### Testes de integração
 
-- [ ] criar estrutura `IntegrationTests`;
-- [ ] configurar `WebApplicationFactory`;
-- [ ] permitir que a fixture selecione o banco por configuração;
-- [ ] usar PostgreSQL isolado com Testcontainers na execução local ou CI com daemon Docker disponível;
-- [ ] reutilizar o serviço PostgreSQL do Compose quando os testes rodarem dentro do container `tests`;
-- [ ] não iniciar Testcontainers de dentro do container `tests`;
-- [ ] testar aplicação das migrations;
-- [ ] testar autenticação válida, inválida e usuário inativo;
-- [ ] testar acesso anônimo às rotas protegidas;
-- [ ] testar todos os endpoints de usuários;
-- [ ] testar todos os endpoints de colaboradores;
-- [ ] testar todos os endpoints de unidades;
-- [ ] testar filtros, duplicidades e recursos inexistentes;
-- [ ] testar unidade inativa, vínculo único e remoção lógica;
-- [ ] validar formato de Problem Details.
+- [x] criar estrutura `IntegrationTests`;
+- [x] configurar `WebApplicationFactory`;
+- [x] permitir que a fixture selecione o banco por configuração;
+- [x] usar PostgreSQL isolado com Testcontainers na execução local ou CI com daemon Docker disponível;
+- [x] reutilizar o serviço PostgreSQL do Compose quando os testes rodarem dentro do container `tests`;
+- [x] não iniciar Testcontainers de dentro do container `tests`;
+- [x] testar aplicação das migrations;
+- [x] testar autenticação válida, inválida e usuário inativo;
+- [x] testar acesso anônimo às rotas protegidas;
+- [x] testar todos os endpoints de usuários;
+- [x] testar todos os endpoints de colaboradores;
+- [x] testar todos os endpoints de unidades;
+- [x] testar filtros, duplicidades e recursos inexistentes;
+- [x] testar unidade inativa, vínculo único e remoção lógica;
+- [x] validar formato de Problem Details.
 
 Critério de conclusão:
 
-- [ ] testes unitários e de integração passam localmente;
-- [ ] testes passam no estágio `tests` do Docker Compose;
-- [ ] execução local ou CI valida o modo Testcontainers;
-- [ ] execução pelo Compose valida o modo de conexão externa;
-- [ ] banco de integração é isolado e reproduzível.
+- [x] testes unitários e de integração passam localmente;
+- [x] testes passam no estágio `tests` do Docker Compose;
+- [x] execução local ou CI valida o modo Testcontainers;
+- [x] execução pelo Compose valida o modo de conexão externa;
+- [x] banco de integração é isolado e reproduzível.
 
 ## Etapa 7 — Docker, documentação e aceite
 
@@ -397,12 +397,12 @@ Critério de conclusão:
 O backend estará concluído somente quando:
 
 - [x] a solução compila atualmente sem erros ou avisos;
-- [ ] todos os testes unitários e de integração passarem;
+- [x] todos os testes unitários e de integração passarem;
 - [x] a migration funcionar em PostgreSQL vazio;
 - [x] API, testes e PostgreSQL subirem pelo Docker Compose;
 - [ ] todas as rotas estiverem disponíveis e documentadas no Swagger;
-- [ ] autenticação e autorização funcionarem ponta a ponta;
-- [ ] todas as regras funcionais estiverem validadas pela API;
+- [x] autenticação e autorização funcionarem ponta a ponta;
+- [x] todas as regras funcionais estiverem validadas pela API;
 - [ ] nenhum segredo estiver versionado;
 - [ ] README e coleção de requisições estiverem completos;
 - [ ] não houver achados materiais pendentes na revisão final.

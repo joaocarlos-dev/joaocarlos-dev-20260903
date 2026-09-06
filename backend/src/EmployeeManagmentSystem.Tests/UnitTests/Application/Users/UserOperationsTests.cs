@@ -2,7 +2,9 @@ using EmployeeManagmentSystem.Application;
 using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 using EmployeeManagmentSystem.Application.Abstractions.Security;
 using EmployeeManagmentSystem.Application.Commands.Users.CreateUser;
+using EmployeeManagmentSystem.Application.Commands.Users.UpdateUser;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
+using EmployeeManagmentSystem.Application.Queries.Users.GetUser;
 using EmployeeManagmentSystem.Application.Queries.Users.GetUsers;
 using EmployeeManagmentSystem.Domain.Common;
 using EmployeeManagmentSystem.Domain.Entities;
@@ -139,6 +141,70 @@ public sealed class UserOperationsTests
 
         var user = Assert.Single(result);
         Assert.Equal(inactiveUser.Id, user.Id);
+    }
+
+    [Fact]
+    public async Task GetUser_WithExistingUser_ShouldReturnUser()
+    {
+        var repository = new FakeUserRepository();
+        var existingUser = new User("USR-001", "admin", "hashed:password123");
+        repository.Users.Add(existingUser);
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(repository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var query = new GetUserQuery(existingUser.Id);
+
+        var result = await mediator.Send(query);
+
+        Assert.Equal(existingUser.Id, result.Id);
+        Assert.Equal(existingUser.Login, result.Login);
+    }
+
+    [Fact]
+    public async Task GetUser_WithMissingUser_ShouldThrowNotFound()
+    {
+        var repository = new FakeUserRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(repository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var query = new GetUserQuery(Guid.NewGuid());
+
+        var action = () => mediator.Send(query);
+
+        await Assert.ThrowsAsync<NotFoundException>(action);
+    }
+
+    [Fact]
+    public async Task UpdateUser_WithExistingUser_ShouldUpdatePasswordAndStatus()
+    {
+        var repository = new FakeUserRepository();
+        var existingUser = new User("USR-001", "admin", "hashed:password123");
+        repository.Users.Add(existingUser);
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(repository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new UpdateUserCommand(existingUser.Id, "new-password", EntityStatus.Inactive);
+
+        await mediator.Send(command);
+
+        Assert.Equal("hashed:new-password", existingUser.PasswordHash);
+        Assert.Equal(EntityStatus.Inactive, existingUser.Status);
+        Assert.Equal(1, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task UpdateUser_WithMissingUser_ShouldThrowNotFoundAndNotPersist()
+    {
+        var repository = new FakeUserRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(repository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new UpdateUserCommand(Guid.NewGuid(), "new-password", EntityStatus.Inactive);
+
+        var action = () => mediator.Send(command);
+
+        await Assert.ThrowsAsync<NotFoundException>(action);
+        Assert.Equal(0, unitOfWork.SaveCalls);
     }
 
     private static ServiceProvider CreateProvider(FakeUserRepository repository, FakeUnitOfWork unitOfWork)

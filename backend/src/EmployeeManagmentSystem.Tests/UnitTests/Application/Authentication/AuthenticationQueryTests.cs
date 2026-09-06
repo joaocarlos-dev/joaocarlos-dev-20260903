@@ -42,6 +42,19 @@ public sealed class AuthenticationQueryTests
     }
 
     [Fact]
+    public async Task Authenticate_WithMissingUser_ShouldThrowAuthenticationException()
+    {
+        var repository = new FakeUserRepository();
+        await using var provider = CreateProvider(repository);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var query = new AuthenticateQuery("missing", "password123");
+
+        var action = () => mediator.Send(query);
+
+        await Assert.ThrowsAsync<AuthenticationException>(action);
+    }
+
+    [Fact]
     public async Task Authenticate_WithInactiveUser_ShouldRejectAuthentication()
     {
         var repository = new FakeUserRepository();

@@ -3,6 +3,7 @@ using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 using EmployeeManagmentSystem.Application.Commands.Units.CreateUnit;
 using EmployeeManagmentSystem.Application.Commands.Units.UpdateUnit;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
+using EmployeeManagmentSystem.Application.Queries.Units.GetUnit;
 using EmployeeManagmentSystem.Application.Queries.Units.GetUnits;
 using EmployeeManagmentSystem.Domain.Common;
 using EmployeeManagmentSystem.Domain.Entities;
@@ -16,6 +17,25 @@ namespace EmployeeManagmentSystem.Tests.UnitTests.Application.Units;
 
 public sealed class UnitOperationsTests
 {
+    [Fact]
+    public async Task CreateUnit_WithUniqueData_ShouldPersistUnit()
+    {
+        var unitRepository = new FakeUnitRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(unitRepository, employeeRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new CreateUnitCommand("UNIT-001", "Headquarters");
+
+        var id = await mediator.Send(command);
+
+        var unit = Assert.Single(unitRepository.Units);
+        Assert.Equal(id, unit.Id);
+        Assert.Equal("UNIT-001", unit.Code);
+        Assert.Equal("Headquarters", unit.Name);
+        Assert.Equal(1, unitOfWork.SaveCalls);
+    }
+
     [Fact]
     public async Task CreateUnit_WithCodeSurroundedBySpaces_ShouldDetectDuplicate()
     {
@@ -126,6 +146,55 @@ public sealed class UnitOperationsTests
         Assert.Equal(2, result.Count);
         Assert.All(result, unit => Assert.Single(unit.Employees));
         Assert.Equal(1, employeeRepository.ListByUnitIdsCalls);
+    }
+
+    [Fact]
+    public async Task GetUnit_WithExistingUnit_ShouldReturnUnit()
+    {
+        var unitRepository = new FakeUnitRepository();
+        var existingUnit = new DomainUnit("UNIT-001", "Headquarters");
+        unitRepository.Units.Add(existingUnit);
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(unitRepository, employeeRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var query = new GetUnitQuery(existingUnit.Id);
+
+        var result = await mediator.Send(query);
+
+        Assert.Equal(existingUnit.Id, result.Id);
+        Assert.Equal(existingUnit.Name, result.Name);
+    }
+
+    [Fact]
+    public async Task GetUnit_WithMissingUnit_ShouldThrowNotFound()
+    {
+        var unitRepository = new FakeUnitRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(unitRepository, employeeRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var query = new GetUnitQuery(Guid.NewGuid());
+
+        var action = () => mediator.Send(query);
+
+        await Assert.ThrowsAsync<NotFoundException>(action);
+    }
+
+    [Fact]
+    public async Task UpdateUnit_WithMissingUnit_ShouldThrowNotFoundAndNotPersist()
+    {
+        var unitRepository = new FakeUnitRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(unitRepository, employeeRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new UpdateUnitCommand(Guid.NewGuid(), "Updated", null);
+
+        var action = () => mediator.Send(command);
+
+        await Assert.ThrowsAsync<NotFoundException>(action);
+        Assert.Equal(0, unitOfWork.SaveCalls);
     }
 
     private static ServiceProvider CreateProvider(

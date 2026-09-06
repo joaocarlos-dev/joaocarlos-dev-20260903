@@ -4,6 +4,8 @@ using EmployeeManagmentSystem.Application.Commands.Employees.CreateEmployee;
 using EmployeeManagmentSystem.Application.Commands.Employees.DeleteEmployee;
 using EmployeeManagmentSystem.Application.Commands.Employees.UpdateEmployee;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
+using EmployeeManagmentSystem.Application.Queries.Employees.GetEmployee;
+using EmployeeManagmentSystem.Application.Queries.Employees.GetEmployees;
 using EmployeeManagmentSystem.Domain.Common;
 using EmployeeManagmentSystem.Domain.Entities;
 using FluentValidation;
@@ -218,6 +220,98 @@ public sealed class EmployeeOperationsTests
 
         Assert.True(employee.IsDeleted);
         Assert.Equal(1, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task GetEmployee_WithExistingEmployee_ShouldReturnEmployee()
+    {
+        var userRepository = new FakeUserRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitRepository = new FakeUnitRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var unit = new DomainUnit("UNIT-001", "Headquarters");
+        var employee = new Employee("EMP-001", "Employee", Guid.NewGuid(), unit);
+        employeeRepository.Employees.Add(employee);
+        await using var provider = CreateProvider(userRepository, employeeRepository, unitRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var query = new GetEmployeeQuery(employee.Id);
+
+        var result = await mediator.Send(query);
+
+        Assert.Equal(employee.Id, result.Id);
+        Assert.Equal(employee.Name, result.Name);
+    }
+
+    [Fact]
+    public async Task GetEmployee_WithMissingEmployee_ShouldThrowNotFound()
+    {
+        var userRepository = new FakeUserRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitRepository = new FakeUnitRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(userRepository, employeeRepository, unitRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var query = new GetEmployeeQuery(Guid.NewGuid());
+
+        var action = () => mediator.Send(query);
+
+        await Assert.ThrowsAsync<NotFoundException>(action);
+    }
+
+    [Fact]
+    public async Task ListEmployees_ShouldExcludeDeletedEmployees()
+    {
+        var userRepository = new FakeUserRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitRepository = new FakeUnitRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var unit = new DomainUnit("UNIT-001", "Headquarters");
+        var activeEmployee = new Employee("EMP-001", "Active", Guid.NewGuid(), unit);
+        var deletedEmployee = new Employee("EMP-002", "Deleted", Guid.NewGuid(), unit);
+        deletedEmployee.Delete();
+        employeeRepository.Employees.AddRange([activeEmployee, deletedEmployee]);
+        await using var provider = CreateProvider(userRepository, employeeRepository, unitRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var query = new GetEmployeesQuery();
+
+        var result = await mediator.Send(query);
+
+        var employee = Assert.Single(result);
+        Assert.Equal(activeEmployee.Id, employee.Id);
+    }
+
+    [Fact]
+    public async Task UpdateEmployee_WithMissingEmployee_ShouldThrowNotFoundAndNotPersist()
+    {
+        var userRepository = new FakeUserRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitRepository = new FakeUnitRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(userRepository, employeeRepository, unitRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new UpdateEmployeeCommand(Guid.NewGuid(), "Updated", null);
+
+        var action = () => mediator.Send(command);
+
+        await Assert.ThrowsAsync<NotFoundException>(action);
+        Assert.Equal(0, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task DeleteEmployee_WithMissingEmployee_ShouldThrowNotFoundAndNotPersist()
+    {
+        var userRepository = new FakeUserRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitRepository = new FakeUnitRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        await using var provider = CreateProvider(userRepository, employeeRepository, unitRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new DeleteEmployeeCommand(Guid.NewGuid());
+
+        var action = () => mediator.Send(command);
+
+        await Assert.ThrowsAsync<NotFoundException>(action);
+        Assert.Equal(0, unitOfWork.SaveCalls);
     }
 
     private static ServiceProvider CreateProvider(
