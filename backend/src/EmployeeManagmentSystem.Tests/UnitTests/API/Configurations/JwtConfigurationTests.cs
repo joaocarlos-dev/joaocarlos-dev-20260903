@@ -19,7 +19,8 @@ public sealed class JwtConfigurationTests
             {
                 ["Jwt:Issuer"] = issuer,
                 ["Jwt:Audience"] = audience,
-                ["Jwt:SigningKey"] = "test-signing-key-with-at-least-32-characters"
+                ["Jwt:SigningKey"] = "test-signing-key-with-at-least-32-characters",
+                ["Jwt:ExpirationMinutes"] = "30"
             })
             .Build();
         var services = new ServiceCollection();
@@ -38,25 +39,51 @@ public sealed class JwtConfigurationTests
         Assert.Equal(TimeSpan.Zero, options.TokenValidationParameters.ClockSkew);
     }
 
-    [Fact]
-    public void AddJwtConfiguration_WithoutSigningKey_ShouldKeepValidationFailClosed()
+    [Theory]
+    [InlineData("Jwt:Issuer")]
+    [InlineData("Jwt:Audience")]
+    [InlineData("Jwt:SigningKey")]
+    public void AddJwtConfiguration_WithMissingRequiredSetting_ShouldThrowInvalidOperationException(string missingSetting)
+    {
+        var settings = new Dictionary<string, string?>
+        {
+            ["Jwt:Issuer"] = "test-issuer",
+            ["Jwt:Audience"] = "test-audience",
+            ["Jwt:SigningKey"] = "test-signing-key-with-at-least-32-characters",
+            ["Jwt:ExpirationMinutes"] = "30"
+        };
+        settings[missingSetting] = null;
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(settings)
+            .Build();
+        var services = new ServiceCollection();
+
+        var action = () => services.AddJwtConfiguration(configuration);
+
+        Assert.Throws<InvalidOperationException>(action);
+    }
+
+    [Theory]
+    [InlineData("short-key", 30)]
+    [InlineData("test-signing-key-with-at-least-32-characters", 0)]
+    [InlineData("test-signing-key-with-at-least-32-characters", 1441)]
+    public void AddJwtConfiguration_WithUnsafeSetting_ShouldThrowInvalidOperationException(
+        string signingKey,
+        int expirationMinutes)
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Jwt:Issuer"] = "test-issuer",
-                ["Jwt:Audience"] = "test-audience"
+                ["Jwt:Audience"] = "test-audience",
+                ["Jwt:SigningKey"] = signingKey,
+                ["Jwt:ExpirationMinutes"] = expirationMinutes.ToString()
             })
             .Build();
         var services = new ServiceCollection();
 
-        services.AddJwtConfiguration(configuration);
-        using var serviceProvider = services.BuildServiceProvider();
-        var options = serviceProvider
-            .GetRequiredService<IOptionsMonitor<JwtBearerOptions>>()
-            .Get(JwtBearerDefaults.AuthenticationScheme);
+        var action = () => services.AddJwtConfiguration(configuration);
 
-        Assert.True(options.TokenValidationParameters.ValidateIssuerSigningKey);
-        Assert.Null(options.TokenValidationParameters.IssuerSigningKey);
+        Assert.Throws<InvalidOperationException>(action);
     }
 }

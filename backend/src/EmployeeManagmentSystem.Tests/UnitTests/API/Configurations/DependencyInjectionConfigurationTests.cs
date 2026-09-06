@@ -1,8 +1,10 @@
 using EmployeeManagmentSystem.API.Configurations.DependencyInjection;
 using EmployeeManagmentSystem.Application.Abstractions.Persistence;
+using EmployeeManagmentSystem.Application.Abstractions.Security;
 using EmployeeManagmentSystem.Application.Commands.Users.CreateUser;
 using EmployeeManagmentSystem.Infrastructure.Persistence;
 using EmployeeManagmentSystem.Infrastructure.Services.Employees;
+using EmployeeManagmentSystem.Infrastructure.Services.Security;
 using EmployeeManagmentSystem.Infrastructure.Services.Units;
 using EmployeeManagmentSystem.Infrastructure.Services.Users;
 using FluentValidation;
@@ -63,6 +65,8 @@ public sealed class DependencyInjectionConfigurationTests
         var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
         var unitRepository = scope.ServiceProvider.GetRequiredService<IUnitRepository>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
 
         Assert.NotNull(mediator);
         Assert.NotNull(validator);
@@ -72,5 +76,7 @@ public sealed class DependencyInjectionConfigurationTests
         Assert.IsType<EmployeeService>(employeeRepository);
         Assert.IsType<UnitService>(unitRepository);
         Assert.IsType<EmployeeManagementDbContext>(unitOfWork);
+        Assert.IsType<PasswordHasherService>(passwordHasher);
+        Assert.IsType<TokenService>(tokenService);
     }
 }

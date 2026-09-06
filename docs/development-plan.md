@@ -113,8 +113,8 @@ UserService.cs
 - [x] implementar `UserService` e `UserServiceDependencyInjection`;
 - [x] implementar `EmployeeService` e `EmployeeServiceDependencyInjection`;
 - [x] implementar `UnitService` e `UnitServiceDependencyInjection`;
-- [ ] implementar serviço de hash de senha com sua extensão de DI;
-- [ ] implementar serviço de geração de JWT com sua extensão de DI;
+- [x] implementar serviço de hash de senha com sua extensão de DI;
+- [x] implementar serviço de geração de JWT com sua extensão de DI;
 - [x] implementar unidade de trabalho e configuração de persistência;
 - [x] chamar as extensões dos services somente pela configuração central da API.
 
@@ -184,7 +184,7 @@ API/
 - [x] Entity Framework Core e provider Npgsql;
 - [x] DbContext, mappings e migration inicial;
 - [ ] controllers e rotas HTTP;
-- [ ] emissão real de JWT e hash seguro de senha;
+- [x] emissão real de JWT e hash seguro de senha;
 - [ ] tratamento global de erros e Problem Details;
 - [ ] autorização das rotas administrativas;
 - [ ] testes de integração;
@@ -259,20 +259,20 @@ Critério de conclusão:
 
 Objetivo: implementar e registrar os mecanismos de credencial e token que serão expostos pela API na etapa seguinte.
 
-- [ ] implementar hash seguro de senha;
-- [ ] implementar verificação de senha;
-- [ ] implementar geração de JWT com identificador e login do usuário;
-- [ ] configurar emissor, audiência, chave e expiração por ambiente;
-- [ ] impedir inicialização ou emissão de token sem configuração segura;
-- [ ] preparar usuário inicial sem versionar senha ou hash sensível;
-- [ ] testar unitariamente hash, verificação de senha e geração de token;
-- [ ] testar unitariamente credenciais válidas, inválidas e usuário inativo.
+- [x] implementar hash seguro de senha;
+- [x] implementar verificação de senha;
+- [x] implementar geração de JWT com identificador e login do usuário;
+- [x] configurar emissor, audiência, chave e expiração por ambiente;
+- [x] impedir inicialização ou emissão de token sem configuração segura;
+- [x] preparar usuário inicial sem versionar senha ou hash sensível;
+- [x] testar unitariamente hash, verificação de senha e geração de token;
+- [x] testar unitariamente credenciais válidas, inválidas e usuário inativo.
 
 Critério de conclusão:
 
-- [ ] implementações de `IPasswordHasher` e `ITokenService` estão registradas pela API;
-- [ ] tokens gerados atendem às regras de validação configuradas;
-- [ ] configuração insegura ou ausente impede emissão de token.
+- [x] implementações de `IPasswordHasher` e `ITokenService` estão registradas pela API;
+- [x] tokens gerados atendem às regras de validação configuradas;
+- [x] configuração insegura ou ausente impede emissão de token.
 
 ## Etapa 4 — Features HTTP
 
@@ -280,7 +280,7 @@ Objetivo: expor as operações da Application por controllers finos.
 
 | Recurso | Método e rota | Mensagem | Application | Infrastructure | API | Integração |
 | --- | --- | --- | --- | --- | --- | --- |
-| Autenticação | `POST /api/v1/auth/login` | `AuthenticateQuery` | [x] | [ ] | [ ] | [ ] |
+| Autenticação | `POST /api/v1/auth/login` | `AuthenticateQuery` | [x] | [x] | [ ] | [ ] |
 | Usuários | `POST /api/v1/users` | `CreateUserCommand` | [x] | [x] | [ ] | [ ] |
 | Usuários | `GET /api/v1/users` | `GetUsersQuery` | [x] | [x] | [ ] | [ ] |
 | Usuários | `GET /api/v1/users/{id}` | `GetUserQuery` | [x] | [x] | [ ] | [ ] |
@@ -384,8 +384,8 @@ Critério de conclusão:
 - [x] Dockerfile da API criado;
 - [x] PostgreSQL configurado no Docker Compose com health check e volume;
 - [x] API condicionada ao sucesso do container de testes;
-- [ ] integrar execução automática das migrations na inicialização ou implantação;
-- [ ] fornecer configurações seguras para JWT sem versionar segredos;
+- [x] integrar execução automática das migrations na inicialização ou implantação;
+- [x] fornecer configurações seguras para JWT sem versionar segredos;
 - [x] validar subida completa com `docker compose up --build`;
 - [ ] executar uma requisição real de login e uma rota protegida;
 - [ ] criar coleção Postman ou arquivo `.http` com todos os fluxos;

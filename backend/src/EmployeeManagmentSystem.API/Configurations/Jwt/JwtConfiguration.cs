@@ -1,6 +1,8 @@
 using System.Text;
+using EmployeeManagmentSystem.Infrastructure.Services.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Options;
 
 namespace EmployeeManagmentSystem.API.Configurations.Jwt;
 
@@ -10,9 +12,17 @@ public static class JwtConfiguration
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var issuer = configuration["Jwt:Issuer"];
-        var audience = configuration["Jwt:Audience"];
-        var signingKey = configuration["Jwt:SigningKey"];
+        var jwtOptions = new JwtOptions
+        {
+            Issuer = configuration["Jwt:Issuer"] ?? string.Empty,
+            Audience = configuration["Jwt:Audience"] ?? string.Empty,
+            SigningKey = configuration["Jwt:SigningKey"] ?? string.Empty,
+            ExpirationMinutes = configuration.GetValue<int?>("Jwt:ExpirationMinutes") ?? 60
+        };
+        jwtOptions.Validate();
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey));
+
+        services.AddSingleton(Options.Create(jwtOptions));
 
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -21,11 +31,11 @@ public static class JwtConfiguration
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = issuer,
+                    ValidIssuer = jwtOptions.Issuer,
                     ValidateAudience = true,
-                    ValidAudience = audience,
+                    ValidAudience = jwtOptions.Audience,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = CreateSigningKey(signingKey),
+                    IssuerSigningKey = signingKey,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
@@ -33,12 +43,5 @@ public static class JwtConfiguration
         services.AddAuthorization();
 
         return services;
-    }
-
-    private static SymmetricSecurityKey? CreateSigningKey(string? signingKey)
-    {
-        return string.IsNullOrWhiteSpace(signingKey)
-            ? null
-            : new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey));
     }
 }

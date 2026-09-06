@@ -3,6 +3,7 @@ using EmployeeManagmentSystem.API.Configurations.Swagger;
 using EmployeeManagmentSystem.Application;
 using EmployeeManagmentSystem.Infrastructure.Persistence;
 using EmployeeManagmentSystem.Infrastructure.Services.Employees;
+using EmployeeManagmentSystem.Infrastructure.Services.Security;
 using EmployeeManagmentSystem.Infrastructure.Services.Units;
 using EmployeeManagmentSystem.Infrastructure.Services.Users;
 
@@ -28,6 +29,8 @@ public static class DependencyInjectionConfiguration
         services.AddEmployeeService();
         services.AddUnitService();
         services.AddJwtConfiguration(configuration);
+        services.AddPasswordHasherService();
+        services.AddTokenService();
         services.AddSwaggerConfiguration();
 
         return services;

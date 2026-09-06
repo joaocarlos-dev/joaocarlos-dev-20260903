@@ -5,5 +5,5 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApiDependencies(builder.Configuration);
 
 var app = builder.Build();
-app.UseApiConfiguration();
+await app.UseApiConfigurationAsync(builder.Configuration);
 app.Run();

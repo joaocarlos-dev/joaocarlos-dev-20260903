@@ -2,9 +2,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-employee_management}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: employee_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
@@ -23,7 +23,7 @@ services:
       dockerfile: EmployeeManagmentSystem.API/Dockerfile
       target: test
     environment:
-      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-employee_management};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=employee_management;Username=postgres;Password=postgres
     depends_on:
       postgres:
         condition: service_healthy
@@ -37,7 +37,14 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: 8080
-      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-employee_management};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=employee_management;Username=postgres;Password=postgres
+      Jwt__Issuer: EmployeeManagmentSystem
+      Jwt__Audience: EmployeeManagmentSystem.Client
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:-}
+      Jwt__ExpirationMinutes: 60
+      InitialUser__Code: ${INITIAL_USER_CODE:-}
+      InitialUser__Login: ${INITIAL_USER_LOGIN:-}
+      InitialUser__Password: ${INITIAL_USER_PASSWORD:-}
     ports:
       - "8080:8080"
     depends_on:
