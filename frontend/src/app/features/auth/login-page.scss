@@ -1,0 +1,147 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.login-layout {
+  display: grid;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  place-items: center;
+}
+
+.login-card {
+  width: min(100%, 420px);
+  padding: 2rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand__mark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+}
+
+.brand strong,
+.brand small {
+  display: block;
+}
+
+.brand small {
+  margin-top: 0.15rem;
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+}
+
+.login-card__heading {
+  margin: 2.25rem 0 1.5rem;
+}
+
+.login-card__heading p {
+  margin: 0 0 0.5rem;
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.login-card__heading h1 {
+  margin: 0;
+  font-size: clamp(1.55rem, 5vw, 1.9rem);
+  letter-spacing: -0.025em;
+}
+
+.login-card__heading span {
+  display: block;
+  margin-top: 0.6rem;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.notice {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+  font-size: 0.83rem;
+  line-height: 1.45;
+}
+
+.notice--warning {
+  border-color: #decda9;
+  background: var(--color-warning-soft);
+  color: #684f24;
+}
+
+.notice--danger {
+  border-color: #e3bcbc;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.field + .field {
+  margin-top: 1rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.field input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.field__error {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--color-danger);
+  font-size: 0.75rem;
+}
+
+form .button {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+@media (max-width: 480px) {
+  .login-layout {
+    align-items: start;
+    padding-top: 1rem;
+  }
+
+  .login-card {
+    padding: 1.5rem;
+  }
+}

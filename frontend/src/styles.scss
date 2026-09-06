@@ -45,6 +45,11 @@ body {
   background: var(--color-background);
 }
 
+app-root {
+  display: block;
+  min-height: 100vh;
+}
+
 button,
 input,
 select,

@@ -21,7 +21,7 @@ docker compose up -d --build
 
 O Compose inicia o PostgreSQL, executa os testes do backend, inicia a API, executa os gates do front-end e somente então inicia o portal. A API fica disponível em `http://localhost:8080`, o health check em `http://localhost:8080/health`, o Swagger em `http://localhost:8080/swagger` e o portal em `http://localhost:4200`.
 
-O container do portal já está integrado ao pipeline, mas a interface disponível ainda corresponde à fundação Angular. Autenticação, layout e operações administrativas serão adicionados nas Etapas 2 a 7 do plano do front-end.
+O container do portal está integrado ao pipeline. A fundação, o design system, o layout responsivo e a autenticação estão concluídos; as operações administrativas serão adicionadas nas Etapas 4 a 7 do plano do front-end.
 
 Confira o estado de serviços ativos e encerrados:
 

@@ -12,6 +12,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import { AuthSession } from '../../core/auth/auth-session';
 
 interface NavigationItem {
   readonly icon: 'dashboard' | 'employees' | 'units' | 'users';
@@ -28,10 +29,12 @@ interface NavigationItem {
 })
 export class PortalShell {
   private readonly router = inject(Router);
+  private readonly session = inject(AuthSession);
   private readonly menuButton = viewChild.required<ElementRef<HTMLButtonElement>>('menuButton');
   private readonly menuLinks = viewChildren<ElementRef<HTMLAnchorElement>>('menuLink');
 
   protected readonly menuOpen = signal(false);
+  protected readonly identity = this.session.identity;
   protected readonly navigation: readonly NavigationItem[] = [
     { icon: 'dashboard', label: 'Visão geral', path: '/dashboard' },
     { icon: 'users', label: 'Usuários', path: '/usuarios' },
@@ -92,5 +95,10 @@ export class PortalShell {
 
   protected toggleMenu(): void {
     this.menuOpen.update((open) => !open);
+  }
+
+  protected logout(): void {
+    this.session.clear();
+    void this.router.navigate(['/login']);
   }
 }

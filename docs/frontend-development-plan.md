@@ -350,12 +350,14 @@ Na validação da Etapa 2, lint, 8 testes e build de produção passaram. O shel
 
 ### Etapa 3 — Autenticação
 
-- [ ] implementar cliente de login e sessão;
-- [ ] implementar interceptor e guards;
-- [ ] implementar tela de login, expiração e logout local;
-- [ ] cobrir sucesso, erro e redirecionamentos.
+- [x] implementar cliente de login e sessão;
+- [x] implementar interceptor e guards;
+- [x] implementar tela de login, expiração e logout local;
+- [x] cobrir sucesso, erro e redirecionamentos.
 
 Critério: token válido abre o portal; token inválido ou expirado volta ao login.
+
+Na validação da Etapa 3, lint, 22 testes e build de produção passaram. O login foi inspecionado em desktop e 390 × 844, sem rolagem horizontal ou erros no console; redirecionamento da rota protegida, validação acessível e aviso de sessão expirada foram verificados.
 
 ### Etapa 4 — Usuários
 

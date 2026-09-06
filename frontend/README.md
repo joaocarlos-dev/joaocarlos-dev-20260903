@@ -17,7 +17,7 @@ O portal fica disponível em `http://localhost:4200`. Requisições para `/api` 
 
 ## Verificação
 
-Execute todos os gates da fundação:
+Execute todos os gates do portal:
 
 ```powershell
 $env:SMOKE_LOGIN = "admin"

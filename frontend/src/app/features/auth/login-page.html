@@ -1,0 +1,64 @@
+<main class="login-layout">
+  <section class="login-card surface" aria-labelledby="login-title">
+    <div class="brand" aria-label="Gestão de Colaboradores">
+      <span class="brand__mark" aria-hidden="true">GC</span>
+      <span>
+        <strong>Gestão</strong>
+        <small>Portal administrativo</small>
+      </span>
+    </div>
+
+    <div class="login-card__heading">
+      <p>Acesso seguro</p>
+      <h1 id="login-title">Entre na sua conta</h1>
+      <span>Use as credenciais fornecidas pelo administrador.</span>
+    </div>
+
+    @if (expired) {
+      <div class="notice notice--warning" role="status">
+        Sua sessão expirou. Entre novamente para continuar.
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="notice notice--danger" role="alert">{{ errorMessage() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="field">
+        <label for="login">Login</label>
+        <input
+          id="login"
+          type="text"
+          formControlName="login"
+          autocomplete="username"
+          maxlength="100"
+          [attr.aria-invalid]="form.controls.login.invalid && form.controls.login.touched"
+          aria-describedby="login-error"
+        />
+        @if (form.controls.login.invalid && form.controls.login.touched) {
+          <small id="login-error" class="field__error">Informe o login.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="password">Senha</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+          [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
+          aria-describedby="password-error"
+        />
+        @if (form.controls.password.invalid && form.controls.password.touched) {
+          <small id="password-error" class="field__error">A senha deve ter pelo menos 8 caracteres.</small>
+        }
+      </div>
+
+      <button class="button button--primary" type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Entrando…' : 'Entrar' }}
+      </button>
+    </form>
+  </section>
+</main>

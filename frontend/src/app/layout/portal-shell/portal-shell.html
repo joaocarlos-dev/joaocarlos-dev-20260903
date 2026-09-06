@@ -81,11 +81,12 @@
         <span>Administração centralizada</span>
       </div>
       <div class="identity" aria-label="Sessão atual">
-        <span class="identity__avatar" aria-hidden="true">G</span>
+        <span class="identity__avatar" aria-hidden="true">{{ identity()?.login?.charAt(0)?.toUpperCase() || 'G' }}</span>
         <span class="identity__copy">
-          <strong>Sessão administrativa</strong>
+          <strong>{{ identity()?.login || 'Sessão administrativa' }}</strong>
           <small>Conta local</small>
         </span>
+        <button class="button button--secondary" type="button" (click)="logout()">Sair</button>
       </div>
     </header>
 

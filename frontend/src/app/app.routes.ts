@@ -1,8 +1,18 @@
 import { Routes } from '@angular/router';
+import { authGuard, guestGuard } from './core/auth/auth-guards';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    title: 'Entrar | Gestão',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/auth/login-page').then((module) => module.LoginPage),
+  },
+  {
     path: '',
+    canActivate: [authGuard],
+    canActivateChild: [authGuard],
     loadComponent: () =>
       import('./layout/portal-shell/portal-shell').then((module) => module.PortalShell),
     children: [
