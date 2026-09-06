@@ -188,8 +188,8 @@ API/
 - [x] tratamento global de erros e Problem Details;
 - [x] autorização das rotas administrativas;
 - [x] testes de integração;
-- [ ] coleção HTTP ou Postman;
-- [ ] documentação operacional no README.
+- [x] coleção HTTP ou Postman;
+- [x] documentação operacional no README.
 
 ## Etapa 1 — Reorganização final da API
 
@@ -388,9 +388,9 @@ Critério de conclusão:
 - [x] fornecer configurações seguras para JWT sem versionar segredos;
 - [x] validar subida completa com `docker compose up --build`;
 - [ ] executar uma requisição real de login e uma rota protegida;
-- [ ] criar coleção Postman ou arquivo `.http` com todos os fluxos;
-- [ ] documentar configuração, migrations, execução e testes no README;
-- [ ] executar revisão final independente.
+- [x] criar coleção Postman ou arquivo `.http` com todos os fluxos;
+- [x] documentar configuração, migrations, execução e testes no README;
+- [x] executar revisão final independente.
 
 ## Gate obrigatório do backend
 
@@ -400,12 +400,12 @@ O backend estará concluído somente quando:
 - [x] todos os testes unitários e de integração passarem;
 - [x] a migration funcionar em PostgreSQL vazio;
 - [x] API, testes e PostgreSQL subirem pelo Docker Compose;
-- [ ] todas as rotas estiverem disponíveis e documentadas no Swagger;
+- [x] todas as rotas estiverem disponíveis e documentadas no Swagger;
 - [x] autenticação e autorização funcionarem ponta a ponta;
 - [x] todas as regras funcionais estiverem validadas pela API;
-- [ ] nenhum segredo estiver versionado;
-- [ ] README e coleção de requisições estiverem completos;
-- [ ] não houver achados materiais pendentes na revisão final.
+- [x] nenhum segredo estiver versionado;
+- [x] README e coleção de requisições estiverem completos;
+- [x] não houver achados materiais pendentes na revisão final.
 
 ## Etapa posterior — Front-end
 

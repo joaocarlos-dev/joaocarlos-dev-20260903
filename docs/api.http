@@ -1,0 +1,118 @@
+@baseUrl = http://localhost:8080
+@initialLogin = replace-with-initial-user-login
+@initialPassword = replace-with-initial-user-password
+@token = {{login.response.body.$.accessToken}}
+@userId = {{createUser.response.body.$}}
+@unitId = {{createUnit.response.body.$}}
+@employeeId = {{createEmployee.response.body.$}}
+
+### Swagger
+GET {{baseUrl}}/swagger/index.html
+
+### Login with the initial user configured in .env
+# @name login
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "login": "{{initialLogin}}",
+  "password": "{{initialPassword}}"
+}
+
+### Create unit
+# @name createUnit
+POST {{baseUrl}}/api/v1/units
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "UNIT-001",
+  "name": "Headquarters"
+}
+
+### List units
+GET {{baseUrl}}/api/v1/units
+Authorization: Bearer {{token}}
+
+### Get unit
+GET {{baseUrl}}/api/v1/units/{{unitId}}
+Authorization: Bearer {{token}}
+
+### Update unit
+PATCH {{baseUrl}}/api/v1/units/{{unitId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Headquarters Updated",
+  "status": 0
+}
+
+### Create user
+# @name createUser
+POST {{baseUrl}}/api/v1/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "USR-001",
+  "login": "user.one",
+  "password": "Password123!",
+  "status": 0
+}
+
+### List active users
+GET {{baseUrl}}/api/v1/users?status=0
+Authorization: Bearer {{token}}
+
+### Get user
+GET {{baseUrl}}/api/v1/users/{{userId}}
+Authorization: Bearer {{token}}
+
+### Update user status and password
+PATCH {{baseUrl}}/api/v1/users/{{userId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "password": "NewPassword123!",
+  "status": 0
+}
+
+### Create employee
+# @name createEmployee
+POST {{baseUrl}}/api/v1/employees
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "EMP-001",
+  "name": "Employee One",
+  "userId": "{{userId}}",
+  "unitId": "{{unitId}}"
+}
+
+### List employees
+GET {{baseUrl}}/api/v1/employees
+Authorization: Bearer {{token}}
+
+### Get employee
+GET {{baseUrl}}/api/v1/employees/{{employeeId}}
+Authorization: Bearer {{token}}
+
+### Update employee
+PATCH {{baseUrl}}/api/v1/employees/{{employeeId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Employee One Updated",
+  "unitId": "{{unitId}}"
+}
+
+### Delete employee logically
+DELETE {{baseUrl}}/api/v1/employees/{{employeeId}}
+Authorization: Bearer {{token}}
+
+### Protected route without a token (expected 401)
+GET {{baseUrl}}/api/v1/units
