@@ -54,7 +54,7 @@ public sealed class AuthenticationQueryTests
 
         var action = () => mediator.Send(query);
 
-        await Assert.ThrowsAsync<EmployeeManagmentSystem.Domain.Common.DomainException>(action);
+        await Assert.ThrowsAsync<AuthenticationException>(action);
     }
 
     private static ServiceProvider CreateProvider(FakeUserRepository repository)

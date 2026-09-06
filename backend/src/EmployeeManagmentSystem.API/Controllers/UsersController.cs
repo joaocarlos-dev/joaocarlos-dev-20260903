@@ -13,10 +13,13 @@ namespace EmployeeManagmentSystem.API.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/v1/users")]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
 public sealed class UsersController(ISender sender) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<Guid>> Create(
         CreateUserRequest request,
         CancellationToken cancellationToken)
@@ -40,6 +43,7 @@ public sealed class UsersController(ISender sender) : ControllerBase
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserDto>> GetById(
         Guid id,
         CancellationToken cancellationToken)
@@ -50,6 +54,7 @@ public sealed class UsersController(ISender sender) : ControllerBase
 
     [HttpPatch("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(
         Guid id,
         UpdateUserRequest request,

@@ -13,6 +13,8 @@ public sealed class AuthController(ISender sender) : ControllerBase
     [HttpPost("login")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(AuthenticationDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AuthenticationDto>> Login(
         LoginRequest request,
         CancellationToken cancellationToken)

@@ -1,6 +1,7 @@
 using EmployeeManagmentSystem.Application.Abstractions.Messaging;
 using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
+using EmployeeManagmentSystem.Domain.Common;
 using EmployeeManagmentSystem.Domain.Entities;
 using MediatR;
 
@@ -27,7 +28,14 @@ internal sealed class UpdateEmployeeCommandHandler(
         {
             var unit = await unitRepository.GetByIdAsync(request.UnitId.Value, cancellationToken)
                 ?? throw new NotFoundException(nameof(EmployeeManagmentSystem.Domain.Entities.Unit), request.UnitId.Value);
-            employee.TransferTo(unit);
+            try
+            {
+                employee.TransferTo(unit);
+            }
+            catch (DomainException exception)
+            {
+                throw new ApplicationConflictException(exception.Message);
+            }
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

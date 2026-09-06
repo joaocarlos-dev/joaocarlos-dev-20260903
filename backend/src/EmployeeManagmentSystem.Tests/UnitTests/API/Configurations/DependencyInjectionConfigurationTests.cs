@@ -11,6 +11,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
@@ -59,6 +60,7 @@ public sealed class DependencyInjectionConfigurationTests
         var validator = serviceProvider.GetService<IValidator<CreateUserCommand>>();
         var schemeProvider = serviceProvider.GetRequiredService<IAuthenticationSchemeProvider>();
         var bearerScheme = await schemeProvider.GetSchemeAsync(JwtBearerDefaults.AuthenticationScheme);
+        var hasExceptionHandler = services.Any(service => service.ServiceType == typeof(IExceptionHandler));
         var hasSwaggerProvider = services.Any(service => service.ServiceType == typeof(ISwaggerProvider));
         using var scope = serviceProvider.CreateScope();
         var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
@@ -71,6 +73,7 @@ public sealed class DependencyInjectionConfigurationTests
         Assert.NotNull(mediator);
         Assert.NotNull(validator);
         Assert.NotNull(bearerScheme);
+        Assert.True(hasExceptionHandler);
         Assert.True(hasSwaggerProvider);
         Assert.IsType<UserService>(userRepository);
         Assert.IsType<EmployeeService>(employeeRepository);

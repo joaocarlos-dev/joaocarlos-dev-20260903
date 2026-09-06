@@ -1,6 +1,7 @@
 using System.Text;
 using EmployeeManagmentSystem.Infrastructure.Services.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 
@@ -38,6 +39,29 @@ public static class JwtConfiguration
                     IssuerSigningKey = signingKey,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = async context =>
+                    {
+                        context.HandleResponse();
+
+                        if (context.Response.HasStarted)
+                        {
+                            return;
+                        }
+
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/problem+json";
+
+                        await context.Response.WriteAsJsonAsync(new ProblemDetails
+                        {
+                            Status = StatusCodes.Status401Unauthorized,
+                            Title = "Unauthorized",
+                            Detail = "Authentication credentials are missing or invalid.",
+                            Instance = context.Request.Path
+                        });
+                    }
                 };
             });
         services.AddAuthorization();

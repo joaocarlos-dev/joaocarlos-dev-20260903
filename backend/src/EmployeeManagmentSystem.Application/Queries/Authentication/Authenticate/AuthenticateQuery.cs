@@ -3,6 +3,7 @@ using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 using EmployeeManagmentSystem.Application.Abstractions.Security;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
 using EmployeeManagmentSystem.Application.DTOs;
+using EmployeeManagmentSystem.Domain.Common;
 using MediatR;
 
 namespace EmployeeManagmentSystem.Application.Queries.Authentication.Authenticate;
@@ -23,7 +24,15 @@ internal sealed class AuthenticateQueryHandler(
             throw new AuthenticationException();
         }
 
-        user.EnsureCanAuthenticate();
+        try
+        {
+            user.EnsureCanAuthenticate();
+        }
+        catch (DomainException)
+        {
+            throw new AuthenticationException();
+        }
+
         return new AuthenticationDto(tokenService.Generate(user));
     }
 }

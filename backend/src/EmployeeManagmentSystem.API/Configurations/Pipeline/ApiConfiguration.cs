@@ -18,6 +18,7 @@ public static class ApiConfiguration
         };
         await app.Services.InitializeDatabaseAsync(initialUser);
 
+        app.UseExceptionHandler();
         app.UseSwaggerConfiguration();
         app.UseHttpsRedirection();
         app.UseAuthentication();

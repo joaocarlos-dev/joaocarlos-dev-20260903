@@ -1,4 +1,5 @@
 using EmployeeManagmentSystem.API.Configurations.Jwt;
+using EmployeeManagmentSystem.API.Configurations.Errors;
 using EmployeeManagmentSystem.API.Configurations.Swagger;
 using EmployeeManagmentSystem.Application;
 using EmployeeManagmentSystem.Infrastructure.Persistence;
@@ -23,6 +24,8 @@ public static class DependencyInjectionConfiguration
         }
 
         services.AddControllers();
+        services.AddProblemDetails();
+        services.AddExceptionHandler<ApiExceptionHandler>();
         services.AddApplicationDependencies();
         services.AddPersistence(connectionString);
         services.AddUserService();

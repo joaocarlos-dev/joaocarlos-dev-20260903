@@ -108,6 +108,29 @@ public sealed class EmployeeOperationsTests
     }
 
     [Fact]
+    public async Task CreateEmployee_WithInactiveUnit_ShouldThrowConflictAndNotPersist()
+    {
+        var userRepository = new FakeUserRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitRepository = new FakeUnitRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var user = new User("USR-001", "admin", "hashed:password123");
+        var unit = new DomainUnit("UNIT-001", "Headquarters");
+        unit.ChangeStatus(EmployeeManagmentSystem.Domain.Enums.EntityStatus.Inactive);
+        userRepository.Users.Add(user);
+        unitRepository.Units.Add(unit);
+        await using var provider = CreateProvider(userRepository, employeeRepository, unitRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new CreateEmployeeCommand("EMP-001", "Employee", user.Id, unit.Id);
+
+        var action = () => mediator.Send(command);
+
+        await Assert.ThrowsAsync<ApplicationConflictException>(action);
+        Assert.Empty(employeeRepository.Employees);
+        Assert.Equal(0, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
     public async Task UpdateEmployee_WithTrimmedNameAtMaximumLength_ShouldPersistNormalizedName()
     {
         var userRepository = new FakeUserRepository();
@@ -126,6 +149,30 @@ public sealed class EmployeeOperationsTests
 
         Assert.Equal(name, employee.Name);
         Assert.Equal(1, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task UpdateEmployee_WithInactiveUnit_ShouldThrowConflictAndNotPersist()
+    {
+        var userRepository = new FakeUserRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitRepository = new FakeUnitRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var currentUnit = new DomainUnit("UNIT-001", "Headquarters");
+        var inactiveUnit = new DomainUnit("UNIT-002", "Branch");
+        inactiveUnit.ChangeStatus(EmployeeManagmentSystem.Domain.Enums.EntityStatus.Inactive);
+        var employee = new Employee("EMP-001", "Employee", Guid.NewGuid(), currentUnit);
+        employeeRepository.Employees.Add(employee);
+        unitRepository.Units.Add(inactiveUnit);
+        await using var provider = CreateProvider(userRepository, employeeRepository, unitRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new UpdateEmployeeCommand(employee.Id, null, inactiveUnit.Id);
+
+        var action = () => mediator.Send(command);
+
+        await Assert.ThrowsAsync<ApplicationConflictException>(action);
+        Assert.Equal(currentUnit.Id, employee.UnitId);
+        Assert.Equal(0, unitOfWork.SaveCalls);
     }
 
     [Fact]

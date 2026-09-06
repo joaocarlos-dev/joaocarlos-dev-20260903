@@ -185,8 +185,8 @@ API/
 - [x] DbContext, mappings e migration inicial;
 - [x] controllers e rotas HTTP;
 - [x] emissão real de JWT e hash seguro de senha;
-- [ ] tratamento global de erros e Problem Details;
-- [ ] autorização das rotas administrativas;
+- [x] tratamento global de erros e Problem Details;
+- [x] autorização das rotas administrativas;
 - [ ] testes de integração;
 - [ ] coleção HTTP ou Postman;
 - [ ] documentação operacional no README.
@@ -323,23 +323,23 @@ Regras de acesso HTTP:
 
 Objetivo: padronizar respostas, falhas e documentação das rotas.
 
-- [ ] configurar versionamento em `/api/v1`;
-- [ ] mapear validações do FluentValidation para `400 Bad Request`;
-- [ ] mapear autenticação inválida para `401 Unauthorized`;
-- [ ] mapear recursos inexistentes para `404 Not Found`;
-- [ ] mapear duplicidades e conflitos de regra para `409 Conflict`;
-- [ ] retornar `201 Created` nos cadastros;
-- [ ] retornar `204 No Content` nas atualizações e remoção;
-- [ ] criar tratamento global de exceções;
-- [ ] responder falhas com Problem Details;
-- [ ] documentar autenticação Bearer e respostas no Swagger;
-- [ ] garantir que o Swagger esteja acessível no ambiente definido para avaliação.
+- [x] configurar versionamento em `/api/v1`;
+- [x] mapear validações do FluentValidation para `400 Bad Request`;
+- [x] mapear autenticação inválida para `401 Unauthorized`;
+- [x] mapear recursos inexistentes para `404 Not Found`;
+- [x] mapear duplicidades e conflitos de regra para `409 Conflict`;
+- [x] retornar `201 Created` nos cadastros;
+- [x] retornar `204 No Content` nas atualizações e remoção;
+- [x] criar tratamento global de exceções;
+- [x] responder falhas com Problem Details;
+- [x] documentar autenticação Bearer e respostas no Swagger;
+- [x] garantir que o Swagger esteja acessível no ambiente definido para avaliação.
 
 Critério de conclusão:
 
-- [ ] controllers não possuem lógica de negócio nem persistência;
-- [ ] todas as rotas aparecem no Swagger;
-- [ ] códigos HTTP e Problem Details estão consistentes.
+- [x] controllers não possuem lógica de negócio nem persistência;
+- [x] todas as rotas aparecem no Swagger;
+- [x] códigos HTTP e Problem Details estão consistentes.
 
 ## Etapa 6 — Testes automatizados
 
