@@ -17,6 +17,16 @@ public sealed class AuthenticationIntegrationTests(EmployeeManagementApiFactory 
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
+    public async Task HealthCheck_WithoutToken_ShouldReturnOk()
+    {
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/health");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Login_WithValidCredentials_ShouldReturnUsableToken()
     {
         using var client = factory.CreateClient();

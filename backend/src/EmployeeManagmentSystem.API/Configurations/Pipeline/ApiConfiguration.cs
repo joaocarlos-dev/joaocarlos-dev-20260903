@@ -1,6 +1,7 @@
 using EmployeeManagmentSystem.API.Configurations.Swagger;
 using EmployeeManagmentSystem.Infrastructure.Persistence;
 using EmployeeManagmentSystem.Infrastructure.Services.Security;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 namespace EmployeeManagmentSystem.API.Configurations.Pipeline;
 
@@ -23,6 +24,7 @@ public static class ApiConfiguration
         app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.MapHealthChecks("/health").AllowAnonymous();
         app.MapControllers();
     }
 }

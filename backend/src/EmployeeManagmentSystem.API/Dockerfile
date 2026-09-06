@@ -19,6 +19,9 @@ RUN dotnet publish EmployeeManagmentSystem.API/EmployeeManagmentSystem.API.cspro
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=publish /app/publish .
 USER $APP_UID
 EXPOSE 8080

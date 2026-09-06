@@ -47,6 +47,12 @@ services:
       InitialUser__Password: ${INITIAL_USER_PASSWORD:?INITIAL_USER_PASSWORD must be set}
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy

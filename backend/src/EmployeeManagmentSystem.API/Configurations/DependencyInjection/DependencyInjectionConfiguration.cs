@@ -24,6 +24,7 @@ public static class DependencyInjectionConfiguration
         }
 
         services.AddControllers();
+        services.AddHealthChecks();
         services.AddProblemDetails();
         services.AddExceptionHandler<ApiExceptionHandler>();
         services.AddApplicationDependencies();

@@ -9,6 +9,9 @@
 ### Swagger
 GET {{baseUrl}}/swagger/index.html
 
+### Health check
+GET {{baseUrl}}/health
+
 ### Login with the initial user configured in .env
 # @name login
 POST {{baseUrl}}/api/v1/auth/login
@@ -61,7 +64,7 @@ Content-Type: application/json
   "status": 0
 }
 
-### List active users
+### List inactive users
 GET {{baseUrl}}/api/v1/users?status=0
 Authorization: Bearer {{token}}
 

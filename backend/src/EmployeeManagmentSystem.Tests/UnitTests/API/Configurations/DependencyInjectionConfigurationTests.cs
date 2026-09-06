@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace EmployeeManagmentSystem.Tests.UnitTests.API.Configurations;
@@ -62,6 +63,7 @@ public sealed class DependencyInjectionConfigurationTests
         var bearerScheme = await schemeProvider.GetSchemeAsync(JwtBearerDefaults.AuthenticationScheme);
         var hasExceptionHandler = services.Any(service => service.ServiceType == typeof(IExceptionHandler));
         var hasSwaggerProvider = services.Any(service => service.ServiceType == typeof(ISwaggerProvider));
+        var hasHealthCheckService = services.Any(service => service.ServiceType == typeof(HealthCheckService));
         using var scope = serviceProvider.CreateScope();
         var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
         var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
@@ -75,6 +77,7 @@ public sealed class DependencyInjectionConfigurationTests
         Assert.NotNull(bearerScheme);
         Assert.True(hasExceptionHandler);
         Assert.True(hasSwaggerProvider);
+        Assert.True(hasHealthCheckService);
         Assert.IsType<UserService>(userRepository);
         Assert.IsType<EmployeeService>(employeeRepository);
         Assert.IsType<UnitService>(unitRepository);

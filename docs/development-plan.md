@@ -312,7 +312,7 @@ Regras funcionais a validar ponta a ponta:
 Regras de acesso HTTP:
 
 - [x] criar `AuthController` com login anônimo;
-- [x] manter o login como única rota anônima;
+- [x] manter login e health check como únicas rotas anônimas;
 - [x] proteger todos os controllers administrativos com autenticação Bearer;
 - [x] login válido retorna token utilizável;
 - [x] login inválido não revela se usuário ou senha falhou;
@@ -387,7 +387,7 @@ Critério de conclusão:
 - [x] integrar execução automática das migrations na inicialização ou implantação;
 - [x] fornecer configurações seguras para JWT sem versionar segredos;
 - [x] validar subida completa com `docker compose up --build`;
-- [ ] executar uma requisição real de login e uma rota protegida;
+- [x] executar uma requisição real de login e uma rota protegida;
 - [x] criar coleção Postman ou arquivo `.http` com todos os fluxos;
 - [x] documentar configuração, migrations, execução e testes no README;
 - [x] executar revisão final independente.
@@ -410,6 +410,8 @@ O backend estará concluído somente quando:
 ## Etapa posterior — Front-end
 
 Após o gate do backend:
+
+O planejamento detalhado desta etapa está em [frontend-development-plan.md](frontend-development-plan.md).
 
 - [ ] criar estrutura e configurações do Angular;
 - [ ] implementar autenticação, interceptor JWT e guards;
