@@ -40,7 +40,7 @@ public static class SwaggerConfiguration
 
     public static WebApplication UseSwaggerConfiguration(this WebApplication app)
     {
-        if (app.Environment.IsDevelopment())
+        if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Local"))
         {
             app.UseSwagger();
             app.UseSwaggerUI();

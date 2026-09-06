@@ -158,7 +158,7 @@ API/
 - [x] manter configuração e middleware de Swagger em `Configurations/Swagger`;
 - [x] manter configuração de autenticação e validação JWT em `Configurations/Jwt`;
 - [x] manter composição do pipeline HTTP em `Configurations/Pipeline`;
-- [ ] criar controllers finos, organizados por recurso.
+- [x] criar controllers finos, organizados por recurso.
 
 ## Estado atual validado
 
@@ -183,7 +183,7 @@ API/
 - [x] services de persistência da Infrastructure;
 - [x] Entity Framework Core e provider Npgsql;
 - [x] DbContext, mappings e migration inicial;
-- [ ] controllers e rotas HTTP;
+- [x] controllers e rotas HTTP;
 - [x] emissão real de JWT e hash seguro de senha;
 - [ ] tratamento global de erros e Problem Details;
 - [ ] autorização das rotas administrativas;
@@ -280,20 +280,20 @@ Objetivo: expor as operações da Application por controllers finos.
 
 | Recurso | Método e rota | Mensagem | Application | Infrastructure | API | Integração |
 | --- | --- | --- | --- | --- | --- | --- |
-| Autenticação | `POST /api/v1/auth/login` | `AuthenticateQuery` | [x] | [x] | [ ] | [ ] |
-| Usuários | `POST /api/v1/users` | `CreateUserCommand` | [x] | [x] | [ ] | [ ] |
-| Usuários | `GET /api/v1/users` | `GetUsersQuery` | [x] | [x] | [ ] | [ ] |
-| Usuários | `GET /api/v1/users/{id}` | `GetUserQuery` | [x] | [x] | [ ] | [ ] |
-| Usuários | `PATCH /api/v1/users/{id}` | `UpdateUserCommand` | [x] | [x] | [ ] | [ ] |
-| Colaboradores | `POST /api/v1/employees` | `CreateEmployeeCommand` | [x] | [x] | [ ] | [ ] |
-| Colaboradores | `GET /api/v1/employees` | `GetEmployeesQuery` | [x] | [x] | [ ] | [ ] |
-| Colaboradores | `GET /api/v1/employees/{id}` | `GetEmployeeQuery` | [x] | [x] | [ ] | [ ] |
-| Colaboradores | `PATCH /api/v1/employees/{id}` | `UpdateEmployeeCommand` | [x] | [x] | [ ] | [ ] |
-| Colaboradores | `DELETE /api/v1/employees/{id}` | `DeleteEmployeeCommand` | [x] | [x] | [ ] | [ ] |
-| Unidades | `POST /api/v1/units` | `CreateUnitCommand` | [x] | [x] | [ ] | [ ] |
-| Unidades | `GET /api/v1/units` | `GetUnitsQuery` | [x] | [x] | [ ] | [ ] |
-| Unidades | `GET /api/v1/units/{id}` | `GetUnitQuery` | [x] | [x] | [ ] | [ ] |
-| Unidades | `PATCH /api/v1/units/{id}` | `UpdateUnitCommand` | [x] | [x] | [ ] | [ ] |
+| Autenticação | `POST /api/v1/auth/login` | `AuthenticateQuery` | [x] | [x] | [x] | [ ] |
+| Usuários | `POST /api/v1/users` | `CreateUserCommand` | [x] | [x] | [x] | [ ] |
+| Usuários | `GET /api/v1/users` | `GetUsersQuery` | [x] | [x] | [x] | [ ] |
+| Usuários | `GET /api/v1/users/{id}` | `GetUserQuery` | [x] | [x] | [x] | [ ] |
+| Usuários | `PATCH /api/v1/users/{id}` | `UpdateUserCommand` | [x] | [x] | [x] | [ ] |
+| Colaboradores | `POST /api/v1/employees` | `CreateEmployeeCommand` | [x] | [x] | [x] | [ ] |
+| Colaboradores | `GET /api/v1/employees` | `GetEmployeesQuery` | [x] | [x] | [x] | [ ] |
+| Colaboradores | `GET /api/v1/employees/{id}` | `GetEmployeeQuery` | [x] | [x] | [x] | [ ] |
+| Colaboradores | `PATCH /api/v1/employees/{id}` | `UpdateEmployeeCommand` | [x] | [x] | [x] | [ ] |
+| Colaboradores | `DELETE /api/v1/employees/{id}` | `DeleteEmployeeCommand` | [x] | [x] | [x] | [ ] |
+| Unidades | `POST /api/v1/units` | `CreateUnitCommand` | [x] | [x] | [x] | [ ] |
+| Unidades | `GET /api/v1/units` | `GetUnitsQuery` | [x] | [x] | [x] | [ ] |
+| Unidades | `GET /api/v1/units/{id}` | `GetUnitQuery` | [x] | [x] | [x] | [ ] |
+| Unidades | `PATCH /api/v1/units/{id}` | `UpdateUnitCommand` | [x] | [x] | [x] | [ ] |
 
 Regras funcionais a validar ponta a ponta:
 
@@ -311,9 +311,9 @@ Regras funcionais a validar ponta a ponta:
 
 Regras de acesso HTTP:
 
-- [ ] criar `AuthController` com login anônimo;
-- [ ] manter o login como única rota anônima;
-- [ ] proteger todos os controllers administrativos com autenticação Bearer;
+- [x] criar `AuthController` com login anônimo;
+- [x] manter o login como única rota anônima;
+- [x] proteger todos os controllers administrativos com autenticação Bearer;
 - [ ] login válido retorna token utilizável;
 - [ ] login inválido não revela se usuário ou senha falhou;
 - [ ] usuário inativo não recebe token;
