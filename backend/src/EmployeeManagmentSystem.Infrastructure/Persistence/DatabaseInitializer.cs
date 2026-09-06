@@ -9,6 +9,9 @@ namespace EmployeeManagmentSystem.Infrastructure.Persistence;
 public static class DatabaseInitializer
 {
     private const long InitializationLockId = 1_164_591_772_469_447_505;
+    private const string CurrentInitialMigrationId = "20260905211712_InitialCreate";
+    private const string PreviousInitialMigrationId = "20260905172901_InitialCreate";
+    private const string EfCoreProductVersion = "8.0.11";
 
     public static async Task InitializeDatabaseAsync(
         this IServiceProvider serviceProvider,
@@ -35,6 +38,36 @@ public static class DatabaseInitializer
 
             try
             {
+                await context.Database.ExecuteSqlRawAsync(
+                    $"""
+                    CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+                        "MigrationId" character varying(150) NOT NULL,
+                        "ProductVersion" character varying(32) NOT NULL,
+                        CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+                    );
+
+                    DO $$
+                    BEGIN
+                        IF to_regclass('public."__EFMigrationsHistory"') IS NOT NULL
+                            AND to_regclass('public.units') IS NOT NULL
+                            AND to_regclass('public.users') IS NOT NULL
+                            AND to_regclass('public.employees') IS NOT NULL
+                            AND EXISTS (
+                                SELECT 1 FROM "__EFMigrationsHistory"
+                                WHERE "MigrationId" = '{PreviousInitialMigrationId}'
+                            )
+                            AND NOT EXISTS (
+                                SELECT 1 FROM "__EFMigrationsHistory"
+                                WHERE "MigrationId" = '{CurrentInitialMigrationId}'
+                            )
+                        THEN
+                            INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+                            VALUES ('{CurrentInitialMigrationId}', '{EfCoreProductVersion}');
+                        END IF;
+                    END $$;
+                    """,
+                    cancellationToken);
+
                 await context.Database.MigrateAsync(cancellationToken);
 
                 if (!initialUser.IsConfigured)
