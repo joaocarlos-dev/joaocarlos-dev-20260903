@@ -60,5 +60,39 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
+  frontend-tests:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: test
+    environment:
+      API_BASE_URL: http://api:8080
+      SMOKE_LOGIN: ${INITIAL_USER_LOGIN:?INITIAL_USER_LOGIN must be set}
+      SMOKE_PASSWORD: ${INITIAL_USER_PASSWORD:?INITIAL_USER_PASSWORD must be set}
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: "no"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: final
+    ports:
+      - "4200:80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    depends_on:
+      api:
+        condition: service_healthy
+      frontend-tests:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
 volumes:
   postgres_data:

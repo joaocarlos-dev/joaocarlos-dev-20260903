@@ -327,11 +327,11 @@ Critério concluído: `postgres -> tests -> api saudável` funciona em subida li
 
 ### Etapa 1 — Fundação Angular
 
-- [ ] criar `frontend/` com Angular 22, standalone, routing, SCSS e strict;
-- [ ] fixar dependências e lockfile;
-- [ ] configurar lint, testes, build e proxy;
-- [ ] remover demonstração do template;
-- [ ] atualizar `.gitignore` e README.
+- [x] criar `frontend/` com Angular 22, standalone, routing, SCSS e strict;
+- [x] fixar dependências e lockfile;
+- [x] configurar lint, testes, build e proxy;
+- [x] remover demonstração do template;
+- [x] atualizar `.gitignore` e README.
 
 Critério: lint, teste inicial e build passam localmente.
 
@@ -399,33 +399,33 @@ Critério: a interface não oferece operação ausente na API.
 
 ### Etapa 8 — Docker e aceite
 
-- [ ] criar Dockerfile e Nginx do frontend;
-- [ ] adicionar `frontend-tests` e `frontend` ao Compose;
-- [ ] implementar health checks;
-- [ ] validar falha proposital em cada gate;
-- [ ] validar subida limpa e segunda subida com `docker compose up -d --build`;
+- [x] criar Dockerfile e Nginx do frontend;
+- [x] adicionar `frontend-tests` e `frontend` ao Compose;
+- [x] implementar health checks;
+- [x] validar falha proposital em cada gate;
+- [x] validar subida limpa e segunda subida com `docker compose up -d --build`;
 - [ ] validar login e rota protegida pelo portal;
-- [ ] atualizar README;
-- [ ] executar revisão final independente.
+- [x] atualizar README;
+- [x] executar revisão final independente.
 
 Critério: a ordem é comprovada por estados e logs; uma falha impede o dependente.
 
 ## Gate de aceite do front-end
 
-- [ ] `frontend/` existe ao lado de `backend/`;
-- [ ] Angular é a tecnologia principal e pacotes estão fixados no lockfile;
-- [ ] lint, todos os testes e build passam;
+- [x] `frontend/` existe ao lado de `backend/`;
+- [x] Angular é a tecnologia principal e pacotes estão fixados no lockfile;
+- [x] lint, todos os testes e build passam;
 - [ ] autenticação e proteção de rotas funcionam;
 - [ ] todas as operações disponíveis na API estão cobertas;
 - [ ] Problem Details são tratados consistentemente;
 - [ ] bundle não contém segredo nem URL absoluta da API;
 - [ ] interface é responsiva, acessível e minimalista;
 - [ ] não existem gradientes nem cores chamativas;
-- [ ] Nginx serve a SPA e encaminha `/api`;
-- [ ] Compose respeita `postgres -> tests -> api -> frontend-tests -> frontend`;
-- [ ] falha do backend impede API e falha do frontend impede frontend;
-- [ ] PostgreSQL, API e frontend terminam saudáveis;
-- [ ] documentação está atualizada e não há achado material pendente.
+- [x] Nginx serve a SPA e encaminha `/api`;
+- [x] Compose respeita `postgres -> tests -> api -> frontend-tests -> frontend`;
+- [x] falha do backend impede API e falha do frontend impede frontend;
+- [x] PostgreSQL, API e frontend terminam saudáveis;
+- [x] documentação está atualizada e não há achado material pendente.
 
 ## Fora do escopo inicial
 
