@@ -337,14 +337,16 @@ Critério: lint, teste inicial e build passam localmente.
 
 ### Etapa 2 — Design system e layout
 
-- [ ] implementar tokens e estilos-base;
-- [ ] implementar shell e navegação responsiva;
-- [ ] criar componentes compartilhados mínimos;
-- [ ] criar estados de carregamento, vazio, erro e 404;
-- [ ] validar teclado, contraste e breakpoints;
-- [ ] garantir ausência de gradientes e cores chamativas.
+- [x] implementar tokens e estilos-base;
+- [x] implementar shell e navegação responsiva;
+- [x] criar componentes compartilhados mínimos;
+- [x] criar estados de carregamento, vazio, erro e 404;
+- [x] validar teclado, contraste e breakpoints;
+- [x] garantir ausência de gradientes e cores chamativas.
 
 Critério: shell responsivo, acessível e consistente.
+
+Na validação da Etapa 2, lint, 8 testes e build de produção passaram. O shell foi inspecionado em 1440 × 900 e 390 × 844, sem rolagem horizontal ou erros no console; navegação, menu móvel, foco, regiões semânticas e página 404 foram verificados.
 
 ### Etapa 3 — Autenticação
 

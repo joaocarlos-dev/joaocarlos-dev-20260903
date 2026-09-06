@@ -1,0 +1,33 @@
+<app-page-header
+  eyebrow="Visão geral"
+  title="Bem-vindo ao portal"
+  description="Acompanhe os principais dados e acesse rapidamente as áreas administrativas."
+/>
+
+<section class="summary" aria-labelledby="summary-title">
+  <div class="summary__heading">
+    <div>
+      <h2 id="summary-title">Resumo operacional</h2>
+      <p>Os totais serão atualizados assim que a integração com a API estiver disponível.</p>
+    </div>
+    <span class="summary__status"><i aria-hidden="true"></i> Estrutura pronta</span>
+  </div>
+
+  <div class="cards">
+    @for (card of cards; track card.path) {
+      <a class="card surface" [routerLink]="card.path">
+        <span>{{ card.label }}</span>
+        <strong aria-label="Total ainda não carregado">—</strong>
+        <small>Acessar área <span aria-hidden="true">→</span></small>
+      </a>
+    }
+  </div>
+</section>
+
+<section class="notice surface" aria-labelledby="notice-title">
+  <span class="notice__icon" aria-hidden="true">i</span>
+  <div>
+    <h2 id="notice-title">Base da interface concluída</h2>
+    <p>O layout já está preparado para receber autenticação, tabelas, formulários e estados de retorno da API.</p>
+  </div>
+</section>

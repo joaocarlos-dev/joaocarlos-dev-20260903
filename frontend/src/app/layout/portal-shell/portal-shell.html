@@ -1,0 +1,96 @@
+<a class="skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
+
+<div class="shell">
+  <aside
+    class="sidebar"
+    id="navegacao-principal"
+    [class.sidebar--open]="menuOpen()"
+    aria-label="Navegação principal"
+  >
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true">GC</span>
+      <span>
+        <strong>Gestão</strong>
+        <small>Portal administrativo</small>
+      </span>
+    </div>
+
+    <nav>
+      <p class="nav-label">Menu principal</p>
+      <ul>
+        @for (item of navigation; track item.path) {
+          <li>
+            <a
+              #menuLink
+              [routerLink]="item.path"
+              routerLinkActive="nav-link--active"
+              #activeLink="routerLinkActive"
+              [attr.aria-current]="activeLink.isActive ? 'page' : null"
+              class="nav-link"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                @switch (item.icon) {
+                  @case ('dashboard') {
+                    <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
+                  }
+                  @case ('users') {
+                    <path d="M8.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM3 20v-2.2c0-2.1 1.8-3.8 4-3.8h3c2.2 0 4 1.7 4 3.8V20M15.5 4.7a3.5 3.5 0 0 1 0 6.6M17 14c2.2 0 4 1.7 4 3.8V20" />
+                  }
+                  @case ('units') {
+                    <path d="M4 20V7l8-3 8 3v13M8 10h2M14 10h2M8 14h2M14 14h2M9 20v-3h6v3" />
+                  }
+                  @case ('employees') {
+                    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20v-2c0-2.2 2-4 4.5-4h5c2.5 0 4.5 1.8 4.5 4v2" />
+                  }
+                }
+              </svg>
+              <span>{{ item.label }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <div class="sidebar__footer">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span>Ambiente operacional</span>
+    </div>
+  </aside>
+
+  @if (menuOpen()) {
+    <button class="backdrop" type="button" aria-label="Fechar menu" (click)="closeMenu()"></button>
+  }
+
+  <div class="shell__main">
+    <header class="topbar">
+      <button
+        #menuButton
+        class="menu-button"
+        type="button"
+        aria-controls="navegacao-principal"
+        [attr.aria-expanded]="menuOpen()"
+        (click)="toggleMenu()"
+      >
+        <span class="visually-hidden">{{ menuOpen() ? 'Fechar menu' : 'Abrir menu' }}</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+      <div class="topbar__context">
+        <strong>Gestão de Colaboradores</strong>
+        <span>Administração centralizada</span>
+      </div>
+      <div class="identity" aria-label="Sessão atual">
+        <span class="identity__avatar" aria-hidden="true">G</span>
+        <span class="identity__copy">
+          <strong>Sessão administrativa</strong>
+          <small>Conta local</small>
+        </span>
+      </div>
+    </header>
+
+    <main class="content" id="conteudo-principal" tabindex="-1">
+      <router-outlet />
+    </main>
+  </div>
+</div>

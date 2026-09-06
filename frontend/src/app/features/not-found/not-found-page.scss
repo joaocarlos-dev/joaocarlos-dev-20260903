@@ -1,0 +1,41 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+main {
+  display: grid;
+  min-height: 100vh;
+  padding: 1.25rem;
+  place-items: center;
+}
+
+section {
+  width: min(100%, 520px);
+  padding: clamp(2rem, 7vw, 3.5rem);
+  text-align: center;
+}
+
+.code {
+  display: block;
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+h1 {
+  margin: 0.7rem 0 0;
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  letter-spacing: -0.03em;
+}
+
+p {
+  margin: 0.85rem auto 0;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.button {
+  margin-top: 1.5rem;
+}

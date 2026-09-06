@@ -1,3 +1,63 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  {
+    path: '',
+    loadComponent: () =>
+      import('./layout/portal-shell/portal-shell').then((module) => module.PortalShell),
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+      {
+        path: 'dashboard',
+        title: 'Visão geral | Gestão',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard-page').then((module) => module.DashboardPage),
+      },
+      {
+        path: 'usuarios',
+        title: 'Usuários | Gestão',
+        data: {
+          description: 'Cadastre acessos e acompanhe a situação dos usuários do sistema.',
+          eyebrow: 'Acessos',
+          title: 'Usuários',
+        },
+        loadComponent: () =>
+          import('./features/shared/feature-preview-page').then(
+            (module) => module.FeaturePreviewPage,
+          ),
+      },
+      {
+        path: 'unidades',
+        title: 'Unidades | Gestão',
+        data: {
+          description: 'Organize as unidades e consulte seus colaboradores vinculados.',
+          eyebrow: 'Estrutura',
+          title: 'Unidades',
+        },
+        loadComponent: () =>
+          import('./features/shared/feature-preview-page').then(
+            (module) => module.FeaturePreviewPage,
+          ),
+      },
+      {
+        path: 'colaboradores',
+        title: 'Colaboradores | Gestão',
+        data: {
+          description: 'Gerencie vínculos entre pessoas, usuários e unidades.',
+          eyebrow: 'Equipe',
+          title: 'Colaboradores',
+        },
+        loadComponent: () =>
+          import('./features/shared/feature-preview-page').then(
+            (module) => module.FeaturePreviewPage,
+          ),
+      },
+    ],
+  },
+  {
+    path: '**',
+    title: 'Página não encontrada | Gestão',
+    loadComponent: () =>
+      import('./features/not-found/not-found-page').then((module) => module.NotFoundPage),
+  },
+];

@@ -1,0 +1,30 @@
+<section
+  class="state surface"
+  [class.state--error]="kind() === 'error'"
+  [attr.aria-busy]="kind() === 'loading'"
+  [attr.aria-live]="kind() === 'error' ? 'assertive' : 'polite'"
+  [attr.role]="kind() === 'error' ? 'alert' : 'status'"
+>
+  <span class="state__icon" aria-hidden="true">
+    @switch (kind()) {
+      @case ('loading') {
+        <span class="state__spinner"></span>
+      }
+      @case ('error') {
+        !
+      }
+      @default {
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M4 7.5h16v11H4zM7 4.5h10M9 11h6" />
+        </svg>
+      }
+    }
+  </span>
+  <h2>{{ title() }}</h2>
+  <p>{{ description() }}</p>
+  @if (actionLabel()) {
+    <button class="button button--secondary" type="button" (click)="action.emit()">
+      {{ actionLabel() }}
+    </button>
+  }
+</section>

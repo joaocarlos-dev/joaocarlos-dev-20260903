@@ -1,0 +1,77 @@
+:host {
+  display: block;
+}
+
+.state {
+  display: flex;
+  min-height: 280px;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  flex-direction: column;
+}
+
+.state__icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 1.25rem;
+  font-weight: 750;
+}
+
+.state--error .state__icon {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+svg {
+  width: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.state__spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgb(63 95 122 / 25%);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+p {
+  max-width: 470px;
+  margin: 0.5rem 0 0;
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+}
+
+.button {
+  margin-top: 1.25rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .state__spinner {
+    animation-duration: 1.8s;
+  }
+}
