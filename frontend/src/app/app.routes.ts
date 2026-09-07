@@ -6,8 +6,7 @@ export const routes: Routes = [
     path: 'login',
     title: 'Entrar | Gestão',
     canActivate: [guestGuard],
-    loadComponent: () =>
-      import('./features/auth/login-page').then((module) => module.LoginPage),
+    loadComponent: () => import('./features/auth/login-page').then((module) => module.LoginPage),
   },
   {
     path: '',
@@ -26,15 +25,8 @@ export const routes: Routes = [
       {
         path: 'usuarios',
         title: 'Usuários | Gestão',
-        data: {
-          description: 'Cadastre acessos e acompanhe a situação dos usuários do sistema.',
-          eyebrow: 'Acessos',
-          title: 'Usuários',
-        },
         loadComponent: () =>
-          import('./features/shared/feature-preview-page').then(
-            (module) => module.FeaturePreviewPage,
-          ),
+          import('./features/users/users-page').then((module) => module.UsersPage),
       },
       {
         path: 'unidades',

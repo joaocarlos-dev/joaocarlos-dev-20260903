@@ -1,97 +1,100 @@
 <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
 
 <div class="shell">
-  <aside
-    class="sidebar"
-    id="navegacao-principal"
-    [class.sidebar--open]="menuOpen()"
-    aria-label="Navegação principal"
-  >
-    <div class="brand">
-      <span class="brand__mark" aria-hidden="true">GC</span>
-      <span>
-        <strong>Gestão</strong>
-        <small>Portal administrativo</small>
-      </span>
-    </div>
+  <header class="header">
+    <div class="header__inner">
+      <a class="brand" routerLink="/dashboard" aria-label="Gestão de Colaboradores — início">
+        <span class="brand__mark" aria-hidden="true">GC</span>
+        <span class="brand__copy">
+          <strong>Gestão</strong>
+          <small>Portal administrativo</small>
+        </span>
+      </a>
 
-    <nav>
-      <p class="nav-label">Menu principal</p>
-      <ul>
-        @for (item of navigation; track item.path) {
-          <li>
-            <a
-              #menuLink
-              [routerLink]="item.path"
-              routerLinkActive="nav-link--active"
-              #activeLink="routerLinkActive"
-              [attr.aria-current]="activeLink.isActive ? 'page' : null"
-              class="nav-link"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                @switch (item.icon) {
-                  @case ('dashboard') {
-                    <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
-                  }
-                  @case ('users') {
-                    <path d="M8.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM3 20v-2.2c0-2.1 1.8-3.8 4-3.8h3c2.2 0 4 1.7 4 3.8V20M15.5 4.7a3.5 3.5 0 0 1 0 6.6M17 14c2.2 0 4 1.7 4 3.8V20" />
-                  }
-                  @case ('units') {
-                    <path d="M4 20V7l8-3 8 3v13M8 10h2M14 10h2M8 14h2M14 14h2M9 20v-3h6v3" />
-                  }
-                  @case ('employees') {
-                    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20v-2c0-2.2 2-4 4.5-4h5c2.5 0 4.5 1.8 4.5 4v2" />
-                  }
-                }
-              </svg>
-              <span>{{ item.label }}</span>
-            </a>
-          </li>
-        }
-      </ul>
-    </nav>
+      <nav
+        class="navigation"
+        id="navegacao-principal"
+        [class.navigation--open]="menuOpen()"
+        aria-label="Navegação principal"
+      >
+        <ul>
+          @for (item of navigation; track item.path) {
+            <li>
+              <a
+                #menuLink
+                [routerLink]="item.path"
+                routerLinkActive="nav-link--active"
+                #activeLink="routerLinkActive"
+                [attr.aria-current]="activeLink.isActive ? 'page' : null"
+                class="nav-link"
+              >
+                {{ item.label }}
+              </a>
+            </li>
+          }
+        </ul>
+        <button #menuLink class="mobile-logout" type="button" (click)="logout()">Sair da conta</button>
+      </nav>
 
-    <div class="sidebar__footer">
-      <span class="status-dot" aria-hidden="true"></span>
-      <span>Ambiente operacional</span>
+      <div class="header__actions">
+        <button
+          class="icon-button"
+          type="button"
+          (click)="toggleTheme()"
+          [attr.aria-label]="theme.theme() === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'"
+          [attr.title]="theme.theme() === 'dark' ? 'Tema claro' : 'Tema escuro'"
+        >
+          @if (theme.theme() === 'dark') {
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
+              />
+            </svg>
+          } @else {
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 15.2A8 8 0 0 1 8.8 4 8 8 0 1 0 20 15.2Z" />
+            </svg>
+          }
+        </button>
+
+        <div class="identity" aria-label="Sessão atual">
+          <span class="identity__avatar" aria-hidden="true">{{
+            identity()?.login?.charAt(0)?.toUpperCase() || 'G'
+          }}</span>
+          <span class="identity__copy">
+            <strong>{{ identity()?.login || 'Sessão administrativa' }}</strong>
+            <small>Conta local</small>
+          </span>
+        </div>
+
+        <button class="logout-button" type="button" (click)="logout()">Sair</button>
+
+        <button
+          #menuButton
+          class="menu-button"
+          type="button"
+          aria-controls="navegacao-principal"
+          [attr.aria-expanded]="menuOpen()"
+          (click)="toggleMenu()"
+        >
+          <span class="visually-hidden">{{ menuOpen() ? 'Fechar menu' : 'Abrir menu' }}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            @if (menuOpen()) {
+              <path d="m6 6 12 12M18 6 6 18" />
+            } @else {
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            }
+          </svg>
+        </button>
+      </div>
     </div>
-  </aside>
+  </header>
 
   @if (menuOpen()) {
     <button class="backdrop" type="button" aria-label="Fechar menu" (click)="closeMenu()"></button>
   }
 
-  <div class="shell__main">
-    <header class="topbar">
-      <button
-        #menuButton
-        class="menu-button"
-        type="button"
-        aria-controls="navegacao-principal"
-        [attr.aria-expanded]="menuOpen()"
-        (click)="toggleMenu()"
-      >
-        <span class="visually-hidden">{{ menuOpen() ? 'Fechar menu' : 'Abrir menu' }}</span>
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M4 7h16M4 12h16M4 17h16" />
-        </svg>
-      </button>
-      <div class="topbar__context">
-        <strong>Gestão de Colaboradores</strong>
-        <span>Administração centralizada</span>
-      </div>
-      <div class="identity" aria-label="Sessão atual">
-        <span class="identity__avatar" aria-hidden="true">{{ identity()?.login?.charAt(0)?.toUpperCase() || 'G' }}</span>
-        <span class="identity__copy">
-          <strong>{{ identity()?.login || 'Sessão administrativa' }}</strong>
-          <small>Conta local</small>
-        </span>
-        <button class="button button--secondary" type="button" (click)="logout()">Sair</button>
-      </div>
-    </header>
-
-    <main class="content" id="conteudo-principal" tabindex="-1">
-      <router-outlet />
-    </main>
-  </div>
+  <main class="content" id="conteudo-principal" tabindex="-1">
+    <router-outlet />
+  </main>
 </div>

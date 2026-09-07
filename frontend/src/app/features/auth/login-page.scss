@@ -28,7 +28,7 @@
   place-items: center;
   border-radius: var(--radius-sm);
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
   font-size: 0.8rem;
   font-weight: 750;
   letter-spacing: 0.04em;
@@ -51,7 +51,7 @@
 
 .login-card__heading p {
   margin: 0 0 0.5rem;
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-size: 0.72rem;
   font-weight: 750;
   letter-spacing: 0.08em;
@@ -82,15 +82,15 @@
 }
 
 .notice--warning {
-  border-color: #decda9;
+  border-color: var(--color-warning);
   background: var(--color-warning-soft);
-  color: #684f24;
+  color: var(--color-warning-text);
 }
 
 .notice--danger {
-  border-color: #e3bcbc;
+  border-color: var(--color-danger);
   background: var(--color-danger-soft);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 .field + .field {
@@ -108,7 +108,7 @@
   width: 100%;
   min-height: 44px;
   padding: 0.65rem 0.75rem;
-  border: 1px solid var(--color-border-strong);
+  border: 1px solid var(--color-input-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
   color: var(--color-text);
@@ -121,7 +121,7 @@
 .field__error {
   display: block;
   margin-top: 0.35rem;
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   font-size: 0.75rem;
 }
 

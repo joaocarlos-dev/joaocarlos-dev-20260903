@@ -17,17 +17,17 @@
   width: 44px;
   height: 44px;
   place-items: center;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   margin-bottom: 1rem;
   background: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   font-size: 1.25rem;
   font-weight: 750;
 }
 
 .state--error .state__icon {
   background: var(--color-danger-soft);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 
 svg {
@@ -42,7 +42,7 @@ svg {
 .state__spinner {
   width: 20px;
   height: 20px;
-  border: 2px solid rgb(63 95 122 / 25%);
+  border: 2px solid var(--color-border-strong);
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 800ms linear infinite;

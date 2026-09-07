@@ -361,12 +361,14 @@ Na validação da Etapa 3, lint, 22 testes e build de produção passaram. O log
 
 ### Etapa 4 — Usuários
 
-- [ ] listar e filtrar usuários;
-- [ ] criar usuário ativo ou inativo;
-- [ ] atualizar senha e/ou status;
-- [ ] impedir PATCH vazio;
-- [ ] tratar duplicidades;
-- [ ] cobrir fluxos por testes.
+- [x] listar e filtrar usuários;
+- [x] criar usuário ativo ou inativo;
+- [x] atualizar senha e/ou status;
+- [x] impedir PATCH vazio;
+- [x] tratar duplicidades;
+- [x] cobrir fluxos por testes.
+
+O layout foi atualizado junto da Etapa 4: a navegação lateral deu lugar a um header responsivo com menu hambúrguer no mobile, a sinalização por pontos verdes foi removida e a nova paleta passou a oferecer temas claro e escuro persistentes.
 
 Critério: todas as operações de usuários da API funcionam no portal.
 
@@ -436,7 +438,7 @@ Critério: a ordem é comprovada por estados e logs; uma falha impede o dependen
 - refresh token, logout remoto e papéis;
 - exclusão de usuários ou unidades;
 - paginação, busca e ordenação server-side;
-- internacionalização, tema escuro, SSR e modo offline;
+- internacionalização, SSR e modo offline;
 - testes que gravem no banco principal.
 
 Esses itens exigem decisão de produto ou mudança no backend e não devem ser simulados apenas no cliente.

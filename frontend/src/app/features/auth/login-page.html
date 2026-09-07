@@ -52,7 +52,9 @@
           aria-describedby="password-error"
         />
         @if (form.controls.password.invalid && form.controls.password.touched) {
-          <small id="password-error" class="field__error">A senha deve ter pelo menos 8 caracteres.</small>
+          <small id="password-error" class="field__error"
+            >A senha deve ter pelo menos 8 caracteres.</small
+          >
         }
       </div>
 

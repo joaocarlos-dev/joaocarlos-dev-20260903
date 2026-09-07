@@ -1,0 +1,300 @@
+<div class="page-content" [attr.inert]="editorMode() ? '' : null">
+  <app-page-header
+    eyebrow="Acessos"
+    title="Usuários"
+    description="Cadastre acessos e mantenha senhas e situações de uso atualizadas."
+  >
+    <button class="button button--primary" type="button" (click)="openCreate()">
+      Novo usuário
+    </button>
+  </app-page-header>
+
+  <section class="toolbar surface" aria-label="Filtros de usuários">
+    <div class="search-field">
+      <label for="user-search">Buscar usuário</label>
+      <input
+        id="user-search"
+        type="search"
+        placeholder="Código ou login"
+        [value]="search()"
+        (input)="applySearch($event)"
+      />
+    </div>
+    <div class="filter-field">
+      <label for="status-filter">Status</label>
+      <select id="status-filter" [value]="statusFilter()" (change)="changeStatusFilter($event)">
+        <option value="all">Todos</option>
+        <option value="active">Ativos</option>
+        <option value="inactive">Inativos</option>
+      </select>
+    </div>
+  </section>
+
+  @if (feedback()) {
+    <div class="feedback" role="status">
+      <span>{{ feedback() }}</span>
+      <button type="button" aria-label="Dispensar mensagem" (click)="feedback.set(null)">
+        Fechar
+      </button>
+    </div>
+  }
+
+  @if (loading()) {
+    <app-screen-state
+      kind="loading"
+      title="Carregando usuários"
+      description="Aguarde enquanto consultamos os acessos cadastrados."
+    />
+  } @else if (loadError()) {
+    <app-screen-state
+      kind="error"
+      title="Não foi possível carregar os usuários"
+      [description]="loadError() || 'Tente novamente.'"
+      actionLabel="Tentar novamente"
+      (action)="loadUsers()"
+    />
+  } @else if (filteredUsers().length === 0) {
+    <app-screen-state
+      kind="empty"
+      [title]="search() ? 'Nenhum usuário encontrado' : 'Nenhum usuário cadastrado'"
+      [description]="
+        search()
+          ? 'Tente buscar por outro código ou login.'
+          : 'Crie o primeiro acesso para começar.'
+      "
+    />
+  } @else {
+    <section class="user-list surface" aria-labelledby="user-list-title">
+      <div class="user-list__heading">
+        <div>
+          <h2 id="user-list-title">Acessos cadastrados</h2>
+          <p>
+            {{ filteredUsers().length }} {{ filteredUsers().length === 1 ? 'usuário' : 'usuários' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Código</th>
+              <th scope="col">Login</th>
+              <th scope="col">Status</th>
+              <th scope="col">Criado em</th>
+              <th scope="col"><span class="visually-hidden">Ações</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of filteredUsers(); track user.id) {
+              <tr>
+                <td data-label="Código">
+                  <strong>{{ user.code }}</strong>
+                </td>
+                <td data-label="Login">{{ user.login }}</td>
+                <td data-label="Status">
+                  <span class="status" [class.status--inactive]="user.status === 0">
+                    {{ user.status === 1 ? 'Ativo' : 'Inativo' }}
+                  </span>
+                </td>
+                <td data-label="Criado em">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
+                <td class="table-action">
+                  <button class="edit-button" type="button" (click)="openEdit(user)">
+                    Editar
+                    <span class="visually-hidden"> {{ user.login }}</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>
+
+@if (editorMode()) {
+  <div class="dialog-layer">
+    <button
+      class="dialog-backdrop"
+      type="button"
+      aria-label="Fechar formulário"
+      (click)="closeEditor()"
+    ></button>
+    <section
+      #dialog
+      class="dialog surface"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="editorMode() === 'create' ? 'create-title' : 'edit-title'"
+    >
+      <div class="dialog__header">
+        <div>
+          <p>{{ editorMode() === 'create' ? 'Novo acesso' : 'Editar acesso' }}</p>
+          <h2 [id]="editorMode() === 'create' ? 'create-title' : 'edit-title'">
+            {{ editorMode() === 'create' ? 'Cadastrar usuário' : selectedUser()?.login }}
+          </h2>
+        </div>
+        <button class="close-button" type="button" aria-label="Fechar" (click)="closeEditor()">
+          ×
+        </button>
+      </div>
+
+      @if (formError()) {
+        <div class="form-alert" role="alert">{{ formError() }}</div>
+      }
+
+      @if (editorMode() === 'create') {
+        <form [formGroup]="createForm" (ngSubmit)="submitCreate()" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="create-code">Código</label>
+              <input
+                id="create-code"
+                type="text"
+                formControlName="code"
+                maxlength="50"
+                autocomplete="off"
+                required
+                aria-describedby="create-code-error"
+                [attr.aria-invalid]="
+                  (createForm.controls.code.invalid && createForm.controls.code.touched) ||
+                  !!apiFieldErrors()['code']
+                "
+              />
+              @if (
+                (createForm.controls.code.invalid && createForm.controls.code.touched) ||
+                apiFieldErrors()['code']
+              ) {
+                <small id="create-code-error">{{
+                  apiFieldErrors()['code'] || 'Informe um código de até 50 caracteres.'
+                }}</small>
+              }
+            </div>
+            <div class="field">
+              <label for="create-login">Login</label>
+              <input
+                id="create-login"
+                type="text"
+                formControlName="login"
+                maxlength="100"
+                autocomplete="off"
+                required
+                aria-describedby="create-login-error"
+                [attr.aria-invalid]="
+                  (createForm.controls.login.invalid && createForm.controls.login.touched) ||
+                  !!apiFieldErrors()['login']
+                "
+              />
+              @if (
+                (createForm.controls.login.invalid && createForm.controls.login.touched) ||
+                apiFieldErrors()['login']
+              ) {
+                <small id="create-login-error">{{
+                  apiFieldErrors()['login'] || 'Informe um login de até 100 caracteres.'
+                }}</small>
+              }
+            </div>
+            <div class="field field--wide">
+              <label for="create-password">Senha</label>
+              <input
+                id="create-password"
+                type="password"
+                formControlName="password"
+                autocomplete="new-password"
+                required
+                aria-describedby="create-password-error"
+                [attr.aria-invalid]="
+                  (createForm.controls.password.invalid && createForm.controls.password.touched) ||
+                  !!apiFieldErrors()['password']
+                "
+              />
+              @if (
+                (createForm.controls.password.invalid && createForm.controls.password.touched) ||
+                apiFieldErrors()['password']
+              ) {
+                <small id="create-password-error">{{
+                  apiFieldErrors()['password'] || 'A senha deve ter pelo menos 8 caracteres.'
+                }}</small>
+              }
+            </div>
+            <fieldset
+              id="create-status"
+              class="field field--wide"
+              tabindex="-1"
+              [attr.aria-describedby]="apiFieldErrors()['status'] ? 'create-status-error' : null"
+              [attr.aria-invalid]="!!apiFieldErrors()['status']"
+            >
+              <legend>Status inicial</legend>
+              <div class="choice-group">
+                <label><input type="radio" formControlName="status" [value]="1" /> Ativo</label>
+                <label><input type="radio" formControlName="status" [value]="0" /> Inativo</label>
+              </div>
+              @if (apiFieldErrors()['status']) {
+                <small id="create-status-error">{{ apiFieldErrors()['status'] }}</small>
+              }
+            </fieldset>
+          </div>
+          <div class="dialog__actions">
+            <button class="button button--secondary" type="button" (click)="closeEditor()">
+              Cancelar
+            </button>
+            <button class="button button--primary" type="submit" [disabled]="saving()">
+              {{ saving() ? 'Salvando…' : 'Cadastrar usuário' }}
+            </button>
+          </div>
+        </form>
+      } @else {
+        <form [formGroup]="editForm" (ngSubmit)="submitEdit()" novalidate>
+          <div class="field">
+            <label for="edit-password">Nova senha <span>(opcional)</span></label>
+            <input
+              id="edit-password"
+              type="password"
+              formControlName="password"
+              autocomplete="new-password"
+              aria-describedby="edit-password-help edit-password-error"
+              [attr.aria-invalid]="
+                (editForm.controls.password.invalid && editForm.controls.password.touched) ||
+                !!apiFieldErrors()['password']
+              "
+            />
+            <p id="edit-password-help">Deixe em branco para manter a senha atual.</p>
+            @if (
+              (editForm.controls.password.invalid && editForm.controls.password.touched) ||
+              apiFieldErrors()['password']
+            ) {
+              <small id="edit-password-error">{{
+                apiFieldErrors()['password'] || 'A nova senha deve ter pelo menos 8 caracteres.'
+              }}</small>
+            }
+          </div>
+          <fieldset
+            id="edit-status"
+            class="field"
+            tabindex="-1"
+            [attr.aria-describedby]="apiFieldErrors()['status'] ? 'edit-status-error' : null"
+            [attr.aria-invalid]="!!apiFieldErrors()['status']"
+          >
+            <legend>Status</legend>
+            <div class="choice-group">
+              <label><input type="radio" formControlName="status" [value]="1" /> Ativo</label>
+              <label><input type="radio" formControlName="status" [value]="0" /> Inativo</label>
+            </div>
+            @if (apiFieldErrors()['status']) {
+              <small id="edit-status-error">{{ apiFieldErrors()['status'] }}</small>
+            }
+          </fieldset>
+          <div class="dialog__actions">
+            <button class="button button--secondary" type="button" (click)="closeEditor()">
+              Cancelar
+            </button>
+            <button class="button button--primary" type="submit" [disabled]="saving()">
+              {{ saving() ? 'Salvando…' : 'Salvar alterações' }}
+            </button>
+          </div>
+        </form>
+      }
+    </section>
+  </div>
+}

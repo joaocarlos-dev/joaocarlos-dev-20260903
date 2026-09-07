@@ -56,20 +56,38 @@ describe('PortalShell', () => {
     const button = element.querySelector<HTMLButtonElement>(
       '[aria-controls="navegacao-principal"]',
     );
-    const links = Array.from(element.querySelectorAll<HTMLAnchorElement>('nav a'));
+    const menuItems = Array.from(element.querySelectorAll<HTMLElement>('nav a, nav button'));
 
     button?.click();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(document.activeElement).toBe(links[0]);
+    expect(document.activeElement).toBe(menuItems[0]);
 
-    links.at(-1)?.focus();
+    menuItems.at(-1)?.focus();
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', cancelable: true }));
-    expect(document.activeElement).toBe(links[0]);
+    expect(document.activeElement).toBe(menuItems[0]);
 
     document.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, cancelable: true }),
     );
-    expect(document.activeElement).toBe(links.at(-1));
+    expect(document.activeElement).toBe(menuItems.at(-1));
+  });
+
+  it('should release the mobile menu state when entering the desktop breakpoint', () => {
+    const fixture = TestBed.createComponent(PortalShell);
+    fixture.detectChanges();
+    const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '[aria-controls="navegacao-principal"]',
+    );
+    const originalWidth = window.innerWidth;
+
+    button?.click();
+    fixture.detectChanges();
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
+    window.dispatchEvent(new Event('resize'));
+    fixture.detectChanges();
+
+    expect(button?.getAttribute('aria-expanded')).toBe('false');
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalWidth });
   });
 });

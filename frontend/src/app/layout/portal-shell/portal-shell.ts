@@ -13,6 +13,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthSession } from '../../core/auth/auth-session';
+import { ThemeService } from '../../core/theme/theme-service';
 
 interface NavigationItem {
   readonly icon: 'dashboard' | 'employees' | 'units' | 'users';
@@ -30,8 +31,9 @@ interface NavigationItem {
 export class PortalShell {
   private readonly router = inject(Router);
   private readonly session = inject(AuthSession);
+  protected readonly theme = inject(ThemeService);
   private readonly menuButton = viewChild.required<ElementRef<HTMLButtonElement>>('menuButton');
-  private readonly menuLinks = viewChildren<ElementRef<HTMLAnchorElement>>('menuLink');
+  private readonly menuLinks = viewChildren<ElementRef<HTMLElement>>('menuLink');
 
   protected readonly menuOpen = signal(false);
   protected readonly identity = this.session.identity;
@@ -85,6 +87,13 @@ export class PortalShell {
     }
   }
 
+  @HostListener('window:resize')
+  protected handleResize(): void {
+    if (window.innerWidth > 800 && this.menuOpen()) {
+      this.menuOpen.set(false);
+    }
+  }
+
   protected closeMenu(): void {
     const wasOpen = this.menuOpen();
     this.menuOpen.set(false);
@@ -95,6 +104,10 @@ export class PortalShell {
 
   protected toggleMenu(): void {
     this.menuOpen.update((open) => !open);
+  }
+
+  protected toggleTheme(): void {
+    this.theme.toggle();
   }
 
   protected logout(): void {
