@@ -1,0 +1,252 @@
+:host {
+  display: block;
+}
+
+.details-content {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.metadata {
+  padding: 1.5rem;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.section-heading__eyebrow {
+  margin: 0 0 0.3rem;
+  color: var(--color-primary-text);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: -0.015em;
+}
+
+.status {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--color-success) 35%, transparent);
+  border-radius: 999px;
+  background: var(--color-success-soft);
+  color: var(--color-success-text);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.status--inactive {
+  border-color: var(--color-border);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+}
+
+.metadata-grid {
+  display: grid;
+  padding: 1.25rem 0 0;
+  margin: 1.25rem 0 0;
+  border-top: 1px solid var(--color-border);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.metadata-grid div {
+  min-width: 0;
+  padding: 0 1.25rem;
+  border-left: 1px solid var(--color-border);
+}
+
+.metadata-grid div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.metadata-grid div:last-child {
+  padding-right: 0;
+}
+
+.metadata-grid dt {
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.metadata-grid dd {
+  margin: 0.4rem 0 0;
+  overflow-wrap: anywhere;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.employees {
+  display: grid;
+  gap: 1rem;
+}
+
+.section-heading--employees {
+  padding: 0 0.25rem;
+}
+
+.employee-count {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.88rem;
+}
+
+.employee-table {
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+td {
+  font-size: 0.9rem;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+tbody tr:hover {
+  background: var(--color-surface-hover);
+}
+
+@media (max-width: 820px) {
+  .metadata-grid {
+    gap: 1.25rem 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metadata-grid div:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .details-content {
+    margin-top: 1.5rem;
+  }
+
+  .metadata {
+    padding: 1.15rem;
+  }
+
+  .metadata-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metadata-grid div,
+  .metadata-grid div:nth-child(3) {
+    padding: 0;
+    border-left: 0;
+  }
+
+  .section-heading--employees {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .employee-table {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  table,
+  tbody,
+  tr,
+  td {
+    display: block;
+  }
+
+  thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  tbody {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  tr {
+    padding: 0.55rem 0.9rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft);
+  }
+
+  td {
+    display: grid;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--color-border);
+    gap: 1rem;
+    grid-template-columns: minmax(90px, 0.75fr) minmax(0, 1.25fr);
+    text-align: right;
+  }
+
+  td::before {
+    color: var(--color-text-secondary);
+    content: attr(data-label);
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.045em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  tbody tr:last-child td,
+  td:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .section-heading:not(.section-heading--employees) {
+    align-items: flex-start;
+  }
+
+  td {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+    text-align: left;
+  }
+}

@@ -1,0 +1,181 @@
+<div class="page-content" [attr.inert]="editorMode() ? '' : null">
+  <app-page-header
+    eyebrow="Estrutura"
+    title="Unidades"
+    description="Organize as unidades e acompanhe os colaboradores vinculados a cada uma."
+  >
+    <button class="button button--primary" type="button" (click)="openCreate()">Nova unidade</button>
+  </app-page-header>
+
+  <section class="toolbar surface" aria-label="Filtros de unidades">
+    <div class="search-field">
+      <label for="unit-search">Buscar unidade</label>
+      <input
+        id="unit-search"
+        type="search"
+        placeholder="Código ou nome"
+        [value]="search()"
+        (input)="applySearch($event)"
+      />
+    </div>
+    <div class="filter-field">
+      <label for="unit-status-filter">Status</label>
+      <select id="unit-status-filter" [value]="statusFilter()" (change)="changeStatusFilter($event)">
+        <option value="all">Todas</option>
+        <option value="active">Ativas</option>
+        <option value="inactive">Inativas</option>
+      </select>
+    </div>
+  </section>
+
+  @if (feedback()) {
+    <div class="feedback" role="status">
+      <span>{{ feedback() }}</span>
+      <button type="button" aria-label="Dispensar mensagem" (click)="feedback.set(null)">Fechar</button>
+    </div>
+  }
+
+  @if (loading()) {
+    <app-screen-state
+      kind="loading"
+      title="Carregando unidades"
+      description="Aguarde enquanto consultamos a estrutura cadastrada."
+    />
+  } @else if (loadError()) {
+    <app-screen-state
+      kind="error"
+      title="Não foi possível carregar as unidades"
+      [description]="loadError() || 'Tente novamente.'"
+      actionLabel="Tentar novamente"
+      (action)="loadUnits()"
+    />
+  } @else if (filteredUnits().length === 0) {
+    <app-screen-state
+      kind="empty"
+      [title]="hasFilters() ? 'Nenhuma unidade encontrada' : 'Nenhuma unidade cadastrada'"
+      [description]="
+        hasFilters()
+          ? 'Tente ajustar os filtros para encontrar outra unidade.'
+          : 'Crie a primeira unidade para começar.'
+      "
+    />
+  } @else {
+    <section class="unit-list surface" aria-labelledby="unit-list-title">
+      <div class="unit-list__heading">
+        <div>
+          <h2 id="unit-list-title">Unidades cadastradas</h2>
+          <p>{{ filteredUnits().length }} {{ filteredUnits().length === 1 ? 'unidade' : 'unidades' }}</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Código</th>
+              <th scope="col">Nome</th>
+              <th scope="col">Status</th>
+              <th scope="col">Colaboradores</th>
+              <th scope="col">Atualizada em</th>
+              <th scope="col"><span class="visually-hidden">Ações</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (unit of filteredUnits(); track unit.id) {
+              <tr>
+                <td data-label="Código"><strong>{{ unit.code }}</strong></td>
+                <td data-label="Nome">{{ unit.name }}</td>
+                <td data-label="Status">
+                  <span class="status" [class.status--inactive]="unit.status === 0">
+                    {{ unit.status === 1 ? 'Ativa' : 'Inativa' }}
+                  </span>
+                </td>
+                <td data-label="Colaboradores">{{ unit.employees.length }}</td>
+                <td data-label="Atualizada em">{{ (unit.updatedAt || unit.createdAt) | date: 'dd/MM/yyyy' }}</td>
+                <td class="table-action">
+                  <a class="text-action" [routerLink]="['/unidades', unit.id]">
+                    Detalhes<span class="visually-hidden"> {{ unit.name }}</span>
+                  </a>
+                  <button class="edit-button" type="button" (click)="openEdit(unit)">
+                    Editar<span class="visually-hidden"> {{ unit.name }}</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>
+
+@if (editorMode()) {
+  <div class="dialog-layer">
+    <button class="dialog-backdrop" type="button" aria-label="Fechar formulário" (click)="closeEditor()"></button>
+    <section
+      #dialog
+      class="dialog surface"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="editorMode() === 'create' ? 'create-title' : 'edit-title'"
+    >
+      <div class="dialog__header">
+        <div>
+          <p>{{ editorMode() === 'create' ? 'Nova unidade' : 'Editar unidade' }}</p>
+          <h2 [id]="editorMode() === 'create' ? 'create-title' : 'edit-title'">
+            {{ editorMode() === 'create' ? 'Cadastrar unidade' : selectedUnit()?.name }}
+          </h2>
+        </div>
+        <button class="close-button" type="button" aria-label="Fechar" (click)="closeEditor()">×</button>
+      </div>
+
+      @if (formError()) {
+        <div class="form-alert" role="alert">{{ formError() }}</div>
+      }
+
+      @if (editorMode() === 'create') {
+        <form [formGroup]="createForm" (ngSubmit)="submitCreate()" novalidate>
+          <div class="field">
+            <label for="create-code">Código</label>
+            <input id="create-code" type="text" formControlName="code" maxlength="50" autocomplete="off" required aria-describedby="create-code-error" />
+            @if ((createForm.controls.code.invalid && createForm.controls.code.touched) || apiFieldErrors()['code']) {
+              <small id="create-code-error">{{ apiFieldErrors()['code'] || 'Informe um código de até 50 caracteres.' }}</small>
+            }
+          </div>
+          <div class="field">
+            <label for="create-name">Nome</label>
+            <input id="create-name" type="text" formControlName="name" maxlength="150" autocomplete="off" required aria-describedby="create-name-error" />
+            @if ((createForm.controls.name.invalid && createForm.controls.name.touched) || apiFieldErrors()['name']) {
+              <small id="create-name-error">{{ apiFieldErrors()['name'] || 'Informe um nome de até 150 caracteres.' }}</small>
+            }
+          </div>
+          <p class="form-help">Novas unidades são cadastradas como ativas.</p>
+          <div class="dialog__actions">
+            <button class="button button--secondary" type="button" (click)="closeEditor()">Cancelar</button>
+            <button class="button button--primary" type="submit" [disabled]="saving()">{{ saving() ? 'Salvando…' : 'Cadastrar unidade' }}</button>
+          </div>
+        </form>
+      } @else {
+        <form [formGroup]="editForm" (ngSubmit)="submitEdit()" novalidate>
+          <div class="field">
+            <label for="edit-name">Nome</label>
+            <input id="edit-name" type="text" formControlName="name" maxlength="150" autocomplete="off" required aria-describedby="edit-name-error" />
+            @if ((editForm.controls.name.invalid && editForm.controls.name.touched) || apiFieldErrors()['name']) {
+              <small id="edit-name-error">{{ apiFieldErrors()['name'] || 'Informe um nome de até 150 caracteres.' }}</small>
+            }
+          </div>
+          <fieldset class="field" id="edit-status">
+            <legend>Status</legend>
+            <div class="choice-group">
+              <label><input type="radio" formControlName="status" [value]="1" /> Ativa</label>
+              <label><input type="radio" formControlName="status" [value]="0" /> Inativa</label>
+            </div>
+          </fieldset>
+          <div class="dialog__actions">
+            <button class="button button--secondary" type="button" (click)="closeEditor()">Cancelar</button>
+            <button class="button button--primary" type="submit" [disabled]="saving()">{{ saving() ? 'Salvando…' : 'Salvar alterações' }}</button>
+          </div>
+        </form>
+      }
+    </section>
+  </div>
+}

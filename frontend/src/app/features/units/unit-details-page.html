@@ -1,0 +1,107 @@
+<div class="page-content">
+  <app-page-header
+    eyebrow="Estrutura"
+    [title]="pageTitle()"
+    [description]="pageDescription()"
+  >
+    <a class="button button--secondary" routerLink="/unidades">Voltar para unidades</a>
+  </app-page-header>
+
+  <div class="details-content">
+    @if (loading()) {
+      <app-screen-state
+        kind="loading"
+        title="Carregando unidade"
+        description="Aguarde enquanto consultamos os dados e os vínculos cadastrados."
+      />
+    } @else if (loadError(); as error) {
+      <app-screen-state
+        kind="error"
+        [title]="error.title"
+        [description]="error.description"
+        [actionLabel]="error.notFound ? 'Voltar para unidades' : 'Tentar novamente'"
+        (action)="handleErrorAction()"
+      />
+    } @else if (unit(); as currentUnit) {
+      <section class="metadata surface" aria-labelledby="unit-metadata-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-heading__eyebrow">Cadastro</p>
+            <h2 id="unit-metadata-title">Dados da unidade</h2>
+          </div>
+          <span class="status" [class.status--inactive]="currentUnit.status === 0">
+            {{ currentUnit.status === 1 ? 'Ativa' : 'Inativa' }}
+          </span>
+        </div>
+
+        <dl class="metadata-grid">
+          <div>
+            <dt>Código</dt>
+            <dd>{{ currentUnit.code }}</dd>
+          </div>
+          <div>
+            <dt>Colaboradores</dt>
+            <dd>{{ currentUnit.employees.length }}</dd>
+          </div>
+          <div>
+            <dt>Criada em</dt>
+            <dd>{{ currentUnit.createdAt | date: 'dd/MM/yyyy, HH:mm' }}</dd>
+          </div>
+          <div>
+            <dt>Última atualização</dt>
+            <dd>
+              {{ currentUnit.updatedAt ? (currentUnit.updatedAt | date: 'dd/MM/yyyy, HH:mm') : '—' }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="employees" aria-labelledby="unit-employees-title">
+        <div class="section-heading section-heading--employees">
+          <div>
+            <p class="section-heading__eyebrow">Equipe</p>
+            <h2 id="unit-employees-title">Colaboradores vinculados</h2>
+          </div>
+          <p class="employee-count" aria-live="polite">
+            {{ currentUnit.employees.length }}
+            {{ currentUnit.employees.length === 1 ? 'colaborador' : 'colaboradores' }}
+          </p>
+        </div>
+
+        @if (currentUnit.employees.length === 0) {
+          <app-screen-state
+            kind="empty"
+            title="Nenhum colaborador vinculado"
+            description="Esta unidade ainda não possui colaboradores vinculados."
+          />
+        } @else {
+          <div class="employee-table surface">
+            <table>
+              <caption class="visually-hidden">
+                Colaboradores vinculados à unidade {{ currentUnit.name }}
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Código</th>
+                  <th scope="col">Nome</th>
+                  <th scope="col">Vinculado em</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (employee of currentUnit.employees; track employee.id) {
+                  <tr>
+                    <td data-label="Código"><strong>{{ employee.code }}</strong></td>
+                    <td data-label="Nome">{{ employee.name }}</td>
+                    <td data-label="Vinculado em">
+                      {{ employee.createdAt | date: 'dd/MM/yyyy' }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    }
+  </div>
+</div>

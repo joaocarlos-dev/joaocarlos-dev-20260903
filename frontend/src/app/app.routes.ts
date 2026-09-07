@@ -31,14 +31,15 @@ export const routes: Routes = [
       {
         path: 'unidades',
         title: 'Unidades | Gestão',
-        data: {
-          description: 'Organize as unidades e consulte seus colaboradores vinculados.',
-          eyebrow: 'Estrutura',
-          title: 'Unidades',
-        },
         loadComponent: () =>
-          import('./features/shared/feature-preview-page').then(
-            (module) => module.FeaturePreviewPage,
+          import('./features/units/units-page').then((module) => module.UnitsPage),
+      },
+      {
+        path: 'unidades/:id',
+        title: 'Detalhes da unidade | Gestão',
+        loadComponent: () =>
+          import('./features/units/unit-details-page').then(
+            (module) => module.UnitDetailsPage,
           ),
       },
       {

@@ -1,4 +1,6 @@
-export type EntityStatus = 0 | 1;
+import { EntityStatus } from '../../core/api/api.models';
+
+export type { EntityStatus, ProblemDetails } from '../../core/api/api.models';
 
 export interface User {
   readonly id: string;
@@ -19,11 +21,4 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   readonly password?: string;
   readonly status?: EntityStatus;
-}
-
-export interface ProblemDetails {
-  readonly detail?: string;
-  readonly errors?: Readonly<Record<string, readonly string[]>>;
-  readonly title?: string;
-  readonly traceId?: string;
 }

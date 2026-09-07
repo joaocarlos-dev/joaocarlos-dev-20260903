@@ -199,13 +199,9 @@ O login será centralizado em um painel simples. A área autenticada terá naveg
 | --- | --- | --- |
 | `/login` | público | login e redirecionamento após sucesso |
 | `/dashboard` | autenticado | totais derivados das listagens existentes |
-| `/usuarios` | autenticado | listagem e filtros |
-| `/usuarios/novo` | autenticado | criação |
-| `/usuarios/:id/editar` | autenticado | senha e/ou status |
-| `/unidades` | autenticado | listagem e filtros locais |
-| `/unidades/nova` | autenticado | criação |
+| `/usuarios` | autenticado | listagem, filtros, criação e edição em diálogos |
+| `/unidades` | autenticado | listagem, filtros, criação e edição em diálogos |
 | `/unidades/:id` | autenticado | detalhe e colaboradores |
-| `/unidades/:id/editar` | autenticado | nome e/ou status |
 | `/colaboradores` | autenticado | listagem, filtros e remoção lógica |
 | `/colaboradores/novo` | autenticado | criação com usuário e unidade ativa |
 | `/colaboradores/:id` | autenticado | detalhe |
@@ -374,13 +370,15 @@ Critério: todas as operações de usuários da API funcionam no portal.
 
 ### Etapa 5 — Unidades
 
-- [ ] listar e criar unidades;
-- [ ] exibir detalhe com colaboradores;
-- [ ] atualizar nome e/ou status;
-- [ ] tratar PATCH vazio, duplicidade e `404`;
-- [ ] cobrir fluxos por testes.
+- [x] listar e criar unidades;
+- [x] exibir detalhe com colaboradores;
+- [x] atualizar nome e/ou status;
+- [x] tratar PATCH vazio, duplicidade e `404`;
+- [x] cobrir fluxos por testes.
 
 Critério: todas as operações de unidades da API funcionam no portal.
+
+Na validação da Etapa 5, lint, 54 testes e build de produção passaram. A listagem usa busca e filtro de status no cliente, os formulários enviam somente campos alterados, o detalhe exibe colaboradores e os estados de carregamento, vazio, erro, conflito e `404` foram cobertos.
 
 ### Etapa 6 — Colaboradores
 
