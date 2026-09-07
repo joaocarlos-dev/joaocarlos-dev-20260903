@@ -27,6 +27,9 @@ internal sealed class FakeUserRepository : IUserRepository
     public Task<bool> LoginExistsAsync(string login, CancellationToken cancellationToken = default) =>
         Task.FromResult(Users.Any(user => string.Equals(user.Login, login, StringComparison.OrdinalIgnoreCase)));
 
+    public Task<int> CountAdministratorsAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(Users.Count(user => user.Role == UserRole.Administrator));
+
     public Task AddAsync(User user, CancellationToken cancellationToken = default)
     {
         Users.Add(user);
@@ -91,11 +94,23 @@ internal sealed class FakeUnitOfWork : IUnitOfWork
 {
     public int SaveCalls { get; private set; }
 
+    public Task<IUnitOfWorkTransaction> BeginSerializableTransactionAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IUnitOfWorkTransaction>(new FakeUnitOfWorkTransaction());
+
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         SaveCalls++;
         return Task.FromResult(1);
     }
+}
+
+internal sealed class FakeUnitOfWorkTransaction : IUnitOfWorkTransaction
+{
+    public Task CommitAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task RollbackAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
 
 internal sealed class FakePasswordHasher : IPasswordHasher

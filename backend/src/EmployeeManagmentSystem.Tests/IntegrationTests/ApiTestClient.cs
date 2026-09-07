@@ -7,11 +7,13 @@ namespace EmployeeManagmentSystem.Tests.IntegrationTests;
 
 internal sealed class ApiTestClient(HttpClient client, EmployeeManagementApiFactory factory)
 {
-    public async Task AuthenticateAsAdminAsync()
+    public Task AuthenticateAsAdminAsync() => AuthenticateAsync(factory.AdminLogin, factory.AdminPassword);
+
+    public async Task AuthenticateAsync(string login, string password)
     {
         var response = await client.PostAsJsonAsync(
             "/api/v1/auth/login",
-            new LoginRequest(factory.AdminLogin, factory.AdminPassword));
+            new LoginRequest(login, password));
         response.EnsureSuccessStatusCode();
 
         var authentication = await response.Content.ReadFromJsonAsync<AuthenticationDto>();
@@ -23,11 +25,12 @@ internal sealed class ApiTestClient(HttpClient client, EmployeeManagementApiFact
         string code,
         string login,
         string password = "Password123!",
-        EntityStatus status = EntityStatus.Active)
+        EntityStatus status = EntityStatus.Active,
+        UserRole role = UserRole.Conventional)
     {
         var response = await client.PostAsJsonAsync(
             "/api/v1/users",
-            new CreateUserRequest(code, login, password, status));
+            new CreateUserRequest(code, login, password, status, role));
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<Guid>();
     }
@@ -51,7 +54,7 @@ internal sealed class ApiTestClient(HttpClient client, EmployeeManagementApiFact
 
 internal sealed record LoginRequest(string Login, string Password);
 
-internal sealed record CreateUserRequest(string Code, string Login, string Password, EntityStatus Status);
+internal sealed record CreateUserRequest(string Code, string Login, string Password, EntityStatus Status, UserRole Role = UserRole.Conventional);
 
 internal sealed record UpdateUserRequest(string? Password, EntityStatus? Status);
 

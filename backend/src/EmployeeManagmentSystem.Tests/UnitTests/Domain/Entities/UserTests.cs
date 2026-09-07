@@ -19,6 +19,26 @@ public sealed class UserTests
         Assert.Equal(EntityStatus.Active, user.Status);
         Assert.False(user.IsDeleted);
         Assert.Null(user.UpdatedAt);
+        Assert.Equal(UserRole.Conventional, user.Role);
+    }
+
+    [Fact]
+    public void Constructor_WithAdministratorRole_ShouldCreateAdministrator()
+    {
+        var user = new User("USR-001", "admin", "hashed-password", EntityStatus.Active, UserRole.Administrator);
+
+        Assert.True(user.IsAdministrator);
+        Assert.Equal(UserRole.Administrator, user.Role);
+    }
+
+    [Fact]
+    public void Constructor_WithInvalidRole_ShouldThrowDomainException()
+    {
+        var invalidRole = (UserRole)999;
+
+        Action action = () => new User("USR-001", "admin", "hashed-password", EntityStatus.Active, invalidRole);
+
+        Assert.Throws<DomainException>(action);
     }
 
     [Fact]

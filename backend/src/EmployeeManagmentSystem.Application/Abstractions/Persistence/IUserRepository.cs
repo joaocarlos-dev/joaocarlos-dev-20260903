@@ -10,5 +10,6 @@ public interface IUserRepository
     Task<IReadOnlyCollection<User>> ListAsync(EntityStatus? status, CancellationToken cancellationToken = default);
     Task<bool> CodeExistsAsync(string code, CancellationToken cancellationToken = default);
     Task<bool> LoginExistsAsync(string login, CancellationToken cancellationToken = default);
+    Task<int> CountAdministratorsAsync(CancellationToken cancellationToken = default);
     Task AddAsync(User user, CancellationToken cancellationToken = default);
 }

@@ -3,6 +3,7 @@ using EmployeeManagmentSystem.Application.Commands.Users.UpdateUser;
 using EmployeeManagmentSystem.Application.DTOs;
 using EmployeeManagmentSystem.Application.Queries.Users.GetUser;
 using EmployeeManagmentSystem.Application.Queries.Users.GetUsers;
+using EmployeeManagmentSystem.API.Configurations.Jwt;
 using EmployeeManagmentSystem.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,7 @@ namespace EmployeeManagmentSystem.API.Controllers;
 public sealed class UsersController(ISender sender) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<Guid>> Create(
@@ -25,7 +27,7 @@ public sealed class UsersController(ISender sender) : ControllerBase
         CancellationToken cancellationToken)
     {
         var id = await sender.Send(
-            new CreateUserCommand(request.Code, request.Login, request.Password, request.Status),
+            new CreateUserCommand(request.Code, request.Login, request.Password, request.Status, request.Role),
             cancellationToken);
 
         return CreatedAtAction(nameof(GetById), new { id }, id);
@@ -53,6 +55,7 @@ public sealed class UsersController(ISender sender) : ControllerBase
     }
 
     [HttpPatch("{id:guid}")]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(
@@ -65,6 +68,11 @@ public sealed class UsersController(ISender sender) : ControllerBase
     }
 }
 
-public sealed record CreateUserRequest(string Code, string Login, string Password, EntityStatus Status);
+public sealed record CreateUserRequest(
+    string Code,
+    string Login,
+    string Password,
+    EntityStatus Status,
+    UserRole Role = UserRole.Conventional);
 
 public sealed record UpdateUserRequest(string? Password, EntityStatus? Status);

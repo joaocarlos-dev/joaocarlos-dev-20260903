@@ -8,9 +8,10 @@ public sealed record UserDto(
     string Code,
     string Login,
     EntityStatus Status,
+    UserRole Role,
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt)
 {
     public static UserDto FromEntity(User user) =>
-        new(user.Id, user.Code, user.Login, user.Status, user.CreatedAt, user.UpdatedAt);
+        new(user.Id, user.Code, user.Login, user.Status, user.Role, user.CreatedAt, user.UpdatedAt);
 }

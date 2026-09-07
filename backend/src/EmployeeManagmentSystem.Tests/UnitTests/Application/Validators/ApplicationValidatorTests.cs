@@ -32,11 +32,13 @@ public sealed class ApplicationValidatorTests
     public async Task UserValidators_ShouldAcceptValidRequestsAndRejectInvalidRequests()
     {
         await AssertValidAsync(new CreateUserCommand("USR-001", "admin", "password123", EntityStatus.Active));
+        await AssertValidAsync(new CreateUserCommand("USR-002", "admin2", "password123", EntityStatus.Active, UserRole.Administrator));
         await AssertValidAsync(new UpdateUserCommand(Guid.NewGuid(), "password123", EntityStatus.Inactive));
         await AssertValidAsync(new GetUserQuery(Guid.NewGuid()));
         await AssertValidAsync(new GetUsersQuery(EntityStatus.Active));
 
         await AssertInvalidAsync(new CreateUserCommand(string.Empty, string.Empty, string.Empty, (EntityStatus)999));
+        await AssertInvalidAsync(new CreateUserCommand("USR-002", "admin2", "password123", EntityStatus.Active, (UserRole)999));
         await AssertInvalidAsync(new UpdateUserCommand(Guid.Empty, null, null));
         await AssertInvalidAsync(new UpdateUserCommand(Guid.NewGuid(), null, (EntityStatus)999));
         await AssertInvalidAsync(new GetUserQuery(Guid.Empty));

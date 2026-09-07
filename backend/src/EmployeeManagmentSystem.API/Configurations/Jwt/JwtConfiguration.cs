@@ -1,5 +1,6 @@
 using System.Text;
 using EmployeeManagmentSystem.Infrastructure.Services.Security;
+using EmployeeManagmentSystem.Domain.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -64,7 +65,12 @@ public static class JwtConfiguration
                     }
                 };
             });
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(
+                AuthorizationPolicies.AdministratorOnly,
+                policy => policy.RequireRole(UserRole.Administrator.ToString()));
+        });
 
         return services;
     }

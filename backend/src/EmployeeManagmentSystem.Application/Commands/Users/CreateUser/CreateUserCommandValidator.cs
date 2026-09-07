@@ -17,5 +17,6 @@ internal sealed class CreateUserCommandValidator : AbstractValidator<CreateUserC
             .WithMessage($"'Login' must be {EntityFieldLengths.Login} characters or fewer.");
         RuleFor(command => command.Password).NotEmpty().MinimumLength(8);
         RuleFor(command => command.Status).IsInEnum();
+        RuleFor(command => command.Role).IsInEnum();
     }
 }

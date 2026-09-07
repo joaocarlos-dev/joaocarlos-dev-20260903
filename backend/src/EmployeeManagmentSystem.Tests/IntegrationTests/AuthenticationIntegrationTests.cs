@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using EmployeeManagmentSystem.Application.DTOs;
 using EmployeeManagmentSystem.Domain.Enums;
 using EmployeeManagmentSystem.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
@@ -34,8 +35,19 @@ public sealed class AuthenticationIntegrationTests(EmployeeManagementApiFactory 
 
         await api.AuthenticateAsAdminAsync();
         var response = await client.GetAsync("/api/v1/users");
+        var users = await response.Content.ReadFromJsonAsync<IReadOnlyCollection<UserDto>>();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains(users!, user => user.Login == factory.AdminLogin && user.Role == UserRole.Administrator);
+
+        var secondAdminId = await api.CreateUserAsync(
+            "ADM-002",
+            "second.admin",
+            role: UserRole.Administrator);
+        var secondAdmin = await client.GetFromJsonAsync<UserDto>($"/api/v1/users/{secondAdminId}");
+
+        Assert.NotNull(secondAdmin);
+        Assert.Equal(UserRole.Administrator, secondAdmin.Role);
     }
 
     [Fact]
@@ -89,5 +101,28 @@ public sealed class AuthenticationIntegrationTests(EmployeeManagementApiFactory 
         var response = await client.GetAsync("/api/v1/users");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ConventionalUser_ShouldReceiveForbiddenOnAdministrativeMutations()
+    {
+        using var adminClient = factory.CreateClient();
+        var adminApi = new ApiTestClient(adminClient, factory);
+        await adminApi.AuthenticateAsAdminAsync();
+        await adminApi.CreateUserAsync("USR-001", "conventional.user");
+
+        using var conventionalClient = factory.CreateClient();
+        var conventionalApi = new ApiTestClient(conventionalClient, factory);
+        await conventionalApi.AuthenticateAsync("conventional.user", "Password123!");
+
+        var updateResponse = await conventionalClient.PatchAsJsonAsync(
+            "/api/v1/users/00000000-0000-0000-0000-000000000001",
+            new UpdateUserRequest("NewPassword123!", null));
+        var createResponse = await conventionalClient.PostAsJsonAsync(
+            "/api/v1/units",
+            new CreateUnitRequest("UNIT-001", "Headquarters"));
+
+        Assert.Equal(HttpStatusCode.Forbidden, updateResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, createResponse.StatusCode);
     }
 }

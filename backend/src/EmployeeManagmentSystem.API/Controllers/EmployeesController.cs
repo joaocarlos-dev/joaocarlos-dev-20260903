@@ -4,6 +4,7 @@ using EmployeeManagmentSystem.Application.Commands.Employees.UpdateEmployee;
 using EmployeeManagmentSystem.Application.DTOs;
 using EmployeeManagmentSystem.Application.Queries.Employees.GetEmployee;
 using EmployeeManagmentSystem.Application.Queries.Employees.GetEmployees;
+using EmployeeManagmentSystem.API.Configurations.Jwt;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ namespace EmployeeManagmentSystem.API.Controllers;
 public sealed class EmployeesController(ISender sender) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
@@ -52,6 +54,7 @@ public sealed class EmployeesController(ISender sender) : ControllerBase
     }
 
     [HttpPatch("{id:guid}")]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(
@@ -64,6 +67,7 @@ public sealed class EmployeesController(ISender sender) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(

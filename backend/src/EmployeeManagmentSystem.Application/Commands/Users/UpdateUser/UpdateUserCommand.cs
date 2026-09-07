@@ -17,19 +17,37 @@ internal sealed class UpdateUserCommandHandler(
 {
     public async Task Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByIdAsync(request.Id, cancellationToken)
-            ?? throw new NotFoundException(nameof(User), request.Id);
+        await using var transaction = await unitOfWork.BeginSerializableTransactionAsync(cancellationToken);
 
-        if (request.Password is not null)
+        try
         {
-            user.UpdatePassword(passwordHasher.Hash(request.Password));
+            var user = await userRepository.GetByIdAsync(request.Id, cancellationToken)
+                ?? throw new NotFoundException(nameof(User), request.Id);
+
+            if (request.Password is not null)
+            {
+                user.UpdatePassword(passwordHasher.Hash(request.Password));
+            }
+
+            if (request.Status.HasValue)
+            {
+                if (user.IsAdministrator && request.Status.Value == EntityStatus.Inactive
+                    && await userRepository.CountAdministratorsAsync(cancellationToken) <= 1)
+                {
+                    throw new ApplicationConflictException("The last administrator cannot be deactivated.");
+                }
+
+                user.ChangeStatus(request.Status.Value);
+            }
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
         }
 
-        if (request.Status.HasValue)
-        {
-            user.ChangeStatus(request.Status.Value);
-        }
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

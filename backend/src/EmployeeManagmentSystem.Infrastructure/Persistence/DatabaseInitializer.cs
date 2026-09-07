@@ -1,5 +1,6 @@
 using EmployeeManagmentSystem.Application.Abstractions.Security;
 using EmployeeManagmentSystem.Domain.Entities;
+using EmployeeManagmentSystem.Domain.Enums;
 using EmployeeManagmentSystem.Infrastructure.Services.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -75,8 +76,18 @@ public static class DatabaseInitializer
                     return;
                 }
 
-                if (await context.Users.AnyAsync(user => user.Login == initialUser.Login.Trim(), cancellationToken))
+                var existingInitialUser = await context.Users.SingleOrDefaultAsync(
+                    user => user.Code == initialUser.Code.Trim(),
+                    cancellationToken);
+
+                if (existingInitialUser is not null)
                 {
+                    if (!existingInitialUser.IsAdministrator)
+                    {
+                        existingInitialUser.ChangeRole(UserRole.Administrator);
+                        await context.SaveChangesAsync(cancellationToken);
+                    }
+
                     return;
                 }
 
@@ -84,7 +95,9 @@ public static class DatabaseInitializer
                 var user = new User(
                     initialUser.Code,
                     initialUser.Login,
-                    passwordHasher.Hash(initialUser.Password!));
+                    passwordHasher.Hash(initialUser.Password!),
+                    EntityStatus.Active,
+                    UserRole.Administrator);
                 await context.Users.AddAsync(user, cancellationToken);
                 await context.SaveChangesAsync(cancellationToken);
             }

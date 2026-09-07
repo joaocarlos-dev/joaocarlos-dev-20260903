@@ -8,7 +8,12 @@ using MediatR;
 
 namespace EmployeeManagmentSystem.Application.Commands.Users.CreateUser;
 
-public sealed record CreateUserCommand(string Code, string Login, string Password, EntityStatus Status) : ICommand<Guid>;
+public sealed record CreateUserCommand(
+    string Code,
+    string Login,
+    string Password,
+    EntityStatus Status,
+    UserRole Role = UserRole.Conventional) : ICommand<Guid>;
 
 internal sealed class CreateUserCommandHandler(
     IUserRepository userRepository,
@@ -30,7 +35,7 @@ internal sealed class CreateUserCommandHandler(
             throw new ApplicationConflictException("The user login is already in use.");
         }
 
-        var user = new User(code, login, passwordHasher.Hash(request.Password), request.Status);
+        var user = new User(code, login, passwordHasher.Hash(request.Password), request.Status, request.Role);
         await userRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

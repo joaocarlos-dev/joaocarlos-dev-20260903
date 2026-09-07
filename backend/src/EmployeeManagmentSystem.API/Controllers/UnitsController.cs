@@ -3,6 +3,7 @@ using EmployeeManagmentSystem.Application.Commands.Units.UpdateUnit;
 using EmployeeManagmentSystem.Application.DTOs;
 using EmployeeManagmentSystem.Application.Queries.Units.GetUnit;
 using EmployeeManagmentSystem.Application.Queries.Units.GetUnits;
+using EmployeeManagmentSystem.API.Configurations.Jwt;
 using EmployeeManagmentSystem.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,7 @@ namespace EmployeeManagmentSystem.API.Controllers;
 public sealed class UnitsController(ISender sender) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<Guid>> Create(
@@ -48,6 +50,7 @@ public sealed class UnitsController(ISender sender) : ControllerBase
     }
 
     [HttpPatch("{id:guid}")]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(

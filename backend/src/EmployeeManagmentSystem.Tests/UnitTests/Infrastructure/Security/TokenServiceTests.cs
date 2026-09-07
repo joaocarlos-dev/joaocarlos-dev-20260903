@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using EmployeeManagmentSystem.Domain.Entities;
+using EmployeeManagmentSystem.Domain.Enums;
 using EmployeeManagmentSystem.Infrastructure.Services.Security;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -18,7 +19,7 @@ public sealed class TokenServiceTests
     public void Generate_WithValidUser_ShouldCreateValidTokenWithIdentityClaims()
     {
         var service = CreateService();
-        var user = new User("USR-001", "admin", "password-hash");
+        var user = new User("USR-001", "admin", "password-hash", EntityStatus.Active, UserRole.Administrator);
 
         var encodedToken = service.Generate(user);
 
@@ -29,6 +30,7 @@ public sealed class TokenServiceTests
         Assert.IsType<JwtSecurityToken>(validatedToken);
         Assert.Equal(user.Id.ToString(), principal.FindFirstValue(ClaimTypes.NameIdentifier));
         Assert.Equal(user.Login, principal.Identity?.Name);
+        Assert.Equal(UserRole.Administrator.ToString(), principal.FindFirstValue(ClaimTypes.Role));
     }
 
     [Fact]

@@ -35,6 +35,9 @@ public sealed class UserService(EmployeeManagementDbContext context) : IUserRepo
     public Task<bool> LoginExistsAsync(string login, CancellationToken cancellationToken = default) =>
         context.Users.AnyAsync(user => user.Login == login, cancellationToken);
 
+    public Task<int> CountAdministratorsAsync(CancellationToken cancellationToken = default) =>
+        context.Users.CountAsync(user => user.Role == UserRole.Administrator, cancellationToken);
+
     public async Task AddAsync(User user, CancellationToken cancellationToken = default)
     {
         await context.Users.AddAsync(user, cancellationToken);
