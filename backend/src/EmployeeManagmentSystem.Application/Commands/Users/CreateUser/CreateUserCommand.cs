@@ -2,6 +2,8 @@ using EmployeeManagmentSystem.Application.Abstractions.Messaging;
 using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 using EmployeeManagmentSystem.Application.Abstractions.Security;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
+using EmployeeManagmentSystem.Application.Common.Events;
+using System.Text.Json;
 using EmployeeManagmentSystem.Domain.Entities;
 using EmployeeManagmentSystem.Domain.Enums;
 using MediatR;
@@ -18,7 +20,8 @@ public sealed record CreateUserCommand(
 internal sealed class CreateUserCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateUserCommand, Guid>
+    IUnitOfWork unitOfWork,
+    IOutboxRepository outboxRepository) : IRequestHandler<CreateUserCommand, Guid>
 {
     public async Task<Guid> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
@@ -37,6 +40,11 @@ internal sealed class CreateUserCommandHandler(
 
         var user = new User(code, login, passwordHasher.Hash(request.Password), request.Status, request.Role);
         await userRepository.AddAsync(user, cancellationToken);
+        await outboxRepository.AddAsync(new OutboxMessage
+        {
+            Type = nameof(UserRegisteredEvent),
+            Payload = JsonSerializer.Serialize(new UserRegisteredEvent(user.Id, user.Code, user.Login, user.CreatedAt))
+        }, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return user.Id;

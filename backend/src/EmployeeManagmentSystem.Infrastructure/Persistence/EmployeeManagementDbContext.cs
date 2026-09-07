@@ -1,4 +1,5 @@
 using EmployeeManagmentSystem.Application.Abstractions.Persistence;
+using EmployeeManagmentSystem.Application.Common.Events;
 using EmployeeManagmentSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ public sealed class EmployeeManagementDbContext(DbContextOptions<EmployeeManagem
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Unit> Units => Set<Unit>();
     public DbSet<LoginRateLimitBucket> LoginRateLimitBuckets => Set<LoginRateLimitBucket>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     public async Task<IUnitOfWorkTransaction> BeginTransactionAsync(
         CancellationToken cancellationToken = default) =>

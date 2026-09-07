@@ -8,6 +8,8 @@ using EmployeeManagmentSystem.Infrastructure.Services.Units;
 using EmployeeManagmentSystem.Infrastructure.Services.Users;
 using EmployeeManagmentSystem.Application.Abstractions.Security;
 using EmployeeManagmentSystem.Infrastructure.Services.Security;
+using EmployeeManagmentSystem.Infrastructure.Services.Outbox;
+using EmployeeManagmentSystem.API.Configurations.Outbox;
 using EmployeeManagmentSystem.Application.Common.Configuration;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Net;
@@ -72,6 +74,15 @@ public static class DependencyInjectionConfiguration
         services.AddUserService();
         services.AddEmployeeService();
         services.AddUnitService();
+        services.AddOutboxService();
+        var rabbitMqOptions = configuration.GetSection("RabbitMq").Get<RabbitMqOptions>() ?? new RabbitMqOptions();
+        if (rabbitMqOptions.Enabled)
+        {
+            rabbitMqOptions.Validate();
+        }
+
+        services.AddSingleton(rabbitMqOptions);
+        services.AddHostedService<RabbitMqOutboxPublisher>();
         services.AddJwtConfiguration(configuration);
         services.AddPasswordHasherService();
         services.AddTokenService();

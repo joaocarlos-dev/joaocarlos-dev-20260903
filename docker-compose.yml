@@ -17,6 +17,23 @@ services:
       start_period: 5s
     restart: unless-stopped
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?RABBITMQ_USER must be set}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD must be set}
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   tests:
     build:
       context: ./backend/src
@@ -42,6 +59,10 @@ services:
       Jwt__Audience: ${JWT_AUDIENCE:?JWT_AUDIENCE must be set}
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?JWT_SIGNING_KEY must be set}
       Jwt__ExpirationMinutes: ${JWT_EXPIRATION_MINUTES:-60}
+      RabbitMq__Enabled: "true"
+      RabbitMq__Host: rabbitmq
+      RabbitMq__UserName: ${RABBITMQ_USER:?RABBITMQ_USER must be set}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD must be set}
       InitialUser__Code: ${INITIAL_USER_CODE:?INITIAL_USER_CODE must be set}
       InitialUser__Login: ${INITIAL_USER_LOGIN:?INITIAL_USER_LOGIN must be set}
       InitialUser__Password: ${INITIAL_USER_PASSWORD:?INITIAL_USER_PASSWORD must be set}
@@ -58,6 +79,8 @@ services:
         condition: service_healthy
       tests:
         condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
 
   frontend-tests:
@@ -96,3 +119,4 @@ services:
 
 volumes:
   postgres_data:
+  rabbitmq_data:

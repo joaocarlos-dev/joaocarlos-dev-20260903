@@ -2,6 +2,7 @@ using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 using EmployeeManagmentSystem.Application.Abstractions.Security;
 using EmployeeManagmentSystem.Domain.Entities;
 using EmployeeManagmentSystem.Domain.Enums;
+using EmployeeManagmentSystem.Application.Common.Events;
 
 namespace EmployeeManagmentSystem.Tests.UnitTests.Application;
 
@@ -138,4 +139,36 @@ internal sealed class FakeLoginAttemptLimiter : ILoginAttemptLimiter
 
     public Task<bool> IsAllowedAsync(string login, string? clientIp, CancellationToken cancellationToken = default) =>
         Task.FromResult(Allowed);
+}
+
+internal sealed class FakeOutboxRepository : IOutboxRepository
+{
+    public string WorkerId => "test-worker";
+    public List<OutboxMessage> Messages { get; } = [];
+
+    public Task AddAsync(OutboxMessage message, CancellationToken cancellationToken = default)
+    {
+        Messages.Add(message);
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyCollection<OutboxMessage>> GetPendingAsync(int batchSize, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyCollection<OutboxMessage>>(Messages.Where(message => message.ProcessedAt is null).Take(batchSize).ToArray());
+
+    public Task<bool> MarkProcessedAsync(Guid id, string workerId, CancellationToken cancellationToken = default)
+    {
+        Messages.Single(message => message.Id == id).ProcessedAt = DateTimeOffset.UtcNow;
+        return Task.FromResult(true);
+    }
+
+    public Task<bool> MarkFailedAsync(Guid id, string error, string workerId, CancellationToken cancellationToken = default)
+    {
+        var message = Messages.Single(item => item.Id == id);
+        message.Attempts++;
+        message.LastError = error;
+        return Task.FromResult(true);
+    }
+
+    public Task PruneProcessedAsync(TimeSpan retention, int batchSize, CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
 }

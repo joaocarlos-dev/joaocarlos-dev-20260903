@@ -22,7 +22,8 @@ public sealed class UserOperationsTests
     {
         var repository = new FakeUserRepository();
         var unitOfWork = new FakeUnitOfWork();
-        await using var provider = CreateProvider(repository, unitOfWork);
+        var outbox = new FakeOutboxRepository();
+        await using var provider = CreateProvider(repository, unitOfWork, outbox);
         var mediator = provider.GetRequiredService<IMediator>();
         var command = new CreateUserCommand("USR-001", "admin", "password123", EntityStatus.Active);
 
@@ -32,7 +33,33 @@ public sealed class UserOperationsTests
         Assert.Equal(id, user.Id);
         Assert.Equal("hashed:password123", user.PasswordHash);
         Assert.Equal(EntityStatus.Active, user.Status);
+        var message = Assert.Single(outbox.Messages);
+        Assert.Equal("UserRegisteredEvent", message.Type);
+        Assert.Contains(user.Id.ToString(), message.Payload);
         Assert.Equal(1, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
+    public async Task CreateUser_500Registrations_ShouldCreateAnOutboxMessageForEachUser()
+    {
+        var repository = new FakeUserRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var outbox = new FakeOutboxRepository();
+        await using var provider = CreateProvider(repository, unitOfWork, outbox);
+        var mediator = provider.GetRequiredService<IMediator>();
+
+        for (var index = 1; index <= 500; index++)
+        {
+            await mediator.Send(new CreateUserCommand(
+                $"USR-{index:000}",
+                $"employee-{index:000}",
+                "Password123!",
+                EntityStatus.Active));
+        }
+
+        Assert.Equal(500, repository.Users.Count);
+        Assert.Equal(500, outbox.Messages.Count);
+        Assert.All(outbox.Messages, message => Assert.Equal("UserRegisteredEvent", message.Type));
     }
 
     [Fact]
@@ -207,13 +234,17 @@ public sealed class UserOperationsTests
         Assert.Equal(0, unitOfWork.SaveCalls);
     }
 
-    private static ServiceProvider CreateProvider(FakeUserRepository repository, FakeUnitOfWork unitOfWork)
+    private static ServiceProvider CreateProvider(
+        FakeUserRepository repository,
+        FakeUnitOfWork unitOfWork,
+        FakeOutboxRepository? outbox = null)
     {
         var services = new ServiceCollection();
         services.AddApplicationDependencies();
         services.AddSingleton<IUserRepository>(repository);
         services.AddSingleton<IUnitOfWork>(unitOfWork);
         services.AddSingleton<IPasswordHasher, FakePasswordHasher>();
+        services.AddSingleton<IOutboxRepository>(outbox ?? new FakeOutboxRepository());
 
         return services.BuildServiceProvider();
     }
