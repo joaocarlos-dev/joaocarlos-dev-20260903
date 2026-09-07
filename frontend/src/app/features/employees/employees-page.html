@@ -1,31 +1,24 @@
-<div #pageContent>
-<app-page-header eyebrow="Equipe" title="Colaboradores" description="Gerencie pessoas vinculadas a usuários e unidades.">
-  <button class="button button--primary" type="button" (click)="openCreate()">Novo colaborador</button>
-</app-page-header>
-
-@if (feedback()) { <p class="feedback" role="status">{{ feedback() }}</p> }
-<section class="toolbar" aria-label="Filtros de colaboradores">
-  <label>Buscar <input type="search" [value]="search()" (input)="applySearch($event)" placeholder="Código, nome, usuário ou unidade" /></label>
-</section>
-
-@if (loading()) { <app-screen-state kind="loading" title="Carregando colaboradores..." description="Consultando vínculos cadastrados." /> }
-@else if (loadError()) { <app-screen-state kind="error" title="Não foi possível carregar os colaboradores" [description]="loadError()!" actionLabel="Tentar novamente" (action)="loadData()" /> }
-@else if (filteredEmployees().length === 0) { <app-screen-state kind="empty" title="Nenhum colaborador encontrado" description="Ajuste a busca ou cadastre um novo colaborador." /> }
-@else {
-  <div class="table-wrap"><table><thead><tr><th>Código</th><th>Nome</th><th>Usuário</th><th>Unidade</th><th>Ações</th></tr></thead><tbody>
-    @for (employee of filteredEmployees(); track employee.id) {
-      <tr><td>{{ employee.code }}</td><td><a [routerLink]="['/colaboradores', employee.id]">{{ employee.name }}</a></td><td>{{ userName(employee.userId) }}</td><td>{{ unitName(employee.unitId) }}</td><td class="actions"><button type="button" (click)="openEdit(employee)">Editar</button><button type="button" [disabled]="deleting() === employee.id" (click)="remove(employee)">Remover</button></td></tr>
-    }
-  </tbody></table></div>
-}
+<div #pageContent class="page-content" [attr.inert]="editorMode() ? '' : null">
+  <app-page-header eyebrow="Equipe" title="Colaboradores" description="Gerencie pessoas vinculadas a usuários e unidades.">
+    <button class="button button--primary" type="button" (click)="openCreate()">Novo colaborador</button>
+  </app-page-header>
+  <section class="toolbar surface" aria-label="Filtros de colaboradores"><div class="search-field"><label for="employee-search">Buscar colaborador</label><input id="employee-search" type="search" [value]="search()" (input)="applySearch($event)" placeholder="Código, nome, usuário ou unidade" /></div></section>
+  @if (feedback()) { <div class="feedback" role="status"><span>{{ feedback() }}</span><button type="button" aria-label="Dispensar mensagem" (click)="feedback.set(null)">Fechar</button></div> }
+  @if (loading()) { <app-screen-state kind="loading" title="Carregando colaboradores" description="Aguarde enquanto consultamos os vínculos cadastrados." /> }
+  @else if (loadError()) { <app-screen-state kind="error" title="Não foi possível carregar os colaboradores" [description]="loadError()!" actionLabel="Tentar novamente" (action)="loadData()" /> }
+  @else if (filteredEmployees().length === 0) { <app-screen-state kind="empty" [title]="hasSearch() ? 'Nenhum colaborador encontrado' : 'Nenhum colaborador cadastrado'" [description]="hasSearch() ? 'Tente buscar por outro código, nome, usuário ou unidade.' : 'Cadastre o primeiro colaborador para começar.'" /> }
+  @else {
+    <section class="employee-list surface" aria-labelledby="employee-list-title"><div class="employee-list__heading"><div><h2 id="employee-list-title">Colaboradores cadastrados</h2><p>{{ filteredEmployees().length }} {{ filteredEmployees().length === 1 ? 'colaborador' : 'colaboradores' }}</p></div></div>
+      <div class="table-scroll"><table><thead><tr><th scope="col">Código</th><th scope="col">Nome</th><th scope="col">Usuário</th><th scope="col">Unidade</th><th scope="col">Atualizado em</th><th scope="col"><span class="visually-hidden">Ações</span></th></tr></thead><tbody>
+        @for (employee of filteredEmployees(); track employee.id) { <tr><td data-label="Código"><strong>{{ employee.code }}</strong></td><td data-label="Nome"><a class="employee-link" [routerLink]="['/colaboradores', employee.id]"><strong>{{ employee.name }}</strong></a></td><td data-label="Usuário">{{ userName(employee.userId) }}</td><td data-label="Unidade">{{ unitName(employee.unitId) }}</td><td data-label="Atualizado em">{{ (employee.updatedAt || employee.createdAt) | date: 'dd/MM/yyyy' }}</td><td class="table-action"><button class="edit-button" type="button" (click)="openEdit(employee)">Editar<span class="visually-hidden"> {{ employee.name }}</span></button><button class="remove-button" type="button" [disabled]="deleting() === employee.id" (click)="remove(employee)">{{ deleting() === employee.id ? 'Removendo…' : 'Remover' }}<span class="visually-hidden"> {{ employee.name }}</span></button></td></tr> }
+      </tbody></table></div>
+    </section>
+  }
 </div>
-
 @if (editorMode()) {
-  <div class="backdrop"><section #dialog class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="editorMode() === 'create' ? 'Novo colaborador' : 'Editar colaborador'">
-    <button class="close" type="button" aria-label="Fechar" (click)="closeEditor()">×</button>
-    <h2>{{ editorMode() === 'create' ? 'Novo colaborador' : 'Editar colaborador' }}</h2>
-    @if (formError()) { <p class="error" role="alert">{{ formError() }}</p> }
-    @if (editorMode() === 'create') { <form [formGroup]="createForm" (ngSubmit)="submitCreate()"><label>Código<input formControlName="code" /></label><label>Nome<input formControlName="name" /></label><label>Usuário<select formControlName="userId"><option value="">Selecione</option>@for (user of availableUsers(); track user.id) { <option [value]="user.id">{{ user.login }}</option> }</select></label><label>Unidade<select formControlName="unitId"><option value="">Selecione</option>@for (unit of activeUnits(); track unit.id) { <option [value]="unit.id">{{ unit.name }}</option> }</select></label><button class="button button--primary" type="submit" [disabled]="saving()">Salvar</button></form> }
-    @else { <form [formGroup]="editForm" (ngSubmit)="submitEdit()"><label>Nome<input formControlName="name" /></label><label>Unidade<select formControlName="unitId">@for (unit of activeUnits(); track unit.id) { <option [value]="unit.id">{{ unit.name }}</option> }</select></label><button class="button button--primary" type="submit" [disabled]="saving()">Salvar</button></form> }
+  <div class="dialog-layer"><button class="dialog-backdrop" type="button" aria-label="Fechar formulário" (click)="closeEditor()"></button><section #dialog class="dialog surface" role="dialog" aria-modal="true" [attr.aria-label]="editorMode() === 'create' ? 'Novo colaborador' : 'Editar colaborador'"><button class="close-button" type="button" aria-label="Fechar" (click)="closeEditor()">×</button><p class="dialog__eyebrow">{{ editorMode() === 'create' ? 'Novo colaborador' : 'Editar colaborador' }}</p><h2>{{ editorMode() === 'create' ? 'Cadastrar colaborador' : 'Atualizar colaborador' }}</h2>
+    @if (formError()) { <div class="form-alert" role="alert">{{ formError() }}</div> }
+    @if (editorMode() === 'create') { <form [formGroup]="createForm" (ngSubmit)="submitCreate()" novalidate><div class="field"><label for="create-code">Código</label><input id="create-code" maxlength="50" autocomplete="off" formControlName="code" required />@if (createForm.controls.code.invalid && createForm.controls.code.touched) { <small>Informe um código de até 50 caracteres.</small> }</div><div class="field"><label for="create-name">Nome</label><input id="create-name" maxlength="150" autocomplete="off" formControlName="name" required />@if (createForm.controls.name.invalid && createForm.controls.name.touched) { <small>Informe um nome de até 150 caracteres.</small> }</div><div class="field"><label for="create-user">Usuário</label><select id="create-user" formControlName="userId" required><option value="">Selecione um usuário</option>@for (user of availableUsers(); track user.id) { <option [value]="user.id">{{ user.login }}</option> }</select></div><div class="field"><label for="create-unit">Unidade</label><select id="create-unit" formControlName="unitId" required><option value="">Selecione uma unidade</option>@for (unit of activeUnits(); track unit.id) { <option [value]="unit.id">{{ unit.name }}</option> }</select></div><div class="dialog__actions"><button class="button button--secondary" type="button" (click)="closeEditor()">Cancelar</button><button class="button button--primary" type="submit" [disabled]="saving()">{{ saving() ? 'Salvando…' : 'Cadastrar colaborador' }}</button></div></form> }
+    @else { <form [formGroup]="editForm" (ngSubmit)="submitEdit()" novalidate><div class="field"><label for="edit-name">Nome</label><input id="edit-name" maxlength="150" autocomplete="off" formControlName="name" required />@if (editForm.controls.name.invalid && editForm.controls.name.touched) { <small>Informe um nome de até 150 caracteres.</small> }</div><div class="field"><label for="edit-unit">Unidade</label><select id="edit-unit" formControlName="unitId" required>@for (unit of activeUnits(); track unit.id) { <option [value]="unit.id">{{ unit.name }}</option> }</select></div><div class="dialog__actions"><button class="button button--secondary" type="button" (click)="closeEditor()">Cancelar</button><button class="button button--primary" type="submit" [disabled]="saving()">{{ saving() ? 'Salvando…' : 'Salvar alterações' }}</button></div></form> }
   </section></div>
 }

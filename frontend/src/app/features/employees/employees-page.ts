@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DatePipe, DOCUMENT } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, HostListener, inject, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -18,7 +18,7 @@ type EditorMode = 'create' | 'edit' | null;
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageHeader, ReactiveFormsModule, RouterLink, ScreenState],
+  imports: [DatePipe, PageHeader, ReactiveFormsModule, RouterLink, ScreenState],
   selector: 'app-employees-page',
   templateUrl: './employees-page.html',
   styleUrl: './employees-page.scss',
@@ -54,15 +54,16 @@ export class EmployeesPage {
       ),
     );
   });
+  protected readonly hasSearch = computed(() => !!this.search().trim());
 
   protected readonly createForm = new FormGroup({
-    code: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(50)] }),
-    name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(150)] }),
+    code: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/.*\S.*/), Validators.maxLength(50)] }),
+    name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/.*\S.*/), Validators.maxLength(150)] }),
     userId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     unitId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
   protected readonly editForm = new FormGroup({
-    name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(150)] }),
+    name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/.*\S.*/), Validators.maxLength(150)] }),
     unitId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
