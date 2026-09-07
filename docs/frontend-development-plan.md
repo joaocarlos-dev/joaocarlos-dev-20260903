@@ -364,7 +364,7 @@ Na validação da Etapa 3, lint, 22 testes e build de produção passaram. O log
 
 O layout foi atualizado junto da Etapa 4: a navegação lateral deu lugar a um header responsivo com menu hambúrguer no mobile, a sinalização por pontos verdes foi removida e a nova paleta passou a oferecer temas claro e escuro persistentes.
 
-Critério: todas as operações de usuários da API funcionam no portal.
+Critério atendido para listagem, criação e atualização de usuários; o detalhe de usuário (`GET /api/v1/users/{id}`) permanece pendente no front-end.
 
 ### Etapa 5 — Unidades
 
@@ -397,11 +397,13 @@ trata conflitos e `404`, protege diálogos contra foco no fundo e evita resposta
 ### Etapa 7 — Dashboard e acabamento
 
 - [x] criar totais derivados das listagens;
-- [ ] revisar filtros, ordenação, estados e textos em português;
-- [ ] revisar responsividade, acessibilidade e bundle;
-- [ ] cruzar comportamento com Swagger e coleção HTTP.
+- [x] revisar filtros, ordenação, estados e textos em português;
+- [x] revisar responsividade, acessibilidade e bundle;
+- [x] cruzar comportamento com Swagger e coleção HTTP.
 
 Critério: a interface não oferece operação ausente na API.
+
+Na validação final da Etapa 7, as telas de usuários, unidades e colaboradores foram conferidas contra os endpoints e requests da coleção HTTP. Os filtros e estados de carregamento, vazio, erro, conflito e `404` permanecem alinhados ao contrato; o bundle de produção é verificado por `verify-bundle.mjs` sem URL absoluta da API ou segredo, não há gradientes e os componentes usam labels, regiões semânticas e foco visível.
 
 ### Etapa 8 — Docker e aceite
 
@@ -410,23 +412,25 @@ Critério: a interface não oferece operação ausente na API.
 - [x] implementar health checks;
 - [x] validar falha proposital em cada gate;
 - [x] validar subida limpa e segunda subida com `docker compose up -d --build`;
-- [ ] validar login e rota protegida pelo portal;
+- [x] validar login e rota protegida pelo portal;
 - [x] atualizar README;
 - [x] executar revisão final independente.
 
 Critério: a ordem é comprovada por estados e logs; uma falha impede o dependente.
+
+Na validação final da Etapa 8, o build atual foi servido localmente e o fluxo foi validado manualmente no navegador: login válido abriu o dashboard, logout encerrou a sessão e o acesso direto a `/dashboard` sem sessão redirecionou para `/login` preservando `returnUrl`.
 
 ## Gate de aceite do front-end
 
 - [x] `frontend/` existe ao lado de `backend/`;
 - [x] Angular é a tecnologia principal e pacotes estão fixados no lockfile;
 - [x] lint, todos os testes e build passam;
-- [ ] autenticação e proteção de rotas funcionam;
-- [ ] todas as operações disponíveis na API estão cobertas;
-- [ ] Problem Details são tratados consistentemente;
-- [ ] bundle não contém segredo nem URL absoluta da API;
-- [ ] interface é responsiva, acessível e minimalista;
-- [ ] não existem gradientes nem cores chamativas;
+- [x] autenticação e proteção de rotas funcionam;
+- [ ] todas as operações disponíveis na API estão cobertas; o detalhe de usuário (`GET /api/v1/users/{id}`) ainda não possui tela correspondente no front-end.
+- [x] Problem Details são tratados consistentemente;
+- [x] bundle não contém segredo nem URL absoluta da API;
+- [x] interface é responsiva, acessível e minimalista;
+- [x] não existem gradientes nem cores chamativas;
 - [x] Nginx serve a SPA e encaminha `/api`;
 - [x] Compose respeita `postgres -> tests -> api -> frontend-tests -> frontend`;
 - [x] falha do backend impede API e falha do frontend impede frontend;

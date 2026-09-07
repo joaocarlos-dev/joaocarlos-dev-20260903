@@ -13,7 +13,8 @@
     "test:ci": "ng test --watch=false",
     "smoke:api:ci": "node scripts/smoke-api.mjs",
     "lint": "ng lint",
-    "verify:ci": "npm run lint && npm run test:ci && npm run smoke:api:ci && npm run build"
+    "verify:bundle:ci": "node scripts/verify-bundle.mjs",
+    "verify:ci": "npm run lint && npm run test:ci && npm run smoke:api:ci && npm run build && npm run verify:bundle:ci"
   },
   "private": true,
   "dependencies": {
