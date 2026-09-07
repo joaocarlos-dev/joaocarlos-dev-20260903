@@ -60,11 +60,13 @@ public sealed class EmployeesIntegrationTests(EmployeeManagementApiFactory facto
     {
         var unitId = await api.CreateUnitAsync("UNIT-001", "Headquarters");
         var userId = await api.CreateUserAsync("USR-001", "employee.user");
+        var duplicateCodeUserId = await api.CreateUserAsync("USR-002", "duplicate.code.user");
+        var missingUnitUserId = await api.CreateUserAsync("USR-003", "missing.unit.user");
         await api.CreateEmployeeAsync("EMP-001", "Employee One", userId, unitId);
 
         var duplicateCode = await client.PostAsJsonAsync(
             "/api/v1/employees",
-            new CreateEmployeeRequest("EMP-001", "Employee Two", Guid.NewGuid(), unitId));
+            new CreateEmployeeRequest("EMP-001", "Employee Two", duplicateCodeUserId, unitId));
         var linkedUser = await client.PostAsJsonAsync(
             "/api/v1/employees",
             new CreateEmployeeRequest("EMP-002", "Employee Two", userId, unitId));
@@ -73,7 +75,7 @@ public sealed class EmployeesIntegrationTests(EmployeeManagementApiFactory facto
             new CreateEmployeeRequest("EMP-003", "Employee Three", Guid.NewGuid(), unitId));
         var missingUnit = await client.PostAsJsonAsync(
             "/api/v1/employees",
-            new CreateEmployeeRequest("EMP-004", "Employee Four", Guid.NewGuid(), Guid.NewGuid()));
+            new CreateEmployeeRequest("EMP-004", "Employee Four", missingUnitUserId, Guid.NewGuid()));
 
         Assert.Equal(HttpStatusCode.Conflict, duplicateCode.StatusCode);
         Assert.Equal(HttpStatusCode.Conflict, linkedUser.StatusCode);
