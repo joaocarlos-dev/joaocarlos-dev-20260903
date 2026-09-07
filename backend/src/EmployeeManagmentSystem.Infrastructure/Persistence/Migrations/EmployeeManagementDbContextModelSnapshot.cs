@@ -181,6 +181,29 @@ namespace EmployeeManagmentSystem.Infrastructure.Persistence.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("EmployeeManagmentSystem.Infrastructure.Persistence.LoginRateLimitBucket", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("key");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_count");
+
+                    b.Property<DateTimeOffset>("WindowStarted")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_started");
+
+                    b.HasKey("Key");
+
+                    b.HasIndex("WindowStarted")
+                        .HasDatabaseName("ix_login_rate_limit_buckets_window_started");
+
+                    b.ToTable("login_rate_limit_buckets", (string)null);
+                });
+
             modelBuilder.Entity("EmployeeManagmentSystem.Domain.Entities.Employee", b =>
                 {
                     b.HasOne("EmployeeManagmentSystem.Domain.Entities.Unit", null)

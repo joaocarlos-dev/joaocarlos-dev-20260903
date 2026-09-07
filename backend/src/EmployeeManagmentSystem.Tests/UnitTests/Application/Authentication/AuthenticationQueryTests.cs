@@ -84,13 +84,31 @@ public sealed class AuthenticationQueryTests
         await Assert.ThrowsAsync<AuthenticationException>(action);
     }
 
-    private static ServiceProvider CreateProvider(FakeUserRepository repository)
+    [Fact]
+    public async Task Authenticate_WhenAccountRateLimited_ShouldThrowTooManyRequestsException()
+    {
+        var repository = new FakeUserRepository();
+        repository.Users.Add(new User("USR-001", "admin", "hashed:password123"));
+        var limiter = new FakeLoginAttemptLimiter { Allowed = false };
+        await using var provider = CreateProvider(repository, limiter);
+        var mediator = provider.GetRequiredService<IMediator>();
+
+        var action = () => mediator.Send(new AuthenticateQuery("admin", "password123"));
+
+        await Assert.ThrowsAsync<TooManyRequestsException>(action);
+    }
+
+    private static ServiceProvider CreateProvider(
+        FakeUserRepository repository,
+        FakeLoginAttemptLimiter? limiter = null)
     {
         var services = new ServiceCollection();
         services.AddApplicationDependencies();
+        services.AddLogging();
         services.AddSingleton<IUserRepository>(repository);
         services.AddSingleton<IPasswordHasher, FakePasswordHasher>();
         services.AddSingleton<ITokenService, FakeTokenService>();
+        services.AddSingleton<ILoginAttemptLimiter>(limiter ?? new FakeLoginAttemptLimiter());
 
         return services.BuildServiceProvider();
     }

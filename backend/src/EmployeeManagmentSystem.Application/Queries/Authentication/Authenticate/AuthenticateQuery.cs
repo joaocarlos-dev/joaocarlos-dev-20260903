@@ -8,15 +8,21 @@ using MediatR;
 
 namespace EmployeeManagmentSystem.Application.Queries.Authentication.Authenticate;
 
-public sealed record AuthenticateQuery(string Login, string Password) : IQuery<AuthenticationDto>;
+public sealed record AuthenticateQuery(string Login, string Password, string? ClientIp = null) : IQuery<AuthenticationDto>;
 
 internal sealed class AuthenticateQueryHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
-    ITokenService tokenService) : IRequestHandler<AuthenticateQuery, AuthenticationDto>
+    ITokenService tokenService,
+    ILoginAttemptLimiter loginAttemptLimiter) : IRequestHandler<AuthenticateQuery, AuthenticationDto>
 {
     public async Task<AuthenticationDto> Handle(AuthenticateQuery request, CancellationToken cancellationToken)
     {
+        if (!await loginAttemptLimiter.IsAllowedAsync(request.Login, request.ClientIp, cancellationToken))
+        {
+            throw new TooManyRequestsException(loginAttemptLimiter.RetryAfterSeconds);
+        }
+
         var user = await userRepository.GetByLoginAsync(request.Login.Trim(), cancellationToken);
 
         if (user is null || !passwordHasher.Verify(request.Password, user.PasswordHash))

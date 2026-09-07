@@ -30,6 +30,19 @@ public sealed class ApiExceptionHandlerTests
     }
 
     [Fact]
+    public async Task TryHandleAsync_WithTooManyRequests_ShouldSetRetryAfter()
+    {
+        var problemDetailsService = new CapturingProblemDetailsService();
+        var handler = new ApiExceptionHandler(problemDetailsService);
+        var httpContext = new DefaultHttpContext();
+
+        await handler.TryHandleAsync(httpContext, new TooManyRequestsException(45), CancellationToken.None);
+
+        Assert.Equal(StatusCodes.Status429TooManyRequests, httpContext.Response.StatusCode);
+        Assert.Equal("45", httpContext.Response.Headers.RetryAfter.ToString());
+    }
+
+    [Fact]
     public async Task TryHandleAsync_WithUniqueConstraintViolation_ShouldReturnConflict()
     {
         var problemDetailsService = new CapturingProblemDetailsService();
@@ -76,6 +89,7 @@ public sealed class ApiExceptionHandlerTests
         yield return new object[] { new AuthenticationException(), StatusCodes.Status401Unauthorized, "Authentication failed" };
         yield return new object[] { new NotFoundException("User", Guid.NewGuid()), StatusCodes.Status404NotFound, "Resource not found" };
         yield return new object[] { new ApplicationConflictException("Conflict."), StatusCodes.Status409Conflict, "Conflict" };
+        yield return new object[] { new TooManyRequestsException(), StatusCodes.Status429TooManyRequests, "Too many requests" };
         yield return new object[] { new InvalidOperationException("Internal."), StatusCodes.Status500InternalServerError, "Unexpected error" };
     }
 

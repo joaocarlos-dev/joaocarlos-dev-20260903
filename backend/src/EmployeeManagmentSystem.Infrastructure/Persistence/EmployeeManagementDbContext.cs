@@ -10,6 +10,7 @@ public sealed class EmployeeManagementDbContext(DbContextOptions<EmployeeManagem
     public DbSet<User> Users => Set<User>();
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Unit> Units => Set<Unit>();
+    public DbSet<LoginRateLimitBucket> LoginRateLimitBuckets => Set<LoginRateLimitBucket>();
 
     public async Task<IUnitOfWorkTransaction> BeginTransactionAsync(
         CancellationToken cancellationToken = default) =>

@@ -66,6 +66,39 @@ public sealed class AuthenticationIntegrationTests(EmployeeManagementApiFactory 
     }
 
     [Fact]
+    public async Task Login_ShouldReturnTooManyRequestsAfterConfiguredLimit()
+    {
+        using var client = factory.CreateClient();
+        var responses = new List<HttpResponseMessage>();
+
+        for (var attempt = 0; attempt < 11; attempt++)
+        {
+            responses.Add(await client.PostAsJsonAsync(
+                "/api/v1/auth/login",
+                new LoginRequest("rate-limit-test", "Password123!")));
+        }
+
+        Assert.All(responses.Take(10), response => Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode));
+        Assert.Equal(HttpStatusCode.TooManyRequests, responses[10].StatusCode);
+        Assert.Equal("60", responses[10].Headers.RetryAfter?.Delta?.TotalSeconds.ToString("0"));
+    }
+
+    [Fact]
+    public async Task Login_ConcurrentRequests_ShouldRespectDistributedLimitWithoutServerErrors()
+    {
+        using var client = factory.CreateClient();
+        var login = $"rate-limit-{Guid.NewGuid():N}";
+        var responses = await Task.WhenAll(Enumerable.Range(0, 20).Select(_ =>
+            client.PostAsJsonAsync(
+                "/api/v1/auth/login",
+                new LoginRequest(login, "Password123!"))));
+
+        Assert.Equal(10, responses.Count(response => response.StatusCode == HttpStatusCode.Unauthorized));
+        Assert.Equal(10, responses.Count(response => response.StatusCode == HttpStatusCode.TooManyRequests));
+        Assert.DoesNotContain(responses, response => (int)response.StatusCode >= 500);
+    }
+
+    [Fact]
     public async Task Login_WithInactiveUser_ShouldReturnUnauthorized()
     {
         await using var scope = factory.Services.CreateAsyncScope();

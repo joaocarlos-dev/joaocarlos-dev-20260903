@@ -130,3 +130,12 @@ internal sealed class FakeTokenService : ITokenService
 {
     public string Generate(User user) => $"token:{user.Id}";
 }
+
+internal sealed class FakeLoginAttemptLimiter : ILoginAttemptLimiter
+{
+    public bool Allowed { get; set; } = true;
+    public int RetryAfterSeconds => 60;
+
+    public Task<bool> IsAllowedAsync(string login, string? clientIp, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Allowed);
+}

@@ -21,6 +21,7 @@ public static class ApiConfiguration
 
         app.UseExceptionHandler();
         app.UseSwaggerConfiguration();
+        app.UseForwardedHeaders();
         app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();

@@ -16,6 +16,16 @@ public sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsSer
     {
         var problemDetails = CreateProblemDetails(httpContext, exception);
         httpContext.Response.StatusCode = problemDetails.Status ?? StatusCodes.Status500InternalServerError;
+        if (exception is TooManyRequestsException tooManyRequestsException)
+        {
+            if (httpContext.RequestServices is not null)
+            {
+                httpContext.RequestServices
+                    .GetService<ILogger<ApiExceptionHandler>>()?
+                    .LogWarning("Login request rejected by the account rate limiter.");
+            }
+            httpContext.Response.Headers.RetryAfter = tooManyRequestsException.RetryAfterSeconds.ToString();
+        }
 
         var context = new ProblemDetailsContext
         {
@@ -54,6 +64,12 @@ public sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsSer
             {
                 Status = StatusCodes.Status409Conflict,
                 Title = "Conflict",
+                Detail = exception.Message
+            },
+            TooManyRequestsException => new ProblemDetails
+            {
+                Status = StatusCodes.Status429TooManyRequests,
+                Title = "Too many requests",
                 Detail = exception.Message
             },
             DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } } => new ProblemDetails
