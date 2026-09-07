@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 
 namespace EmployeeManagmentSystem.API.Configurations.Jwt;
 
@@ -43,6 +46,27 @@ public static class JwtConfiguration
                 };
                 options.Events = new JwtBearerEvents
                 {
+                    OnTokenValidated = async context =>
+                    {
+                        var subject = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier)
+                            ?? context.Principal?.FindFirstValue(JwtRegisteredClaimNames.Sub);
+                        var versionValue = context.Principal?.FindFirstValue(TokenClaims.SecurityVersion);
+
+                        if (!Guid.TryParse(subject, out var userId)
+                            || !int.TryParse(versionValue, out var tokenVersion))
+                        {
+                            context.Fail("The security context is invalid.");
+                            return;
+                        }
+
+                        var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+                        var user = await userRepository.GetByIdAsync(userId, context.HttpContext.RequestAborted);
+
+                        if (user is null || !user.IsActive || user.SecurityVersion != tokenVersion)
+                        {
+                            context.Fail("The security context is no longer valid.");
+                        }
+                    },
                     OnChallenge = async context =>
                     {
                         context.HandleResponse();

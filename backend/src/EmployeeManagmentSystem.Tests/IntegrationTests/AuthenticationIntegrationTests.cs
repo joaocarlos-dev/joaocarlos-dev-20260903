@@ -125,4 +125,27 @@ public sealed class AuthenticationIntegrationTests(EmployeeManagementApiFactory 
         Assert.Equal(HttpStatusCode.Forbidden, updateResponse.StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, createResponse.StatusCode);
     }
+
+    [Fact]
+    public async Task PreviouslyIssuedToken_AfterUserDeactivation_ShouldReturnUnauthorized()
+    {
+        using var adminClient = factory.CreateClient();
+        var adminApi = new ApiTestClient(adminClient, factory);
+        await adminApi.AuthenticateAsAdminAsync();
+        var userId = await adminApi.CreateUserAsync("USR-001", "session.user");
+
+        using var userClient = factory.CreateClient();
+        var userApi = new ApiTestClient(userClient, factory);
+        await userApi.AuthenticateAsync("session.user", "Password123!");
+
+        var beforeDeactivation = await userClient.GetAsync("/api/v1/users");
+        var updateResponse = await adminClient.PatchAsJsonAsync(
+            $"/api/v1/users/{userId}",
+            new UpdateUserRequest(null, EntityStatus.Inactive));
+        var afterDeactivation = await userClient.GetAsync("/api/v1/users");
+
+        Assert.Equal(HttpStatusCode.OK, beforeDeactivation.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, afterDeactivation.StatusCode);
+    }
 }

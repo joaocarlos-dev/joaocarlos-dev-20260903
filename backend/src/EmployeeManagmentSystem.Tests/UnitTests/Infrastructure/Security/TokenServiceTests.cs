@@ -31,6 +31,7 @@ public sealed class TokenServiceTests
         Assert.Equal(user.Id.ToString(), principal.FindFirstValue(ClaimTypes.NameIdentifier));
         Assert.Equal(user.Login, principal.Identity?.Name);
         Assert.Equal(UserRole.Administrator.ToString(), principal.FindFirstValue(ClaimTypes.Role));
+        Assert.Equal("0", principal.FindFirstValue(TokenClaims.SecurityVersion));
     }
 
     [Fact]

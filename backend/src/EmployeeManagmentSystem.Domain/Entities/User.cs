@@ -39,24 +39,28 @@ public sealed class User : AuditableEntity
     public string PasswordHash { get; private set; } = string.Empty;
     public EntityStatus Status { get; private set; }
     public UserRole Role { get; private set; }
+    public int SecurityVersion { get; private set; }
     public bool IsActive => Status == EntityStatus.Active;
     public bool IsAdministrator => Role == UserRole.Administrator;
 
     public void UpdatePassword(string passwordHash)
     {
         PasswordHash = DomainRules.Required(passwordHash, nameof(passwordHash));
+        InvalidateSessions();
         MarkAsUpdated();
     }
 
     public void ChangeStatus(EntityStatus status)
     {
         Status = EnsureValidStatus(status);
+        InvalidateSessions();
         MarkAsUpdated();
     }
 
     public void ChangeRole(UserRole role)
     {
         Role = EnsureValidRole(role);
+        InvalidateSessions();
         MarkAsUpdated();
     }
 
@@ -86,5 +90,13 @@ public sealed class User : AuditableEntity
         }
 
         return role;
+    }
+
+    private void InvalidateSessions()
+    {
+        checked
+        {
+            SecurityVersion++;
+        }
     }
 }

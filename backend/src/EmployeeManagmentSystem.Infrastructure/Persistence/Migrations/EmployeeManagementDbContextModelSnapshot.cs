@@ -160,6 +160,10 @@ namespace EmployeeManagmentSystem.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("role");
 
+                    b.Property<int>("SecurityVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("security_version");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
