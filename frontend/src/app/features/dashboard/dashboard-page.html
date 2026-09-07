@@ -8,20 +8,26 @@
   <div class="summary__heading">
     <div>
       <h2 id="summary-title">Resumo operacional</h2>
-      <p>Os totais serão atualizados assim que a integração com a API estiver disponível.</p>
+      <p>Totais derivados dos registros disponíveis no portal.</p>
     </div>
     <span class="summary__status">Estrutura pronta</span>
   </div>
 
+  @if (loading()) {
+    <app-screen-state kind="loading" title="Carregando resumo" description="Consultando usuários, unidades e colaboradores." />
+  } @else if (error()) {
+    <app-screen-state kind="error" title="Resumo indisponível" [description]="error()!" actionLabel="Tentar novamente" (action)="loadTotals()" />
+  } @else {
   <div class="cards">
-    @for (card of cards; track card.path) {
+    @for (card of cardsWithTotals(); track card.path) {
       <a class="card surface" [routerLink]="card.path">
         <span>{{ card.label }}</span>
-        <strong aria-label="Total ainda não carregado">—</strong>
+        <strong [attr.aria-label]="'Total de ' + card.label">{{ card.total }}</strong>
         <small>Acessar área <span aria-hidden="true">→</span></small>
       </a>
     }
   </div>
+  }
 </section>
 
 <section class="notice surface" aria-labelledby="notice-title">
@@ -29,8 +35,7 @@
   <div>
     <h2 id="notice-title">Portal em evolução</h2>
     <p>
-      A gestão de usuários e unidades já está disponível. A área de colaboradores será integrada
-      na próxima etapa.
+      Usuários, unidades e colaboradores já estão disponíveis para gestão.
     </p>
   </div>
 </section>

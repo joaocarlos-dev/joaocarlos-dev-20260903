@@ -202,10 +202,8 @@ O login será centralizado em um painel simples. A área autenticada terá naveg
 | `/usuarios` | autenticado | listagem, filtros, criação e edição em diálogos |
 | `/unidades` | autenticado | listagem, filtros, criação e edição em diálogos |
 | `/unidades/:id` | autenticado | detalhe e colaboradores |
-| `/colaboradores` | autenticado | listagem, filtros e remoção lógica |
-| `/colaboradores/novo` | autenticado | criação com usuário e unidade ativa |
+| `/colaboradores` | autenticado | listagem, busca, criação, edição e remoção lógica em diálogos |
 | `/colaboradores/:id` | autenticado | detalhe |
-| `/colaboradores/:id/editar` | autenticado | nome e/ou transferência |
 | `**` | qualquer | página não encontrada |
 
 As listagens atuais não possuem paginação, busca ou ordenação no servidor. A primeira versão fará essas operações no cliente e exibirá o total carregado. Paginação server-side exige extensão explícita da API.
@@ -382,19 +380,23 @@ Na validação da Etapa 5, lint, 54 testes e build de produção passaram. A lis
 
 ### Etapa 6 — Colaboradores
 
-- [ ] listar colaboradores e resolver nomes relacionados;
-- [ ] criar usando usuário disponível e unidade ativa;
-- [ ] exibir detalhe;
-- [ ] atualizar nome e/ou unidade;
-- [ ] remover logicamente com confirmação;
-- [ ] tratar vínculo único, unidade inativa, duplicidade e `404`;
-- [ ] cobrir fluxos por testes.
+- [x] listar colaboradores e resolver nomes relacionados;
+- [x] criar usando usuário disponível e unidade ativa;
+- [x] exibir detalhe;
+- [x] atualizar nome e/ou unidade;
+- [x] remover logicamente com confirmação;
+- [x] tratar vínculo único, unidade inativa, duplicidade e `404`;
+- [x] cobrir fluxos por testes.
 
 Critério: todas as operações de colaboradores da API funcionam no portal.
 
+Na validação da Etapa 6, lint, 15 arquivos de teste com 57 testes e build de produção passaram. A tela resolve
+nomes relacionados, restringe novos vínculos a usuários e unidades ativas, envia PATCH parcial, confirma remoção,
+trata conflitos e `404`, protege diálogos contra foco no fundo e evita respostas obsoletas após recarregamentos.
+
 ### Etapa 7 — Dashboard e acabamento
 
-- [ ] criar totais derivados das listagens;
+- [x] criar totais derivados das listagens;
 - [ ] revisar filtros, ordenação, estados e textos em português;
 - [ ] revisar responsividade, acessibilidade e bundle;
 - [ ] cruzar comportamento com Swagger e coleção HTTP.
