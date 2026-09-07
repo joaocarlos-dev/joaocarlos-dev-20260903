@@ -43,8 +43,13 @@ services:
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=employee_management_tests;Username=${POSTGRES_USER:?POSTGRES_USER must be set};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
       RabbitMq__Enabled: "true"
       RabbitMq__Host: rabbitmq
+      RabbitMq__Port: "5672"
       RabbitMq__UserName: ${RABBITMQ_USER:?RABBITMQ_USER must be set}
       RabbitMq__Password: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD must be set}
+      RabbitMq__Exchange: ${RABBITMQ_EXCHANGE:-employee-management.events.v2}
+      RabbitMq__Queue: ${RABBITMQ_QUEUE:-employee-management.user-registrations.v2}
+      RabbitMq__UnroutedExchange: ${RABBITMQ_UNROUTED_EXCHANGE:-employee-management.unrouted.v2}
+      RabbitMq__UnroutedQueue: ${RABBITMQ_UNROUTED_QUEUE:-employee-management.unrouted.v2}
     depends_on:
       postgres:
         condition: service_healthy
@@ -67,8 +72,13 @@ services:
       Jwt__ExpirationMinutes: ${JWT_EXPIRATION_MINUTES:-60}
       RabbitMq__Enabled: "true"
       RabbitMq__Host: rabbitmq
+      RabbitMq__Port: "5672"
       RabbitMq__UserName: ${RABBITMQ_USER:?RABBITMQ_USER must be set}
       RabbitMq__Password: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD must be set}
+      RabbitMq__Exchange: ${RABBITMQ_EXCHANGE:-employee-management.events.v2}
+      RabbitMq__Queue: ${RABBITMQ_QUEUE:-employee-management.user-registrations.v2}
+      RabbitMq__UnroutedExchange: ${RABBITMQ_UNROUTED_EXCHANGE:-employee-management.unrouted.v2}
+      RabbitMq__UnroutedQueue: ${RABBITMQ_UNROUTED_QUEUE:-employee-management.unrouted.v2}
       InitialUser__Code: ${INITIAL_USER_CODE:?INITIAL_USER_CODE must be set}
       InitialUser__Login: ${INITIAL_USER_LOGIN:?INITIAL_USER_LOGIN must be set}
       InitialUser__Password: ${INITIAL_USER_PASSWORD:?INITIAL_USER_PASSWORD must be set}
@@ -88,6 +98,32 @@ services:
       rabbitmq:
         condition: service_healthy
     restart: unless-stopped
+
+  rabbitmq-stress-tests:
+    build:
+      context: ./backend/src
+      dockerfile: EmployeeManagmentSystem.API/Dockerfile
+      target: test
+    profiles:
+      - stress
+    environment:
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=employee_management_stress_tests;Username=${POSTGRES_USER:?POSTGRES_USER must be set};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      RabbitMq__Enabled: "true"
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Port: "5672"
+      RabbitMq__UserName: ${RABBITMQ_USER:?RABBITMQ_USER must be set}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD must be set}
+      RabbitMq__Exchange: ${RABBITMQ_EXCHANGE:-employee-management.events.v2}
+      RabbitMq__Queue: ${RABBITMQ_QUEUE:-employee-management.user-registrations.v2}
+      RabbitMq__UnroutedExchange: ${RABBITMQ_UNROUTED_EXCHANGE:-employee-management.unrouted.v2}
+      RabbitMq__UnroutedQueue: ${RABBITMQ_UNROUTED_QUEUE:-employee-management.unrouted.v2}
+      RabbitMq__RunStressTests: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: "no"
 
   frontend-tests:
     build:

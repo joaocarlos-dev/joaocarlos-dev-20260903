@@ -1,8 +1,10 @@
+using System.Text.Json;
 using EmployeeManagmentSystem.Application;
 using EmployeeManagmentSystem.Application.Abstractions.Persistence;
 using EmployeeManagmentSystem.Application.Abstractions.Security;
 using EmployeeManagmentSystem.Application.Commands.Users.CreateUser;
 using EmployeeManagmentSystem.Application.Commands.Users.UpdateUser;
+using EmployeeManagmentSystem.Application.Common.Events;
 using EmployeeManagmentSystem.Application.Common.Exceptions;
 using EmployeeManagmentSystem.Application.Queries.Users.GetUser;
 using EmployeeManagmentSystem.Application.Queries.Users.GetUsers;
@@ -35,7 +37,10 @@ public sealed class UserOperationsTests
         Assert.Equal(EntityStatus.Active, user.Status);
         var message = Assert.Single(outbox.Messages);
         Assert.Equal("UserRegisteredEvent", message.Type);
-        Assert.Contains(user.Id.ToString(), message.Payload);
+        var registeredEvent = JsonSerializer.Deserialize<UserRegisteredEvent>(message.Payload);
+        Assert.NotNull(registeredEvent);
+        Assert.Equal(message.Id, registeredEvent.EventId);
+        Assert.Equal(user.Id, registeredEvent.UserId);
         Assert.Equal(1, unitOfWork.SaveCalls);
     }
 
@@ -59,7 +64,13 @@ public sealed class UserOperationsTests
 
         Assert.Equal(500, repository.Users.Count);
         Assert.Equal(500, outbox.Messages.Count);
-        Assert.All(outbox.Messages, message => Assert.Equal("UserRegisteredEvent", message.Type));
+        Assert.All(outbox.Messages, message =>
+        {
+            Assert.Equal("UserRegisteredEvent", message.Type);
+            var registeredEvent = JsonSerializer.Deserialize<UserRegisteredEvent>(message.Payload);
+            Assert.NotNull(registeredEvent);
+            Assert.Equal(message.Id, registeredEvent.EventId);
+        });
     }
 
     [Fact]

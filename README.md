@@ -32,6 +32,16 @@ docker compose up -d --build
 
 O Docker Compose configura o banco de dados, inicializa a API e o portal e executa automaticamente as verificações do projeto.
 
+O RabbitMQ fica disponível no painel de gerenciamento em `http://localhost:15672`, usando `RABBITMQ_USER` e `RABBITMQ_PASSWORD` do arquivo `.env`.
+
+Para executar o teste de estresse que registra 500 usuários em paralelo e valida os 500 eventos publicados:
+
+```powershell
+docker compose --profile stress up --build --abort-on-container-exit --exit-code-from rabbitmq-stress-tests rabbitmq-stress-tests
+```
+
+O teste de estresse usa um banco separado e não é executado pelo fluxo padrão de subida da aplicação.
+
 Para encerrar os serviços:
 
 ```powershell

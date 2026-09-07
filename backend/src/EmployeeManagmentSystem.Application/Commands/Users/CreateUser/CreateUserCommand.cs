@@ -39,12 +39,15 @@ internal sealed class CreateUserCommandHandler(
         }
 
         var user = new User(code, login, passwordHasher.Hash(request.Password), request.Status, request.Role);
-        await userRepository.AddAsync(user, cancellationToken);
-        await outboxRepository.AddAsync(new OutboxMessage
+        var outboxMessageId = Guid.NewGuid();
+        var outboxMessage = new OutboxMessage
         {
+            Id = outboxMessageId,
             Type = nameof(UserRegisteredEvent),
-            Payload = JsonSerializer.Serialize(new UserRegisteredEvent(user.Id, user.Code, user.Login, user.CreatedAt))
-        }, cancellationToken);
+            Payload = JsonSerializer.Serialize(new UserRegisteredEvent(outboxMessageId, user.Id, user.Code, user.Login, user.CreatedAt))
+        };
+        await userRepository.AddAsync(user, cancellationToken);
+        await outboxRepository.AddAsync(outboxMessage, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return user.Id;

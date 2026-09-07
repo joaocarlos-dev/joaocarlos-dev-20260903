@@ -2,8 +2,10 @@ using System.Text;
 using System.Text.Json;
 using System.Net;
 using System.Net.Http.Json;
+using EmployeeManagmentSystem.Application.Common.Events;
 using EmployeeManagmentSystem.Application.DTOs;
 using EmployeeManagmentSystem.Domain.Enums;
+using EmployeeManagmentSystem.Infrastructure.Services.Outbox;
 using Microsoft.AspNetCore.Mvc;
 using RabbitMQ.Client;
 
@@ -76,27 +78,12 @@ public sealed class UsersIntegrationTests(EmployeeManagementApiFactory factory) 
     [RabbitMqFact]
     public async Task CreateUser_ShouldPublishUserRegisteredEventToRabbitMq()
     {
-        var connectionFactory = new ConnectionFactory
-        {
-            HostName = Environment.GetEnvironmentVariable("RabbitMq__Host") ?? "localhost",
-            Port = int.TryParse(Environment.GetEnvironmentVariable("RabbitMq__Port"), out var port) ? port : 5672,
-            UserName = Environment.GetEnvironmentVariable("RabbitMq__UserName") ?? "guest",
-            Password = Environment.GetEnvironmentVariable("RabbitMq__Password") ?? "guest"
-        };
+        var options = CreateRabbitMqOptions();
+        var connectionFactory = CreateConnectionFactory(options);
 
         using var connection = connectionFactory.CreateConnection();
         using var channel = connection.CreateModel();
-        var exchange = Environment.GetEnvironmentVariable("RabbitMq__Exchange") ?? "employee-management.events.v2";
-        var unroutedExchange = Environment.GetEnvironmentVariable("RabbitMq__UnroutedExchange") ?? "employee-management.unrouted.v2";
-        channel.ExchangeDeclare(unroutedExchange, ExchangeType.Fanout, durable: true, autoDelete: false);
-        channel.ExchangeDeclare(
-            exchange,
-            ExchangeType.Topic,
-            durable: true,
-            autoDelete: false,
-            arguments: new Dictionary<string, object> { ["alternate-exchange"] = unroutedExchange });
-        var queue = channel.QueueDeclare().QueueName;
-        channel.QueueBind(queue, exchange, "UserRegisteredEvent");
+        var queue = DeclareTestQueue(channel, options);
         var userId = await api.CreateUserAsync($"RABBIT-{Guid.NewGuid():N}", $"rabbit-{Guid.NewGuid():N}");
         var deadline = DateTime.UtcNow.AddSeconds(30);
 
@@ -110,6 +97,8 @@ public sealed class UsersIntegrationTests(EmployeeManagementApiFactory factory) 
                 if (registeredEvent?.UserId == userId)
                 {
                     Assert.Equal("UserRegisteredEvent", message.RoutingKey);
+                    Assert.True(Guid.TryParse(message.BasicProperties.MessageId, out var messageId));
+                    Assert.Equal(messageId, registeredEvent.EventId);
                     return;
                 }
             }
@@ -118,6 +107,87 @@ public sealed class UsersIntegrationTests(EmployeeManagementApiFactory factory) 
         }
 
         Assert.Fail($"UserRegisteredEvent for user {userId} was not found in queue {queue}.");
+    }
+
+    [RabbitMqStressFact]
+    public async Task CreateUser_500ConcurrentRegistrations_ShouldPublish500EventsToRabbitMq()
+    {
+        var options = CreateRabbitMqOptions();
+        var connectionFactory = CreateConnectionFactory(options);
+
+        using var connection = connectionFactory.CreateConnection();
+        using var channel = connection.CreateModel();
+        var queue = DeclareTestQueue(channel, options);
+
+        var responses = await Task.WhenAll(
+            Enumerable.Range(1, 500).Select(index => client.PostAsJsonAsync(
+                "/api/v1/users",
+                new CreateUserRequest(
+                    $"STRESS-{Guid.NewGuid():N}",
+                    $"stress-{index}-{Guid.NewGuid():N}",
+                    "Password123!",
+                    EntityStatus.Active))));
+        var userIds = new HashSet<Guid>();
+
+        foreach (var response in responses)
+        {
+            using (response)
+            {
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                userIds.Add(await response.Content.ReadFromJsonAsync<Guid>());
+            }
+        }
+
+        Assert.Equal(500, userIds.Count);
+
+        var receivedUserIds = new Dictionary<Guid, int>();
+        var receivedEventIds = new HashSet<Guid>();
+        var receivedMessageCount = 0;
+        DateTime? quietPeriodEndsAt = null;
+        var deadline = DateTime.UtcNow.AddMinutes(2);
+        while (DateTime.UtcNow < deadline)
+        {
+            var message = channel.BasicGet(queue, autoAck: true);
+            if (message is not null)
+            {
+                receivedMessageCount++;
+                var payload = Encoding.UTF8.GetString(message.Body.ToArray());
+                var registeredEvent = JsonSerializer.Deserialize<UserRegisteredEventPayload>(payload);
+                Assert.NotNull(registeredEvent);
+                Assert.Equal("UserRegisteredEvent", message.RoutingKey);
+                Assert.True(Guid.TryParse(message.BasicProperties.MessageId, out var messageId));
+                Assert.Equal(messageId, registeredEvent.EventId);
+                Assert.True(userIds.Contains(registeredEvent.UserId), $"Unexpected user {registeredEvent.UserId} was published.");
+                Assert.True(receivedEventIds.Add(registeredEvent.EventId), $"Event {registeredEvent.EventId} was published more than once.");
+                receivedUserIds.TryGetValue(registeredEvent.UserId, out var occurrenceCount);
+                receivedUserIds[registeredEvent.UserId] = occurrenceCount + 1;
+
+                if (receivedUserIds.Count == userIds.Count && quietPeriodEndsAt is null)
+                {
+                    quietPeriodEndsAt = DateTime.UtcNow.AddSeconds(2);
+                }
+            }
+            else
+            {
+                if (receivedUserIds.Count == userIds.Count && quietPeriodEndsAt is null)
+                {
+                    quietPeriodEndsAt = DateTime.UtcNow.AddSeconds(2);
+                }
+
+                if (quietPeriodEndsAt is not null && DateTime.UtcNow >= quietPeriodEndsAt)
+                {
+                    break;
+                }
+
+                await Task.Delay(100);
+            }
+        }
+
+        Assert.Equal(500, receivedMessageCount);
+        Assert.Equal(500, receivedUserIds.Count);
+        Assert.Equal(500, receivedEventIds.Count);
+        Assert.All(receivedUserIds.Values, occurrenceCount => Assert.Equal(1, occurrenceCount));
+        Assert.True(userIds.SetEquals(receivedUserIds.Keys));
     }
 
     [Fact]
@@ -141,7 +211,51 @@ public sealed class UsersIntegrationTests(EmployeeManagementApiFactory factory) 
         Assert.NotEmpty(validationProblem.Errors);
     }
 
-    private sealed record UserRegisteredEventPayload(Guid UserId, string Code, string Login, DateTimeOffset OccurredAt);
+    private static RabbitMqOptions CreateRabbitMqOptions()
+    {
+        var defaults = new RabbitMqOptions();
+        return new RabbitMqOptions
+        {
+            Host = ReadEnvironment("RabbitMq__Host", defaults.Host),
+            Port = ReadPort(defaults.Port),
+            UserName = ReadEnvironment("RabbitMq__UserName", defaults.UserName),
+            Password = ReadEnvironment("RabbitMq__Password", defaults.Password),
+            Exchange = ReadEnvironment("RabbitMq__Exchange", defaults.Exchange),
+            Queue = ReadEnvironment("RabbitMq__Queue", defaults.Queue),
+            UnroutedExchange = ReadEnvironment("RabbitMq__UnroutedExchange", defaults.UnroutedExchange),
+            UnroutedQueue = ReadEnvironment("RabbitMq__UnroutedQueue", defaults.UnroutedQueue)
+        };
+    }
+
+    private static ConnectionFactory CreateConnectionFactory(RabbitMqOptions options) => new()
+    {
+        HostName = options.Host,
+        Port = options.Port,
+        UserName = options.UserName,
+        Password = options.Password
+    };
+
+    private static string DeclareTestQueue(IModel channel, RabbitMqOptions options)
+    {
+        channel.ExchangeDeclare(options.UnroutedExchange, ExchangeType.Fanout, durable: true, autoDelete: false);
+        channel.ExchangeDeclare(
+            options.Exchange,
+            ExchangeType.Topic,
+            durable: true,
+            autoDelete: false,
+            arguments: new Dictionary<string, object> { ["alternate-exchange"] = options.UnroutedExchange });
+        var queue = channel.QueueDeclare().QueueName;
+        channel.QueueBind(queue, options.Exchange, nameof(UserRegisteredEvent));
+        return queue;
+    }
+
+    private static string ReadEnvironment(string name, string fallback) =>
+        Environment.GetEnvironmentVariable(name) is { Length: > 0 } value ? value : fallback;
+
+    private static int ReadPort(int fallback) =>
+        int.TryParse(Environment.GetEnvironmentVariable("RabbitMq__Port"), out var port) ? port : fallback;
+
+    private sealed record UserRegisteredEventPayload(Guid EventId, Guid UserId, string Code, string Login, DateTimeOffset OccurredAt);
 }
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
@@ -152,6 +266,20 @@ internal sealed class RabbitMqFactAttribute : FactAttribute
         if (!bool.TryParse(Environment.GetEnvironmentVariable("RabbitMq__Enabled"), out var enabled) || !enabled)
         {
             Skip = "RabbitMQ integration tests require RabbitMq__Enabled=true.";
+        }
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+internal sealed class RabbitMqStressFactAttribute : FactAttribute
+{
+    public RabbitMqStressFactAttribute()
+    {
+        var rabbitEnabled = bool.TryParse(Environment.GetEnvironmentVariable("RabbitMq__Enabled"), out var enabled) && enabled;
+        var stressEnabled = bool.TryParse(Environment.GetEnvironmentVariable("RabbitMq__RunStressTests"), out var runStress) && runStress;
+        if (!rabbitEnabled || !stressEnabled)
+        {
+            Skip = "RabbitMQ stress tests require RabbitMq__Enabled=true and RabbitMq__RunStressTests=true.";
         }
     }
 }
