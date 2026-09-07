@@ -43,6 +43,13 @@ describe('UnitsPage', () => {
     expect(element.textContent).toContain('Nenhuma unidade encontrada');
   });
 
+  it('should point the details action to the selected unit route', () => {
+    const detailsLink = (fixture.nativeElement as HTMLElement).querySelector<HTMLAnchorElement>(
+      '.details-button',
+    );
+    expect(detailsLink?.getAttribute('href')).toBe('/unidades/unit-id');
+  });
+
   it('should create a unit with trimmed values', () => {
     api.create.mockReturnValue(of('new-unit-id'));
     click('Nova unidade');

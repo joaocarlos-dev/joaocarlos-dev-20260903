@@ -22,9 +22,10 @@ tbody tr:hover { background: var(--color-surface-hover); }
 td strong { color: var(--color-text); }
 .status { display: inline-flex; padding: .28rem .5rem; border: 1px solid var(--color-success); border-radius: var(--radius-sm); background: var(--color-success-soft); color: var(--color-success-text); font-size: .7rem; font-weight: 700; }
 .status--inactive { border-color: var(--color-border-strong); background: var(--color-surface-hover); color: var(--color-text-secondary); }
-.table-action { display: flex; justify-content: flex-end; gap: .65rem; align-items: center; white-space: nowrap; }
-.text-action, .edit-button { min-height: 34px; padding: 0 .6rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-primary-text); font-size: .74rem; font-weight: 700; text-decoration: none; cursor: pointer; }
-.text-action:hover, .edit-button:hover { background: var(--color-primary-soft); }
+.table-action { display: flex; justify-content: center; gap: .65rem; align-items: center; white-space: nowrap; }
+.details-button, .edit-button { min-height: 34px; padding: 0 .6rem; font-size: .74rem; font-weight: 700; }
+.edit-button { border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-primary-text); cursor: pointer; }
+.edit-button:hover { background: var(--color-primary-soft); }
 .dialog-layer { position: fixed; z-index: 50; inset: 0; display: grid; padding: 1rem; place-items: center; }
 .dialog-backdrop { position: absolute; inset: 0; border: 0; background: var(--color-overlay); }
 .dialog { position: relative; width: min(100%, 520px); max-height: calc(100vh - 2rem); padding: 1.5rem; overflow-y: auto; }
@@ -50,7 +51,7 @@ td strong { color: var(--color-text); }
   tbody tr:last-child { border-bottom: 0; }
   td { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .4rem 0; border: 0; text-align: right; }
   td::before { color: var(--color-text-secondary); content: attr(data-label); font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-  .table-action { justify-content: flex-end; padding-top: .65rem; }
+  .table-action { justify-content: center; padding-top: .65rem; }
   .table-action::before { display: none; }
 }
 @media (max-width: 480px) {
