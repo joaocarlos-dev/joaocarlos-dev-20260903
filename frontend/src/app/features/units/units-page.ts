@@ -18,6 +18,7 @@ import { finalize } from 'rxjs';
 import { EntityStatus, ProblemDetails } from '../../core/api/api.models';
 import { PageHeader } from '../../shared/page-header/page-header';
 import { ScreenState } from '../../shared/screen-state/screen-state';
+import { AuthSession } from '../../core/auth/auth-session';
 import { Unit, UpdateUnitRequest } from './unit.models';
 import { UnitsApi } from './units-api';
 
@@ -32,6 +33,7 @@ type EditorMode = 'create' | 'edit' | null;
 })
 export class UnitsPage {
   private readonly api = inject(UnitsApi);
+  private readonly session = inject(AuthSession);
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = viewChild<ElementRef<HTMLElement>>('dialog');
@@ -48,6 +50,7 @@ export class UnitsPage {
   protected readonly formError = signal<string | null>(null);
   protected readonly apiFieldErrors = signal<Readonly<Record<string, string>>>({});
   protected readonly feedback = signal<string | null>(null);
+  protected readonly canMutate = computed(() => this.session.identity()?.isAdministrator === true);
   protected readonly search = signal('');
   protected readonly statusFilter = signal<'all' | 'active' | 'inactive'>('all');
   protected readonly filteredUnits = computed(() => {
@@ -171,6 +174,7 @@ export class UnitsPage {
   }
 
   protected openCreate(): void {
+    if (!this.canMutate()) return;
     this.returnFocus = this.document.activeElement as HTMLElement | null;
     this.createForm.reset({ code: '', name: '' });
     this.formError.set(null);
@@ -180,6 +184,7 @@ export class UnitsPage {
   }
 
   protected openEdit(unit: Unit): void {
+    if (!this.canMutate()) return;
     this.returnFocus = this.document.activeElement as HTMLElement | null;
     this.selectedUnit.set(unit);
     this.editForm.reset({ name: unit.name, status: unit.status });
@@ -204,6 +209,7 @@ export class UnitsPage {
   }
 
   protected submitCreate(): void {
+    if (!this.canMutate()) return;
     this.formError.set(null);
     this.apiFieldErrors.set({});
     if (this.createForm.invalid) {
@@ -229,6 +235,7 @@ export class UnitsPage {
   }
 
   protected submitEdit(): void {
+    if (!this.canMutate()) return;
     this.formError.set(null);
     this.apiFieldErrors.set({});
     const unit = this.selectedUnit();

@@ -1,4 +1,5 @@
 import { EntityStatus } from '../../core/api/api.models';
+import { UserRole } from '../../core/auth/auth.models';
 
 export type { EntityStatus, ProblemDetails } from '../../core/api/api.models';
 
@@ -7,6 +8,7 @@ export interface User {
   readonly code: string;
   readonly login: string;
   readonly status: EntityStatus;
+  readonly role: UserRole;
   readonly createdAt: string;
   readonly updatedAt: string | null;
 }

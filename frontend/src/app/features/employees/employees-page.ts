@@ -13,6 +13,7 @@ import { CreateEmployeeRequest, Employee, UpdateEmployeeRequest } from './employ
 import { EmployeesApi } from './employees-api';
 import { PageHeader } from '../../shared/page-header/page-header';
 import { ScreenState } from '../../shared/screen-state/screen-state';
+import { AuthSession } from '../../core/auth/auth-session';
 
 type EditorMode = 'create' | 'edit' | null;
 
@@ -25,6 +26,7 @@ type EditorMode = 'create' | 'edit' | null;
 })
 export class EmployeesPage {
   private readonly api = inject(EmployeesApi);
+  private readonly session = inject(AuthSession);
   private readonly usersApi = inject(UsersApi);
   private readonly unitsApi = inject(UnitsApi);
   private readonly document = inject(DOCUMENT);
@@ -45,6 +47,7 @@ export class EmployeesPage {
   protected readonly deleting = signal<string | null>(null);
   protected readonly formError = signal<string | null>(null);
   protected readonly feedback = signal<string | null>(null);
+  protected readonly canMutate = computed(() => this.session.identity()?.isAdministrator === true);
   protected readonly search = signal('');
   protected readonly filteredEmployees = computed(() => {
     const term = this.search().trim().toLocaleLowerCase('pt-BR');
@@ -119,6 +122,7 @@ export class EmployeesPage {
   }
 
   protected openCreate(): void {
+    if (!this.canMutate()) return;
     this.returnFocus = this.document.activeElement as HTMLElement | null;
     this.createForm.reset({ code: '', name: '', userId: '', unitId: '' });
     this.formError.set(null);
@@ -127,6 +131,7 @@ export class EmployeesPage {
   }
 
   protected openEdit(employee: Employee): void {
+    if (!this.canMutate()) return;
     this.returnFocus = this.document.activeElement as HTMLElement | null;
     this.selectedEmployee.set(employee);
     this.editForm.reset({ name: employee.name, unitId: employee.unitId });
@@ -144,6 +149,7 @@ export class EmployeesPage {
   }
 
   protected submitCreate(): void {
+    if (!this.canMutate()) return;
     if (this.createForm.invalid) {
       this.createForm.markAllAsTouched();
       return;
@@ -158,6 +164,7 @@ export class EmployeesPage {
   }
 
   protected submitEdit(): void {
+    if (!this.canMutate()) return;
     const employee = this.selectedEmployee();
     if (!employee || this.editForm.invalid) {
       this.editForm.markAllAsTouched();
@@ -180,6 +187,7 @@ export class EmployeesPage {
   }
 
   protected remove(employee: Employee): void {
+    if (!this.canMutate()) return;
     if (!this.document.defaultView?.confirm(`Remover o colaborador ${employee.name}?`)) return;
     this.deleting.set(employee.id);
     this.api.delete(employee.id).pipe(finalize(() => this.deleting.set(null))).subscribe({

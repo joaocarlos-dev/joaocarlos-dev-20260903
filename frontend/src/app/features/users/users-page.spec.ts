@@ -1,9 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { of, Subject, throwError } from 'rxjs';
 import { User } from './user.models';
 import { UsersApi } from './users-api';
 import { UsersPage } from './users-page';
+import { AuthSession } from '../../core/auth/auth-session';
 
 describe('UsersPage', () => {
   let fixture: ComponentFixture<UsersPage>;
@@ -12,21 +14,28 @@ describe('UsersPage', () => {
     create: vi.fn(),
     update: vi.fn(),
   };
+  const administrator = signal(true);
+  const session = { identity: () => ({ isAdministrator: administrator() }) };
   const user: User = {
     id: 'user-id',
     code: 'USR-01',
     login: 'maria',
     status: 1,
+    role: 'Conventional',
     createdAt: '2026-09-01T10:00:00Z',
     updatedAt: null,
   };
 
   beforeEach(async () => {
     vi.resetAllMocks();
+    administrator.set(true);
     api.list.mockReturnValue(of([user]));
     await TestBed.configureTestingModule({
       imports: [UsersPage],
-      providers: [{ provide: UsersApi, useValue: api }],
+      providers: [
+        { provide: UsersApi, useValue: api },
+        { provide: AuthSession, useValue: session },
+      ],
     }).compileComponents();
     fixture = TestBed.createComponent(UsersPage);
     fixture.detectChanges();
@@ -45,6 +54,36 @@ describe('UsersPage', () => {
     fixture.detectChanges();
 
     expect(element.textContent).toContain('Nenhum usuário encontrado');
+  });
+
+  it('should hide user mutations for conventional sessions', () => {
+    administrator.set(false);
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('.page-header .button--primary')).toBeNull();
+    expect(element.querySelector('.edit-button')).toBeNull();
+    fixture.componentInstance['openCreate']();
+    fixture.componentInstance['openEdit'](user);
+    fixture.componentInstance['submitCreate']();
+    fixture.componentInstance['submitEdit']();
+    expect(api.create).not.toHaveBeenCalled();
+    expect(api.update).not.toHaveBeenCalled();
+  });
+
+  it('should reject a password containing only spaces before calling the API', () => {
+    click('Novo usuário');
+    fixture.componentInstance['createForm'].patchValue({
+      code: 'USR-02',
+      login: 'joao',
+      password: '        ',
+      status: 1,
+    });
+
+    fixture.componentInstance['submitCreate']();
+
+    expect(api.create).not.toHaveBeenCalled();
+    expect(fixture.componentInstance['createForm'].controls.password.invalid).toBe(true);
   });
 
   it('should ignore a stale list response after changing the status filter', () => {

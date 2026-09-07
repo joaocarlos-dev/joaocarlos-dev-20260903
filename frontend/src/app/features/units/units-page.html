@@ -4,7 +4,7 @@
     title="Unidades"
     description="Organize as unidades e acompanhe os colaboradores vinculados a cada uma."
   >
-    <button class="button button--primary" type="button" (click)="openCreate()">Nova unidade</button>
+    @if (canMutate()) { <button class="button button--primary" type="button" (click)="openCreate()">Nova unidade</button> }
   </app-page-header>
 
   <section class="toolbar surface" aria-label="Filtros de unidades">
@@ -95,9 +95,9 @@
                   <a class="button button--secondary details-button" [routerLink]="['/unidades', unit.id]">
                     Detalhes<span class="visually-hidden"> {{ unit.name }}</span>
                   </a>
-                  <button class="edit-button" type="button" (click)="openEdit(unit)">
+                  @if (canMutate()) { <button class="edit-button" type="button" (click)="openEdit(unit)">
                     Editar<span class="visually-hidden"> {{ unit.name }}</span>
-                  </button>
+                  </button> }
                 </td>
               </tr>
             }

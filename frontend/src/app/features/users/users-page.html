@@ -4,9 +4,11 @@
     title="Usuários"
     description="Cadastre acessos e mantenha senhas e situações de uso atualizadas."
   >
-    <button class="button button--primary" type="button" (click)="openCreate()">
-      Novo usuário
-    </button>
+    @if (canMutate()) {
+      <button class="button button--primary" type="button" (click)="openCreate()">
+        Novo usuário
+      </button>
+    }
   </app-page-header>
 
   <section class="toolbar surface" aria-label="Filtros de usuários">
@@ -99,10 +101,12 @@
                 </td>
                 <td data-label="Criado em">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
                 <td class="table-action">
-                  <button class="edit-button" type="button" (click)="openEdit(user)">
-                    Editar
-                    <span class="visually-hidden"> {{ user.login }}</span>
-                  </button>
+                  @if (canMutate()) {
+                    <button class="edit-button" type="button" (click)="openEdit(user)">
+                      Editar
+                      <span class="visually-hidden"> {{ user.login }}</span>
+                    </button>
+                  }
                 </td>
               </tr>
             }

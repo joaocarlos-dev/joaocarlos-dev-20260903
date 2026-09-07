@@ -25,11 +25,11 @@ export class LoginPage {
   protected readonly form = new FormGroup({
     login: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(100)],
+      validators: [Validators.required, Validators.pattern(/.*\S.*/), Validators.maxLength(100)],
     }),
     password: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(8)],
+      validators: [Validators.required, Validators.pattern(/.*\S.*/), Validators.minLength(8)],
     }),
   });
 

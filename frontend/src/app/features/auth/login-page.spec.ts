@@ -67,6 +67,15 @@ describe('LoginPage', () => {
     );
   });
 
+  it('should reject a password containing only spaces before calling the API', () => {
+    fixture.componentInstance['form'].setValue({ login: 'admin', password: '        ' });
+
+    submitForm();
+
+    expect(api.login).not.toHaveBeenCalled();
+    expect(fixture.componentInstance['form'].controls.password.invalid).toBe(true);
+  });
+
   function fillCredentials(): void {
     const element = fixture.nativeElement as HTMLElement;
     const login = element.querySelector<HTMLInputElement>('#login');

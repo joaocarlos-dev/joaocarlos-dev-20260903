@@ -21,6 +21,41 @@ describe('AuthSession', () => {
     expect(localStorage.length).toBe(0);
   });
 
+  it('should expose the administrator role from the token', () => {
+    const session = TestBed.inject(AuthSession);
+    const token = createToken('admin', Math.floor(Date.now() / 1000) + 3600, 'Administrator');
+
+    expect(session.start(token)).toBe(true);
+    expect(session.identity()?.role).toBe('Administrator');
+    expect(session.identity()?.isAdministrator).toBe(true);
+  });
+
+  it('should expose a conventional role and treat unknown roles as non-administrative', () => {
+    const session = TestBed.inject(AuthSession);
+
+    expect(session.start(createToken('user', Math.floor(Date.now() / 1000) + 3600, 'Conventional'))).toBe(true);
+    expect(session.identity()?.role).toBe('Conventional');
+    expect(session.identity()?.isAdministrator).toBe(false);
+
+    session.clear();
+    expect(session.start(createToken('user', Math.floor(Date.now() / 1000) + 3600, 'Unknown'))).toBe(true);
+    expect(session.identity()?.role).toBeNull();
+    expect(session.identity()?.isAdministrator).toBe(false);
+  });
+
+  it('should read the Microsoft role claim format', () => {
+    const session = TestBed.inject(AuthSession);
+    const token = createToken(
+      'admin',
+      Math.floor(Date.now() / 1000) + 3600,
+      'Administrator',
+      'http://schemas.microsoft.com/ws/2008/06/identity/claims/role',
+    );
+
+    expect(session.start(token)).toBe(true);
+    expect(session.identity()?.isAdministrator).toBe(true);
+  });
+
   it('should reject and remove expired tokens', () => {
     const session = TestBed.inject(AuthSession);
     const token = createToken('admin', Math.floor(Date.now() / 1000) - 1);
@@ -67,8 +102,8 @@ describe('AuthSession', () => {
   });
 });
 
-function createToken(login: string, expiresAt: number): string {
+function createToken(login: string, expiresAt: number, role?: string, roleClaim = 'role'): string {
   const encode = (value: object) =>
     btoa(JSON.stringify(value)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-  return `${encode({ alg: 'none' })}.${encode({ exp: expiresAt, unique_name: login })}.signature`;
+  return `${encode({ alg: 'none' })}.${encode({ exp: expiresAt, unique_name: login, ...(role ? { [roleClaim]: role } : {}) })}.signature`;
 }

@@ -1,11 +1,13 @@
 import { DOCUMENT } from '@angular/common';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { SessionIdentity } from './auth.models';
+import { SessionIdentity, UserRole } from './auth.models';
 
 interface JwtPayload {
   readonly exp?: unknown;
   readonly unique_name?: unknown;
+  readonly role?: unknown;
+  readonly ['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']?: unknown;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -121,7 +123,16 @@ export class AuthSession {
         return null;
       }
 
-      return { expiresAt: payload.exp * 1000, login: payload.unique_name };
+      const roleValue = payload.role ?? payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      const role = roleValue === 'Administrator' || roleValue === 'Conventional'
+        ? roleValue as UserRole
+        : null;
+      return {
+        expiresAt: payload.exp * 1000,
+        login: payload.unique_name,
+        role,
+        isAdministrator: role === 'Administrator',
+      };
     } catch {
       return null;
     }

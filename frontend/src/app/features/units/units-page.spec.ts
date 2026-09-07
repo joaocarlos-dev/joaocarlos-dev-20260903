@@ -1,14 +1,18 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { Unit } from './unit.models';
 import { UnitsApi } from './units-api';
 import { UnitsPage } from './units-page';
+import { AuthSession } from '../../core/auth/auth-session';
 
 describe('UnitsPage', () => {
   let fixture: ComponentFixture<UnitsPage>;
   const api = { list: vi.fn(), create: vi.fn(), get: vi.fn(), update: vi.fn() };
+  const administrator = signal(true);
+  const session = { identity: () => ({ isAdministrator: administrator() }) };
   const unit: Unit = {
     id: 'unit-id',
     code: 'UNIT-01',
@@ -21,10 +25,11 @@ describe('UnitsPage', () => {
 
   beforeEach(async () => {
     vi.resetAllMocks();
+    administrator.set(true);
     api.list.mockReturnValue(of([unit]));
     await TestBed.configureTestingModule({
       imports: [UnitsPage],
-      providers: [provideRouter([]), { provide: UnitsApi, useValue: api }],
+      providers: [provideRouter([]), { provide: UnitsApi, useValue: api }, { provide: AuthSession, useValue: session }],
     }).compileComponents();
     fixture = TestBed.createComponent(UnitsPage);
     fixture.detectChanges();
@@ -41,6 +46,22 @@ describe('UnitsPage', () => {
     }
     fixture.detectChanges();
     expect(element.textContent).toContain('Nenhuma unidade encontrada');
+  });
+
+  it('should hide and block unit mutations for conventional sessions', () => {
+    administrator.set(false);
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('.page-header .button--primary')).toBeNull();
+    expect(element.querySelector('.edit-button')).toBeNull();
+    fixture.componentInstance['openCreate']();
+    fixture.componentInstance['openEdit'](unit);
+    fixture.componentInstance['submitCreate']();
+    fixture.componentInstance['submitEdit']();
+    expect(fixture.componentInstance['editorMode']()).toBeNull();
+    expect(api.create).not.toHaveBeenCalled();
+    expect(api.update).not.toHaveBeenCalled();
   });
 
   it('should point the details action to the selected unit route', () => {

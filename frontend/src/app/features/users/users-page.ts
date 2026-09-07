@@ -16,6 +16,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { finalize } from 'rxjs';
 import { PageHeader } from '../../shared/page-header/page-header';
 import { ScreenState } from '../../shared/screen-state/screen-state';
+import { AuthSession } from '../../core/auth/auth-session';
 import { EntityStatus, ProblemDetails, UpdateUserRequest, User } from './user.models';
 import { UsersApi } from './users-api';
 
@@ -30,6 +31,7 @@ type EditorMode = 'create' | 'edit' | null;
 })
 export class UsersPage {
   private readonly api = inject(UsersApi);
+  private readonly session = inject(AuthSession);
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = viewChild<ElementRef<HTMLElement>>('dialog');
@@ -45,6 +47,7 @@ export class UsersPage {
   protected readonly formError = signal<string | null>(null);
   protected readonly apiFieldErrors = signal<Readonly<Record<string, string>>>({});
   protected readonly feedback = signal<string | null>(null);
+  protected readonly canMutate = computed(() => this.session.identity()?.isAdministrator === true);
   protected readonly search = signal('');
   protected readonly statusFilter = signal<'all' | 'active' | 'inactive'>('all');
   protected readonly filteredUsers = computed(() => {
@@ -68,7 +71,7 @@ export class UsersPage {
     }),
     password: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(8)],
+      validators: [Validators.required, Validators.pattern(/.*\S.*/), Validators.minLength(8)],
     }),
     status: new FormControl<EntityStatus>(1, { nonNullable: true }),
   });
@@ -76,7 +79,7 @@ export class UsersPage {
   protected readonly editForm = new FormGroup({
     password: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.minLength(8)],
+      validators: [Validators.pattern(/.*\S.*/), Validators.minLength(8)],
     }),
     status: new FormControl<EntityStatus>(1, { nonNullable: true }),
   });
@@ -165,6 +168,9 @@ export class UsersPage {
   }
 
   protected openCreate(): void {
+    if (!this.canMutate()) {
+      return;
+    }
     this.returnFocus = this.document.activeElement as HTMLElement | null;
     this.createForm.reset({ code: '', login: '', password: '', status: 1 });
     this.formError.set(null);
@@ -174,6 +180,9 @@ export class UsersPage {
   }
 
   protected openEdit(user: User): void {
+    if (!this.canMutate()) {
+      return;
+    }
     this.returnFocus = this.document.activeElement as HTMLElement | null;
     this.selectedUser.set(user);
     this.editForm.reset({ password: '', status: user.status });
@@ -199,6 +208,9 @@ export class UsersPage {
   }
 
   protected submitCreate(): void {
+    if (!this.canMutate()) {
+      return;
+    }
     this.formError.set(null);
     this.apiFieldErrors.set({});
     if (this.createForm.invalid) {
@@ -229,6 +241,9 @@ export class UsersPage {
   }
 
   protected submitEdit(): void {
+    if (!this.canMutate()) {
+      return;
+    }
     this.formError.set(null);
     this.apiFieldErrors.set({});
     const user = this.selectedUser();
