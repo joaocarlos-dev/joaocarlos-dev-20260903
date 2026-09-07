@@ -82,6 +82,46 @@ public sealed class EmployeesIntegrationTests(EmployeeManagementApiFactory facto
     }
 
     [Fact]
+    public async Task CreateEmployee_WithInactiveUser_ShouldReturnConflict()
+    {
+        var unitId = await api.CreateUnitAsync("UNIT-001", "Headquarters");
+        var inactiveUserId = await api.CreateUserAsync(
+            "USR-001",
+            "inactive.employee",
+            status: EntityStatus.Inactive);
+
+        var response = await client.PostAsJsonAsync(
+            "/api/v1/employees",
+            new CreateEmployeeRequest("EMP-001", "Employee", inactiveUserId, unitId));
+        var employees = await client.GetFromJsonAsync<IReadOnlyCollection<EmployeeDto>>("/api/v1/employees");
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.NotNull(employees);
+        Assert.Empty(employees);
+    }
+
+    [Fact]
+    public async Task CreateEmployee_ConcurrentRequestsForSameUser_ShouldCreateAtMostOneEmployee()
+    {
+        var unitId = await api.CreateUnitAsync("UNIT-001", "Headquarters");
+        var userId = await api.CreateUserAsync("USR-001", "employee.user");
+
+        var responses = await Task.WhenAll(
+            client.PostAsJsonAsync(
+                "/api/v1/employees",
+                new CreateEmployeeRequest("EMP-001", "Employee One", userId, unitId)),
+            client.PostAsJsonAsync(
+                "/api/v1/employees",
+                new CreateEmployeeRequest("EMP-002", "Employee Two", userId, unitId)));
+        var employees = await client.GetFromJsonAsync<IReadOnlyCollection<EmployeeDto>>("/api/v1/employees");
+
+        Assert.Equal(1, responses.Count(response => response.StatusCode == HttpStatusCode.Created));
+        Assert.Equal(1, responses.Count(response => response.StatusCode == HttpStatusCode.Conflict));
+        Assert.NotNull(employees);
+        Assert.Single(employees);
+    }
+
+    [Fact]
     public async Task CreateOrTransferEmployee_ToInactiveUnit_ShouldReturnConflict()
     {
         var activeUnitId = await api.CreateUnitAsync("UNIT-001", "Headquarters");

@@ -12,6 +12,11 @@ public sealed class UserService(EmployeeManagementDbContext context) : IUserRepo
     public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         context.Users.SingleOrDefaultAsync(user => user.Id == id, cancellationToken);
 
+    public Task<User?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default) =>
+        context.Users
+            .FromSqlInterpolated($"SELECT * FROM users WHERE id = {id} FOR UPDATE")
+            .SingleOrDefaultAsync(cancellationToken);
+
     public Task<User?> GetByLoginAsync(string login, CancellationToken cancellationToken = default) =>
         context.Users.SingleOrDefaultAsync(user => user.Login == login, cancellationToken);
 

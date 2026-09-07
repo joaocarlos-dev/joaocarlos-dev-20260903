@@ -2,6 +2,8 @@ using EmployeeManagmentSystem.Application.Common.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace EmployeeManagmentSystem.API.Configurations.Errors;
 
@@ -53,6 +55,12 @@ public sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsSer
                 Status = StatusCodes.Status409Conflict,
                 Title = "Conflict",
                 Detail = exception.Message
+            },
+            DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } } => new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Conflict",
+                Detail = "The resource already exists."
             },
             _ => new ProblemDetails
             {

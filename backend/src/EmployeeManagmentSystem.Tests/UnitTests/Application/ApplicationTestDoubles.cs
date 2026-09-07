@@ -12,6 +12,9 @@ internal sealed class FakeUserRepository : IUserRepository
     public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         Task.FromResult(Users.SingleOrDefault(user => user.Id == id));
 
+    public Task<User?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Users.SingleOrDefault(user => user.Id == id));
+
     public Task<User?> GetByLoginAsync(string login, CancellationToken cancellationToken = default) =>
         Task.FromResult(Users.SingleOrDefault(user => string.Equals(user.Login, login, StringComparison.OrdinalIgnoreCase)));
 
@@ -93,6 +96,9 @@ internal sealed class FakeUnitRepository : IUnitRepository
 internal sealed class FakeUnitOfWork : IUnitOfWork
 {
     public int SaveCalls { get; private set; }
+
+    public Task<IUnitOfWorkTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IUnitOfWorkTransaction>(new FakeUnitOfWorkTransaction());
 
     public Task<IUnitOfWorkTransaction> BeginSerializableTransactionAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IUnitOfWorkTransaction>(new FakeUnitOfWorkTransaction());

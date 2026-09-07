@@ -6,6 +6,7 @@ namespace EmployeeManagmentSystem.Application.Abstractions.Persistence;
 public interface IUserRepository
 {
     Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<User?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
     Task<User?> GetByLoginAsync(string login, CancellationToken cancellationToken = default);
     Task<IReadOnlyCollection<User>> ListAsync(EntityStatus? status, CancellationToken cancellationToken = default);
     Task<bool> CodeExistsAsync(string code, CancellationToken cancellationToken = default);

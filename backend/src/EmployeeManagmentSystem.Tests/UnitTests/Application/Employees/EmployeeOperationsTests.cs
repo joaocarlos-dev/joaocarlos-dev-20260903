@@ -133,6 +133,29 @@ public sealed class EmployeeOperationsTests
     }
 
     [Fact]
+    public async Task CreateEmployee_WithInactiveUser_ShouldThrowConflictAndNotPersist()
+    {
+        var userRepository = new FakeUserRepository();
+        var employeeRepository = new FakeEmployeeRepository();
+        var unitRepository = new FakeUnitRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var user = new User("USR-001", "employee", "hashed:password123");
+        user.ChangeStatus(EmployeeManagmentSystem.Domain.Enums.EntityStatus.Inactive);
+        var unit = new DomainUnit("UNIT-001", "Headquarters");
+        userRepository.Users.Add(user);
+        unitRepository.Units.Add(unit);
+        await using var provider = CreateProvider(userRepository, employeeRepository, unitRepository, unitOfWork);
+        var mediator = provider.GetRequiredService<IMediator>();
+        var command = new CreateEmployeeCommand("EMP-001", "Employee", user.Id, unit.Id);
+
+        var action = () => mediator.Send(command);
+
+        await Assert.ThrowsAsync<ApplicationConflictException>(action);
+        Assert.Empty(employeeRepository.Employees);
+        Assert.Equal(0, unitOfWork.SaveCalls);
+    }
+
+    [Fact]
     public async Task UpdateEmployee_WithTrimmedNameAtMaximumLength_ShouldPersistNormalizedName()
     {
         var userRepository = new FakeUserRepository();

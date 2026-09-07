@@ -11,6 +11,11 @@ public sealed class EmployeeManagementDbContext(DbContextOptions<EmployeeManagem
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Unit> Units => Set<Unit>();
 
+    public async Task<IUnitOfWorkTransaction> BeginTransactionAsync(
+        CancellationToken cancellationToken = default) =>
+        new DbContextUnitOfWorkTransaction(
+            await Database.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken));
+
     public async Task<IUnitOfWorkTransaction> BeginSerializableTransactionAsync(
         CancellationToken cancellationToken = default) =>
         new DbContextUnitOfWorkTransaction(

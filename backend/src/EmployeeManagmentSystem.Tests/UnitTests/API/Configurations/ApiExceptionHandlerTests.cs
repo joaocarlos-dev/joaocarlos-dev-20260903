@@ -3,7 +3,9 @@ using EmployeeManagmentSystem.Application.Common.Exceptions;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Npgsql;
 
 namespace EmployeeManagmentSystem.Tests.UnitTests.API.Configurations;
 
@@ -25,6 +27,27 @@ public sealed class ApiExceptionHandlerTests
         var problemDetails = Assert.IsType<ValidationProblemDetails>(problemDetailsService.ProblemDetails);
         Assert.Equal("Validation failed", problemDetails.Title);
         Assert.Equal(new[] { "Login is required." }, problemDetails.Errors["Login"]);
+    }
+
+    [Fact]
+    public async Task TryHandleAsync_WithUniqueConstraintViolation_ShouldReturnConflict()
+    {
+        var problemDetailsService = new CapturingProblemDetailsService();
+        var handler = new ApiExceptionHandler(problemDetailsService);
+        var httpContext = new DefaultHttpContext();
+        var postgresException = new PostgresException(
+            "duplicate key value violates unique constraint",
+            "ERROR",
+            "ERROR",
+            PostgresErrorCodes.UniqueViolation);
+        var exception = new DbUpdateException("Save failed.", postgresException);
+
+        var handled = await handler.TryHandleAsync(httpContext, exception, CancellationToken.None);
+
+        Assert.True(handled);
+        Assert.Equal(StatusCodes.Status409Conflict, httpContext.Response.StatusCode);
+        Assert.Equal("Conflict", problemDetailsService.ProblemDetails?.Title);
+        Assert.Equal("The resource already exists.", problemDetailsService.ProblemDetails?.Detail);
     }
 
     [Theory]
