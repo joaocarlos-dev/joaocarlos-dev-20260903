@@ -41,8 +41,14 @@ services:
       target: test
     environment:
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=employee_management_tests;Username=${POSTGRES_USER:?POSTGRES_USER must be set};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      RabbitMq__Enabled: "true"
+      RabbitMq__Host: rabbitmq
+      RabbitMq__UserName: ${RABBITMQ_USER:?RABBITMQ_USER must be set}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD must be set}
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     restart: "no"
 
