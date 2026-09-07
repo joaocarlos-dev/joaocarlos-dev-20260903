@@ -28,6 +28,20 @@ public sealed class AuthenticationQueryTests
     }
 
     [Fact]
+    public async Task Authenticate_ShouldTrimLoginButPreservePassword()
+    {
+        var repository = new FakeUserRepository();
+        var user = new User("USR-001", "admin", "hashed:pass word");
+        repository.Users.Add(user);
+        await using var provider = CreateProvider(repository);
+        var mediator = provider.GetRequiredService<IMediator>();
+
+        var result = await mediator.Send(new AuthenticateQuery(" admin ", "pass word"));
+
+        Assert.Equal($"token:{user.Id}", result.AccessToken);
+    }
+
+    [Fact]
     public async Task Authenticate_WithInvalidPassword_ShouldThrowAuthenticationException()
     {
         var repository = new FakeUserRepository();

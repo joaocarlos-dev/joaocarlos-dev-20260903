@@ -17,7 +17,7 @@ internal sealed class AuthenticateQueryHandler(
 {
     public async Task<AuthenticationDto> Handle(AuthenticateQuery request, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByLoginAsync(request.Login, cancellationToken);
+        var user = await userRepository.GetByLoginAsync(request.Login.Trim(), cancellationToken);
 
         if (user is null || !passwordHasher.Verify(request.Password, user.PasswordHash))
         {

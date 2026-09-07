@@ -6,7 +6,15 @@ internal sealed class AuthenticateQueryValidator : AbstractValidator<Authenticat
 {
     public AuthenticateQueryValidator()
     {
-        RuleFor(query => query.Login).NotEmpty();
-        RuleFor(query => query.Password).NotEmpty();
+        RuleFor(query => query.Login)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .Must(login => !string.IsNullOrWhiteSpace(login))
+            .WithMessage("'Login' must not be blank.");
+        RuleFor(query => query.Password)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .Must(password => !string.IsNullOrWhiteSpace(password))
+            .WithMessage("'Password' must not be blank.");
     }
 }

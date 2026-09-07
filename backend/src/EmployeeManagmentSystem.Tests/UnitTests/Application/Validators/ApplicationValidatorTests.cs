@@ -38,11 +38,16 @@ public sealed class ApplicationValidatorTests
         await AssertValidAsync(new GetUsersQuery(EntityStatus.Active));
 
         await AssertInvalidAsync(new CreateUserCommand(string.Empty, string.Empty, string.Empty, (EntityStatus)999));
+        await AssertInvalidAsync(new CreateUserCommand("   ", "valid-login", "password123", EntityStatus.Active));
+        await AssertInvalidAsync(new CreateUserCommand("USR-003", "   ", "password123", EntityStatus.Active));
+        await AssertInvalidAsync(new CreateUserCommand("USR-003", "user3", "        ", EntityStatus.Active));
         await AssertInvalidAsync(new CreateUserCommand("USR-002", "admin2", "password123", EntityStatus.Active, (UserRole)999));
+        await AssertInvalidAsync(new UpdateUserCommand(Guid.NewGuid(), "        ", null));
         await AssertInvalidAsync(new UpdateUserCommand(Guid.Empty, null, null));
         await AssertInvalidAsync(new UpdateUserCommand(Guid.NewGuid(), null, (EntityStatus)999));
         await AssertInvalidAsync(new GetUserQuery(Guid.Empty));
         await AssertInvalidAsync(new GetUsersQuery((EntityStatus)999));
+        await AssertInvalidAsync(new AuthenticateQuery("        ", "        "));
     }
 
     [Fact]
