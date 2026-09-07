@@ -37,6 +37,7 @@ export class UnitsPage {
   private readonly dialog = viewChild<ElementRef<HTMLElement>>('dialog');
   private loadRequestId = 0;
   private returnFocus: HTMLElement | null = null;
+  private feedbackTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly units = signal<readonly Unit[]>([]);
   protected readonly loading = signal(true);
@@ -90,7 +91,12 @@ export class UnitsPage {
         dialog.querySelector<HTMLElement>('input:not([type="radio"])')?.focus();
       }
     });
-    this.destroyRef.onDestroy(() => this.setBackgroundInert(false));
+    this.destroyRef.onDestroy(() => {
+      this.setBackgroundInert(false);
+      if (this.feedbackTimer) {
+        clearTimeout(this.feedbackTimer);
+      }
+    });
     this.loadUnits();
   }
 
@@ -213,7 +219,7 @@ export class UnitsPage {
       .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: () => {
-          this.feedback.set('Unidade criada com sucesso.');
+          this.showFeedback('Unidade criada com sucesso.');
           this.saving.set(false);
           this.closeEditor();
           this.loadUnits();
@@ -252,7 +258,7 @@ export class UnitsPage {
       .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: () => {
-          this.feedback.set('Unidade atualizada com sucesso.');
+          this.showFeedback('Unidade atualizada com sucesso.');
           this.saving.set(false);
           this.closeEditor();
           this.loadUnits();
@@ -318,5 +324,16 @@ export class UnitsPage {
 
   private setBackgroundInert(inert: boolean): void {
     this.document.querySelector<HTMLElement>('.header')?.toggleAttribute('inert', inert);
+  }
+
+  private showFeedback(message: string): void {
+    if (this.feedbackTimer) {
+      clearTimeout(this.feedbackTimer);
+    }
+    this.feedback.set(message);
+    this.feedbackTimer = setTimeout(() => {
+      this.feedback.set(null);
+      this.feedbackTimer = null;
+    }, 2000);
   }
 }

@@ -52,6 +52,23 @@ describe('UnitsPage', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Unidade criada com sucesso.');
   });
 
+  it('should dismiss the success feedback after two seconds', () => {
+    vi.useFakeTimers();
+    try {
+      api.create.mockReturnValue(of('new-unit-id'));
+      click('Nova unidade');
+      fixture.componentInstance['createForm'].setValue({ code: 'UNIT-02', name: 'Filial' });
+      submitEditor();
+      expect(fixture.componentInstance['feedback']()).toBe('Unidade criada com sucesso.');
+      vi.advanceTimersByTime(1999);
+      expect(fixture.componentInstance['feedback']()).toBe('Unidade criada com sucesso.');
+      vi.advanceTimersByTime(1);
+      expect(fixture.componentInstance['feedback']()).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('should reject a name containing only spaces before calling the API', () => {
     click('Nova unidade');
     fixture.componentInstance['createForm'].setValue({ code: 'UNIT-02', name: '   ' });
