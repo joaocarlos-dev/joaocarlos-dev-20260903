@@ -1,0 +1,31 @@
+<div #pageContent>
+<app-page-header eyebrow="Equipe" title="Colaboradores" description="Gerencie pessoas vinculadas a usuários e unidades.">
+  <button class="button button--primary" type="button" (click)="openCreate()">Novo colaborador</button>
+</app-page-header>
+
+@if (feedback()) { <p class="feedback" role="status">{{ feedback() }}</p> }
+<section class="toolbar" aria-label="Filtros de colaboradores">
+  <label>Buscar <input type="search" [value]="search()" (input)="applySearch($event)" placeholder="Código, nome, usuário ou unidade" /></label>
+</section>
+
+@if (loading()) { <app-screen-state kind="loading" title="Carregando colaboradores..." description="Consultando vínculos cadastrados." /> }
+@else if (loadError()) { <app-screen-state kind="error" title="Não foi possível carregar os colaboradores" [description]="loadError()!" actionLabel="Tentar novamente" (action)="loadData()" /> }
+@else if (filteredEmployees().length === 0) { <app-screen-state kind="empty" title="Nenhum colaborador encontrado" description="Ajuste a busca ou cadastre um novo colaborador." /> }
+@else {
+  <div class="table-wrap"><table><thead><tr><th>Código</th><th>Nome</th><th>Usuário</th><th>Unidade</th><th>Ações</th></tr></thead><tbody>
+    @for (employee of filteredEmployees(); track employee.id) {
+      <tr><td>{{ employee.code }}</td><td><a [routerLink]="['/colaboradores', employee.id]">{{ employee.name }}</a></td><td>{{ userName(employee.userId) }}</td><td>{{ unitName(employee.unitId) }}</td><td class="actions"><button type="button" (click)="openEdit(employee)">Editar</button><button type="button" [disabled]="deleting() === employee.id" (click)="remove(employee)">Remover</button></td></tr>
+    }
+  </tbody></table></div>
+}
+</div>
+
+@if (editorMode()) {
+  <div class="backdrop"><section #dialog class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="editorMode() === 'create' ? 'Novo colaborador' : 'Editar colaborador'">
+    <button class="close" type="button" aria-label="Fechar" (click)="closeEditor()">×</button>
+    <h2>{{ editorMode() === 'create' ? 'Novo colaborador' : 'Editar colaborador' }}</h2>
+    @if (formError()) { <p class="error" role="alert">{{ formError() }}</p> }
+    @if (editorMode() === 'create') { <form [formGroup]="createForm" (ngSubmit)="submitCreate()"><label>Código<input formControlName="code" /></label><label>Nome<input formControlName="name" /></label><label>Usuário<select formControlName="userId"><option value="">Selecione</option>@for (user of availableUsers(); track user.id) { <option [value]="user.id">{{ user.login }}</option> }</select></label><label>Unidade<select formControlName="unitId"><option value="">Selecione</option>@for (unit of activeUnits(); track unit.id) { <option [value]="unit.id">{{ unit.name }}</option> }</select></label><button class="button button--primary" type="submit" [disabled]="saving()">Salvar</button></form> }
+    @else { <form [formGroup]="editForm" (ngSubmit)="submitEdit()"><label>Nome<input formControlName="name" /></label><label>Unidade<select formControlName="unitId">@for (unit of activeUnits(); track unit.id) { <option [value]="unit.id">{{ unit.name }}</option> }</select></label><button class="button button--primary" type="submit" [disabled]="saving()">Salvar</button></form> }
+  </section></div>
+}

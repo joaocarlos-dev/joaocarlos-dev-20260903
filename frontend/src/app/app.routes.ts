@@ -45,14 +45,15 @@ export const routes: Routes = [
       {
         path: 'colaboradores',
         title: 'Colaboradores | Gestão',
-        data: {
-          description: 'Gerencie vínculos entre pessoas, usuários e unidades.',
-          eyebrow: 'Equipe',
-          title: 'Colaboradores',
-        },
         loadComponent: () =>
-          import('./features/shared/feature-preview-page').then(
-            (module) => module.FeaturePreviewPage,
+          import('./features/employees/employees-page').then((module) => module.EmployeesPage),
+      },
+      {
+        path: 'colaboradores/:id',
+        title: 'Detalhes do colaborador | Gestão',
+        loadComponent: () =>
+          import('./features/employees/employee-details-page').then(
+            (module) => module.EmployeeDetailsPage,
           ),
       },
     ],
