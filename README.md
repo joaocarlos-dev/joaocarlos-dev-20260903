@@ -42,6 +42,19 @@ docker compose --profile stress run --rm --build rabbitmq-stress-tests
 
 O teste de estresse usa um banco separado e não é executado pelo fluxo padrão de subida da aplicação.
 
+## Coleção Postman
+
+A coleção [EmployeeManagementSystem.postman_collection.json](postman/EmployeeManagementSystem.postman_collection.json) pode ser importada no Postman para testar as rotas da API.
+
+Após a importação, ajuste a variável baseUrl se necessário:
+
+- Docker: http://localhost:8080;
+- Execução local: http://localhost:5121.
+
+Configure também as variáveis adminLogin e adminPassword com os valores de INITIAL_USER_LOGIN e INITIAL_USER_PASSWORD do arquivo .env. O Postman não lê esse arquivo automaticamente.
+
+Execute primeiro Health Check e Login do administrador. A coleção salva automaticamente o token de acesso e os IDs criados para reutilizá-los nas requisições seguintes.
+
 Para encerrar os serviços:
 
 ```powershell
