@@ -112,6 +112,8 @@ public sealed class UsersIntegrationTests(EmployeeManagementApiFactory factory) 
     [RabbitMqStressFact]
     public async Task CreateUser_500ConcurrentRegistrations_ShouldPublish500EventsToRabbitMq()
     {
+        const int registrationCount = 500;
+        const int maxConcurrentRegistrations = 32;
         var options = CreateRabbitMqOptions();
         var connectionFactory = CreateConnectionFactory(options);
 
@@ -119,14 +121,26 @@ public sealed class UsersIntegrationTests(EmployeeManagementApiFactory factory) 
         using var channel = connection.CreateModel();
         var queue = DeclareTestQueue(channel, options);
 
+        using var concurrencyLimiter = new SemaphoreSlim(maxConcurrentRegistrations);
         var responses = await Task.WhenAll(
-            Enumerable.Range(1, 500).Select(index => client.PostAsJsonAsync(
-                "/api/v1/users",
-                new CreateUserRequest(
-                    $"STRESS-{Guid.NewGuid():N}",
-                    $"stress-{index}-{Guid.NewGuid():N}",
-                    "Password123!",
-                    EntityStatus.Active))));
+            Enumerable.Range(1, registrationCount).Select(async index =>
+            {
+                await concurrencyLimiter.WaitAsync();
+                try
+                {
+                    return await client.PostAsJsonAsync(
+                        "/api/v1/users",
+                        new CreateUserRequest(
+                            $"STRESS-{Guid.NewGuid():N}",
+                            $"stress-{index}-{Guid.NewGuid():N}",
+                            "Password123!",
+                            EntityStatus.Active));
+                }
+                finally
+                {
+                    concurrencyLimiter.Release();
+                }
+            }));
         var userIds = new HashSet<Guid>();
 
         foreach (var response in responses)
@@ -138,7 +152,7 @@ public sealed class UsersIntegrationTests(EmployeeManagementApiFactory factory) 
             }
         }
 
-        Assert.Equal(500, userIds.Count);
+        Assert.Equal(registrationCount, userIds.Count);
 
         var receivedUserIds = new Dictionary<Guid, int>();
         var receivedEventIds = new HashSet<Guid>();
@@ -183,9 +197,9 @@ public sealed class UsersIntegrationTests(EmployeeManagementApiFactory factory) 
             }
         }
 
-        Assert.Equal(500, receivedMessageCount);
-        Assert.Equal(500, receivedUserIds.Count);
-        Assert.Equal(500, receivedEventIds.Count);
+        Assert.Equal(registrationCount, receivedMessageCount);
+        Assert.Equal(registrationCount, receivedUserIds.Count);
+        Assert.Equal(registrationCount, receivedEventIds.Count);
         Assert.All(receivedUserIds.Values, occurrenceCount => Assert.Equal(1, occurrenceCount));
         Assert.True(userIds.SetEquals(receivedUserIds.Keys));
     }

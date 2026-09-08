@@ -76,7 +76,7 @@ public sealed class EmployeeManagementApiFactory : WebApplicationFactory<Program
 
     public async Task ResetDatabaseAsync()
     {
-        await RecreateDatabaseAsync();
+        await ClearDatabaseAsync();
 
         await using var scope = Services.CreateAsyncScope();
         await scope.ServiceProvider.InitializeDatabaseAsync(
@@ -140,6 +140,15 @@ public sealed class EmployeeManagementApiFactory : WebApplicationFactory<Program
         command.CommandText = $"CREATE DATABASE {QuoteIdentifier(database)}";
         await command.ExecuteNonQueryAsync();
         NpgsqlConnection.ClearAllPools();
+    }
+
+    private async Task ClearDatabaseAsync()
+    {
+        await using var connection = new NpgsqlConnection(connectionString);
+        await connection.OpenAsync();
+        await using var command = connection.CreateCommand();
+        command.CommandText = "TRUNCATE TABLE employees, units, users, login_rate_limit_buckets, outbox_messages RESTART IDENTITY CASCADE";
+        await command.ExecuteNonQueryAsync();
     }
 
     private async Task DropDatabaseCoreAsync()
